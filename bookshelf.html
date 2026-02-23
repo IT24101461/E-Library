@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e-Library | My Bookshelf</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="bookshelf.css">
+</head>
+<body>
+
+  <!-- ===== TOP NAVIGATION BAR ===== -->
+  <nav class="topbar">
+    <div class="topbar-logo">e<span>Library</span></div>
+    <div class="topbar-nav">
+      <a href="#">Home</a>
+      <a href="#">Browse</a>
+      <a href="#" class="active">My Bookshelf</a>
+      <a href="#">History</a>
+    </div>
+    <div class="topbar-user">U</div>
+  </nav>
+
+  <!-- ===== BOOK DETAIL BANNER (simulates another member's book page) =====
+       This section will be on other group members' pages.
+       Copy the .btn-add-fav button and call addToFavourites() from their JS.
+  ===== -->
+  <div class="demo-banner" id="book-detail-banner">
+    <div class="demo-book-cover"></div>
+    <div class="demo-book-info">
+      <div class="book-category">Science Fiction</div>
+      <h2>Dune: The Desert Planet</h2>
+      <div class="author">Frank Herbert &nbsp;·&nbsp; 1965</div>
+      <div class="rating">
+        <span class="stars">★★★★★</span>
+        <span style="color:var(--gold);font-weight:700;">4.8</span>
+        <span class="rating-count">(12,403 reviews)</span>
+      </div>
+      <div class="demo-actions">
+
+        <!-- ⭐ ADD TO FAVOURITES BUTTON — place this on every book page ⭐ -->
+        <button class="btn-add-fav" id="mainAddFavBtn"
+          onclick="addToFavourites('Dune: The Desert Planet', 'Frank Herbert', '🌏', 'Sci-Fi', 4.8)">
+          <span id="favBtnIcon">⭐</span>
+          <span id="favBtnText">ADD TO FAVOURITES</span>
+        </button>
+
+        <button class="btn-read">📖 Read Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN LAYOUT ===== -->
+  <div class="main-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Library</div>
+        <div class="sidebar-item active" onclick="filterBooks('all')">
+          <span class="icon">📚</span> All Books <span class="count" id="count-all">0</span>
+        </div>
+        <div class="sidebar-item" onclick="filterBooks('currently reading')">
+          <span class="icon">📖</span> Reading <span class="count" id="count-reading">0</span>
+        </div>
+        <div class="sidebar-item" onclick="filterBooks('completed')">
+          <span class="icon">✅</span> Completed <span class="count" id="count-completed">0</span>
+        </div>
+        <div class="sidebar-item" onclick="filterBooks('new')">
+          <span class="icon">✨</span> New Arrivals <span class="count" id="count-new">0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">My Lists</div>
+        <div class="sidebar-item" id="sidebar-fav" onclick="scrollToList('list-fav')">
+          <span class="icon">⭐</span> Favourites <span class="count" id="count-fav">0</span>
+        </div>
+        <div class="sidebar-item" id="sidebar-wishlist" onclick="scrollToList('list-wishlist')">
+          <span class="icon">🎯</span> Want to Read <span class="count" id="count-wishlist">0</span>
+        </div>
+        <div class="sidebar-item" id="sidebar-custom" onclick="scrollToList('list-custom')">
+          <span class="icon">📌</span> Custom Lists <span class="count" id="count-custom">0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Genres</div>
+        <div class="sidebar-item" onclick="filterBooks('sci-fi')"><span class="icon">🚀</span> Sci-Fi</div>
+        <div class="sidebar-item" onclick="filterBooks('fantasy')"><span class="icon">🐉</span> Fantasy</div>
+        <div class="sidebar-item" onclick="filterBooks('mystery')"><span class="icon">🔍</span> Mystery</div>
+        <div class="sidebar-item" onclick="filterBooks('history')"><span class="icon">📜</span> History</div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+
+      <!-- STATS BAR -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <span class="stat-value" id="stat-total">0</span>
+          <div class="stat-label">Total Books</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-reading">0</span>
+          <div class="stat-label">Reading</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-completed">0</span>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-lists">3</span>
+          <div class="stat-label">My Lists</div>
+        </div>
+      </div>
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div>
+          <div class="page-title">My Bookshelf</div>
+          <div class="page-subtitle">Your personal reading collection</div>
+        </div>
+        <div class="header-actions">
+          <div class="view-toggle">
+            <button class="view-btn active" id="gridViewBtn" onclick="setView('grid')">⊞</button>
+            <button class="view-btn" id="listViewBtn" onclick="setView('list')">☰</button>
+          </div>
+          <select class="sort-select" onchange="sortBooks(this.value)">
+            <option value="date">Date Added</option>
+            <option value="title">Title A-Z</option>
+            <option value="author">Author</option>
+            <option value="rating">Top Rated</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search your bookshelf..." oninput="searchBooks(this.value)" id="searchInput">
+      </div>
+
+      <!-- FILTER CHIPS -->
+      <div class="filter-bar">
+        <div class="chip active" onclick="setGenreFilter('all', this)">All Genres</div>
+        <div class="chip" onclick="setGenreFilter('Sci-Fi', this)">🚀 Sci-Fi</div>
+        <div class="chip" onclick="setGenreFilter('Fantasy', this)">🐉 Fantasy</div>
+        <div class="chip" onclick="setGenreFilter('Mystery', this)">🔍 Mystery</div>
+        <div class="chip" onclick="setGenreFilter('History', this)">📜 History</div>
+        <div class="chip" onclick="setGenreFilter('Romance', this)">💕 Romance</div>
+      </div>
+
+      <!-- ========== FAVOURITES LIST ========== -->
+      <div class="list-section" id="list-fav">
+        <div class="list-header">
+          <div class="list-name">
+            <span class="list-icon">⭐</span>
+            Favourites
+            <span class="list-badge badge-fav" id="fav-badge">0 books</span>
+          </div>
+          <div class="list-actions">
+            <button class="list-action-btn" onclick="clearList('favourites')">Clear All</button>
+          </div>
+        </div>
+        <div class="book-grid" id="fav-grid"></div>
+      </div>
+
+      <!-- ========== CURRENTLY READING ========== -->
+      <div class="list-section" id="list-reading">
+        <div class="list-header">
+          <div class="list-name">
+            <span class="list-icon">📖</span>
+            Currently Reading
+            <span class="list-badge badge-reading" id="reading-badge">0 books</span>
+          </div>
+          <div class="list-actions">
+            <button class="list-action-btn" onclick="clearList('reading')">Clear All</button>
+          </div>
+        </div>
+        <div class="book-grid" id="reading-grid"></div>
+      </div>
+
+      <!-- ========== WANT TO READ ========== -->
+      <div class="list-section" id="list-wishlist">
+        <div class="list-header">
+          <div class="list-name">
+            <span class="list-icon">🎯</span>
+            Want to Read
+            <span class="list-badge badge-wishlist" id="wishlist-badge">0 books</span>
+          </div>
+          <div class="list-actions">
+            <button class="list-action-btn danger" onclick="clearList('wishlist')">Clear All</button>
+          </div>
+        </div>
+        <div class="book-grid" id="wishlist-grid"></div>
+      </div>
+
+      <!-- ========== CUSTOM LISTS ========== -->
+      <div class="list-section" id="list-custom">
+        <div class="list-header">
+          <div class="list-name">
+            <span class="list-icon">📌</span>
+            Custom Lists
+            <span class="list-badge badge-wishlist" id="custom-badge">0 books</span>
+          </div>
+          <div class="list-actions">
+            <button class="btn-new-list" onclick="openNewListModal()">＋ New List</button>
+          </div>
+        </div>
+        <div class="book-grid" id="custom-grid"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===== NEW LIST MODAL ===== -->
+  <div class="modal-overlay" id="newListModal">
+    <div class="modal">
+      <h3>Create New List</h3>
+      <p>Give your reading list a name to organise your books.</p>
+      <input type="text" id="newListName" placeholder="e.g. Summer Reads, Must Read..." maxlength="40">
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeModal('newListModal')">Cancel</button>
+        <button class="btn-modal-create" onclick="createNewList()">Create List</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONFIRM CLEAR MODAL ===== -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <h3>Clear List?</h3>
+      <p class="confirm-text" id="confirmText">This will remove all books from this list.</p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeModal('confirmModal')">Cancel</button>
+        <button class="btn-danger-confirm" onclick="confirmClear()">Yes, Clear All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MOVE TO LIST MODAL ===== -->
+  <div class="modal-overlay" id="moveModal">
+    <div class="modal">
+      <h3>Move to List</h3>
+      <p>Choose which list to move this book to.</p>
+      <div id="moveOptions">
+        <div class="move-option" onclick="moveToList('favourites')">⭐ Favourites</div>
+        <div class="move-option" onclick="moveToList('reading')">📖 Currently Reading</div>
+        <div class="move-option" onclick="moveToList('wishlist')">🎯 Want to Read</div>
+        <div class="move-option" onclick="moveToList('custom')">📌 Custom Lists</div>
+      </div>
+      <div class="modal-actions" style="margin-top:16px">
+        <button class="btn-modal-cancel" onclick="closeModal('moveModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST NOTIFICATION ===== -->
+  <div class="toast" id="toast">
+    <span class="toast-icon" id="toastIcon">✅</span>
+    <span id="toastMsg">Book added to favourites!</span>
+  </div>
+
+  <script src="bookshelf.js"></script>
+</body>
+</html>
