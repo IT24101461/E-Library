@@ -178,14 +178,14 @@ function BookCard({ book, listKey, index, onRemove, onMove, onOpen }) {
 // ============================================================
 // BOOK LIST SECTION COMPONENT
 // ============================================================
-function BookListSection({ id, icon, title, badgeClass, books, listKey, view, onRemove, onMove, onOpen, onClear, onNewList }) {
+function BookListSection({ id, icon, title, badgeClass, books, listKey, view, onRemove, onMove, onOpen, onClear, onNewList, onDelete }) {
   const emptyMessages = {
     favourites: ['⭐', 'No favourites yet',        'Click "Add to Favourites" on any book page'],
     reading:    ['📖', 'Not reading anything yet', 'Start reading a book to track your progress'],
     wishlist:   ['🎯', 'Your wishlist is empty',   'Save books you want to read later'],
-    custom:     ['📌', 'No books here yet',        'Move books here from other sections'],
   };
-  const [emptyIcon, emptyTitle, emptyDesc] = emptyMessages[listKey] || ['📚', 'No books', ''];
+  const isCustom = listKey.startsWith('custom_');
+  const [emptyIcon, emptyTitle, emptyDesc] = emptyMessages[listKey] || ['📌', 'No books here yet', 'Move books here from other sections'];
 
   return (
     <div className="list-section" id={id}>
@@ -198,8 +198,11 @@ function BookListSection({ id, icon, title, badgeClass, books, listKey, view, on
           </span>
         </div>
         <div className="list-actions">
-          {listKey === 'custom' ? (
-            <button className="btn-new-list" onClick={onNewList}>＋ New List</button>
+          {isCustom ? (
+            <>
+              <button className="list-action-btn" onClick={() => onClear(listKey)}>Clear All</button>
+              <button className="list-action-btn danger" onClick={onDelete} title="Delete this list">🗑 Delete List</button>
+            </>
           ) : (
             <button
               className={`list-action-btn ${listKey === 'wishlist' ? 'danger' : ''}`}
@@ -239,27 +242,18 @@ function BookListSection({ id, icon, title, badgeClass, books, listKey, view, on
 // ============================================================
 export default function Bookshelf() {
 
+  const API = 'http://localhost:8080/api/bookshelf';
+
   // ── State ──────────────────────────────────────────────────
-  const [bookshelf, setBookshelf] = useState({
-    favourites: [],
-    reading: [
-      { id: 101, title: 'The Great Gatsby',    author: 'F. Scott Fitzgerald', emoji: '🎩', genre: 'Classic', rating: 4.2, status: 'currently reading', progress: 62 },
-      { id: 102, title: '1984',                author: 'George Orwell',        emoji: '👁️', genre: 'Sci-Fi',  rating: 4.7, status: 'currently reading', progress: 35 },
-    ],
-    wishlist: [
-      { id: 201, title: 'The Name of the Wind', author: 'Patrick Rothfuss',   emoji: '💨', genre: 'Fantasy', rating: 4.9, status: 'new' },
-      { id: 202, title: 'Sherlock Holmes',       author: 'Arthur Conan Doyle', emoji: '🔍', genre: 'Mystery', rating: 4.5, status: 'new' },
-    ],
-    custom: [],
-  });
+  const [bookshelf, setBookshelf] = useState({ favourites: [], reading: [], wishlist: [] });
+  const [customLists, setCustomLists]       = useState([]);
+  const [loading, setLoading]               = useState(true);
 
   const [view,        setView]        = useState('grid');
   const [genreFilter, setGenreFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMode,    setSortMode]    = useState('date');
-  const [nextId,      setNextId]      = useState(300);
 
-  // Add-to-fav button state
   const [favAdded, setFavAdded] = useState(false);
 
   // Modals
@@ -270,129 +264,159 @@ export default function Bookshelf() {
   const [pendingClear,  setPendingClear]  = useState(null);
   const [pendingMove,   setPendingMove]   = useState({ id: null, from: null });
 
-  // Toast
-  const [toast,       setToast]       = useState({ show: false, icon: '', message: '' });
+  const [toast,    setToast]    = useState({ show: false, icon: '', message: '' });
   const toastTimer = useRef(null);
 
-  // ── Helpers ─────────────────────────────────────────────────
+  // ── Helpers ──────────────────────────────────────────────────
   const showToast = useCallback((icon, message) => {
     clearTimeout(toastTimer.current);
     setToast({ show: true, icon, message });
     toastTimer.current = setTimeout(() => setToast(t => ({ ...t, show: false })), 3000);
   }, []);
 
-  const getCurrentUserId = () => 1; // TODO: get from session
+  // ── LOAD all books from backend on mount ─────────────────────
+  useEffect(() => {
+    fetch(`${API}/all`)
+      .then(r => r.json())
+      .then(books => {
+        // Standard lists
+        const favourites = books.filter(b => b.listName === 'favourites');
+        const reading    = books.filter(b => b.listName === 'reading');
+        const wishlist   = books.filter(b => b.listName === 'wishlist');
+        setBookshelf({ favourites, reading, wishlist });
 
-  // ── ADD TO FAVOURITES — CREATE ───────────────────────────────
-  // Called from any other component/page: addToFavourites(...)
-  // Backend: POST /api/bookshelf/add
-  const addToFavourites = (title, author, emoji, genre, rating) => {
+        // Custom lists — any listName that isn't a standard one
+        const standardLists = ['favourites', 'reading', 'wishlist'];
+        const customBooks   = books.filter(b => !standardLists.includes(b.listName));
+        const groupedCustom = customBooks.reduce((acc, book) => {
+          const existing = acc.find(l => l.name === book.listName);
+          if (existing) { existing.books.push(book); }
+          else { acc.push({ id: `custom_${book.listName}`, name: book.listName, books: [book] }); }
+          return acc;
+        }, []);
+        setCustomLists(groupedCustom);
+        setLoading(false);
+      })
+      .catch(() => { showToast('❌', 'Could not connect to server'); setLoading(false); });
+  }, []);
+
+  // ── ADD TO FAVOURITES ────────────────────────────────────────
+  const addToFavourites = async (title, author, emoji, genre, rating) => {
     const exists = bookshelf.favourites.find(b => b.title === title);
     if (exists) { showToast('⭐', `"${title}" is already in Favourites!`); return; }
 
-    const newBook = { id: nextId, title, author, emoji: emoji || '📚', genre: genre || 'General', rating: rating || 0, status: 'new', progress: 0 };
-    setNextId(n => n + 1);
-    setBookshelf(prev => ({ ...prev, favourites: [...prev.favourites, newBook] }));
-    setFavAdded(true);
-
-    /* ── Uncomment when Java Servlet is ready ──
-    fetch('/api/bookshelf/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: getCurrentUserId(), bookId: nextId, bookTitle: title, author, genre, rating, listName: 'favourites' })
-    });
-    ─────────────────────────────────────────── */
-
-    showToast('⭐', `"${title}" added to Favourites!`);
-    setTimeout(() => {
-      document.getElementById('list-fav')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 600);
+    try {
+      const res  = await fetch(`${API}/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, author, emoji: emoji || '📚', genre: genre || 'General', rating: rating || 0, status: 'new', progress: 0, listName: 'favourites' }),
+      });
+      if (!res.ok) { const msg = await res.text(); showToast('❌', msg); return; }
+      const saved = await res.json();
+      setBookshelf(prev => ({ ...prev, favourites: [...prev.favourites, saved] }));
+      setFavAdded(true);
+      showToast('⭐', `"${title}" added to Favourites!`);
+      setTimeout(() => document.getElementById('list-fav')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 600);
+    } catch { showToast('❌', 'Server error — could not add book'); }
   };
 
-  // ── REMOVE BOOK — DELETE ────────────────────────────────────
-  // Backend: DELETE /api/bookshelf/remove?userId=X&bookId=Y&listName=Z
-  const removeBook = (id, listKey) => {
-    const book = bookshelf[listKey].find(b => b.id === id);
-    if (!book) return;
-    setBookshelf(prev => ({ ...prev, [listKey]: prev[listKey].filter(b => b.id !== id) }));
-
-    /* ── Uncomment when backend ready ──
-    fetch(`/api/bookshelf/remove?userId=${getCurrentUserId()}&bookId=${id}&listName=${listKey}`, { method: 'DELETE' });
-    ─────────────────────────────────── */
-
-    showToast('🗑️', `"${book.title}" removed`);
+  // ── REMOVE BOOK ──────────────────────────────────────────────
+  const removeBook = async (id, listKey) => {
+    try {
+      await fetch(`${API}/remove/${id}`, { method: 'DELETE' });
+      if (listKey.startsWith('custom_')) {
+        setCustomLists(prev => prev.map(l => l.id === listKey ? { ...l, books: l.books.filter(b => b.id !== id) } : l));
+      } else {
+        setBookshelf(prev => ({ ...prev, [listKey]: prev[listKey].filter(b => b.id !== id) }));
+      }
+      showToast('🗑️', 'Book removed');
+    } catch { showToast('❌', 'Could not remove book'); }
   };
 
-  // ── CLEAR LIST — DELETE ─────────────────────────────────────
-  // Backend: DELETE /api/bookshelf/clearList?userId=X&listName=Y
-  const clearList = (listKey) => { setPendingClear(listKey); setConfirmModal(true); };
+  // ── CLEAR LIST ───────────────────────────────────────────────
+  const clearList    = (listKey) => { setPendingClear(listKey); setConfirmModal(true); };
 
-  const confirmClear = () => {
+  const deleteCustomList = async (listId) => {
+    const list = customLists.find(l => l.id === listId);
+    if (!list) return;
+    try {
+      await fetch(`${API}/clear/${encodeURIComponent(list.name)}`, { method: 'DELETE' });
+      setCustomLists(prev => prev.filter(l => l.id !== listId));
+      showToast('🗑️', `"${list.name}" deleted`);
+    } catch { showToast('❌', 'Could not delete list'); }
+  };
+
+  const confirmClear = async () => {
     if (!pendingClear) return;
-    setBookshelf(prev => ({ ...prev, [pendingClear]: [] }));
-
-    /* ── Uncomment when backend ready ──
-    fetch(`/api/bookshelf/clearList?userId=${getCurrentUserId()}&listName=${pendingClear}`, { method: 'DELETE' });
-    ─────────────────────────────────── */
-
-    setConfirmModal(false);
-    showToast('🗑️', 'List cleared');
-    setPendingClear(null);
+    const listName = pendingClear.startsWith('custom_')
+      ? customLists.find(l => l.id === pendingClear)?.name
+      : pendingClear;
+    try {
+      await fetch(`${API}/clear/${encodeURIComponent(listName)}`, { method: 'DELETE' });
+      if (pendingClear.startsWith('custom_')) {
+        setCustomLists(prev => prev.map(l => l.id === pendingClear ? { ...l, books: [] } : l));
+      } else {
+        setBookshelf(prev => ({ ...prev, [pendingClear]: [] }));
+      }
+      setConfirmModal(false);
+      showToast('🗑️', 'List cleared');
+      setPendingClear(null);
+    } catch { showToast('❌', 'Could not clear list'); }
   };
 
-  // ── MOVE BOOK — UPDATE ──────────────────────────────────────
-  // Backend: PUT /api/bookshelf/move  { userId, bookId, fromList, toList }
+  // ── MOVE BOOK ────────────────────────────────────────────────
   const openMoveModal = (id, from) => { setPendingMove({ id, from }); setMoveModal(true); };
 
-  const moveToList = (targetList) => {
+  const moveToList = async (targetList) => {
     const { id, from } = pendingMove;
     if (!id || targetList === from) { setMoveModal(false); return; }
 
-    const book = bookshelf[from].find(b => b.id === id);
-    if (!book) return;
+    // resolve real listName for custom lists
+    const resolvedTarget = targetList.startsWith('custom_')
+      ? customLists.find(l => l.id === targetList)?.name
+      : targetList;
 
-    if (bookshelf[targetList].find(b => b.id === id)) {
-      showToast('⚠️', 'Already in that list'); setMoveModal(false); return;
-    }
+    try {
+      const res = await fetch(`${API}/move/${id}?targetList=${encodeURIComponent(resolvedTarget)}`, { method: 'PUT' });
+      if (!res.ok) { showToast('⚠️', await res.text()); setMoveModal(false); return; }
+      const moved = await res.json();
 
-    setBookshelf(prev => ({
-      ...prev,
-      [from]:       prev[from].filter(b => b.id !== id),
-      [targetList]: [...prev[targetList], book],
-    }));
+      // Remove from source in UI
+      if (from.startsWith('custom_')) {
+        setCustomLists(prev => prev.map(l => l.id === from ? { ...l, books: l.books.filter(b => b.id !== id) } : l));
+      } else {
+        setBookshelf(prev => ({ ...prev, [from]: prev[from].filter(b => b.id !== id) }));
+      }
+      // Add to target in UI
+      if (targetList.startsWith('custom_')) {
+        setCustomLists(prev => prev.map(l => l.id === targetList ? { ...l, books: [...l.books, moved] } : l));
+      } else {
+        setBookshelf(prev => ({ ...prev, [targetList]: [...prev[targetList], moved] }));
+      }
 
-    /* ── Uncomment when backend ready ──
-    fetch('/api/bookshelf/move', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: getCurrentUserId(), bookId: id, fromList: from, toList: targetList })
-    });
-    ─────────────────────────────────── */
-
-    setMoveModal(false);
-    showToast('✅', `Moved to ${targetList}`);
-    setPendingMove({ id: null, from: null });
+      setMoveModal(false);
+      showToast('✅', `Moved to ${resolvedTarget}`);
+      setPendingMove({ id: null, from: null });
+    } catch { showToast('❌', 'Could not move book'); }
   };
 
-  // ── CREATE NEW LIST ─────────────────────────────────────────
-  // Backend: POST /api/bookshelf/createList  { userId, listName }
-  const createNewList = () => {
+  // ── CREATE NEW CUSTOM LIST ───────────────────────────────────
+  const createNewList = async () => {
     if (!newListName.trim()) { showToast('⚠️', 'Please enter a list name'); return; }
+    const duplicate = customLists.find(l => l.name.toLowerCase() === newListName.trim().toLowerCase());
+    if (duplicate) { showToast('⚠️', `"${newListName}" already exists`); return; }
 
-    /* ── Uncomment when backend ready ──
-    fetch('/api/bookshelf/createList', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: getCurrentUserId(), listName: newListName })
-    });
-    ─────────────────────────────────── */
-
-    showToast('📌', `List "${newListName}" created!`);
+    // Lists are identified purely by listName in the books table — no separate API call needed.
+    // The list will appear in DB as soon as the first book is added to it.
+    const newList = { id: `custom_${newListName.trim()}`, name: newListName.trim(), books: [] };
+    setCustomLists(prev => [...prev, newList]);
+    showToast('📌', `List "${newListName.trim()}" created!`);
     setNewListName('');
     setNewListModal(false);
+    setTimeout(() => document.getElementById(`list-${newList.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
   };
 
-  // ── OPEN BOOK ───────────────────────────────────────────────
+  // ── OPEN BOOK ────────────────────────────────────────────────
   const openBook = (title) => {
     showToast('📖', `Opening "${title}"...`);
     // In integration: navigate(`/read?title=${encodeURIComponent(title)}`);
@@ -413,12 +437,18 @@ export default function Bookshelf() {
   };
 
   // ── COUNTS ──────────────────────────────────────────────────
-  const allBooks   = Object.values(bookshelf).flat();
+  const allBooks   = [...Object.values(bookshelf).flat(), ...customLists.flatMap(l => l.books)];
   const totalBooks = allBooks.length;
   const readingCnt = bookshelf.reading.length;
   const doneCnt    = allBooks.filter(b => b.status === 'completed').length;
 
   // ── RENDER ──────────────────────────────────────────────────
+  if (loading) return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', color:'#aaa', fontSize:'1.2rem' }}>
+      📚 Loading your bookshelf...
+    </div>
+  );
+
   return (
     <>
       <CustomCursor />
@@ -489,7 +519,7 @@ export default function Bookshelf() {
             {[
               { label: 'Favourites',   icon: '⭐', count: bookshelf.favourites.length, target: 'list-fav' },
               { label: 'Want to Read', icon: '🎯', count: bookshelf.wishlist.length,   target: 'list-wishlist' },
-              { label: 'Custom Lists', icon: '📌', count: bookshelf.custom.length,     target: 'list-custom' },
+              { label: 'Custom Lists', icon: '📌', count: customLists.reduce((s,l) => s + l.books.length, 0), target: 'list-custom_1' },
             ].map((item, i) => (
               <div key={i} className="sidebar-item"
                 onClick={() => document.getElementById(item.target)?.scrollIntoView({ behavior: 'smooth' })}>
@@ -520,7 +550,7 @@ export default function Bookshelf() {
               { value: totalBooks, label: 'Total Books' },
               { value: readingCnt, label: 'Reading' },
               { value: doneCnt,    label: 'Completed' },
-              { value: 3,          label: 'My Lists' },
+              { value: 3 + customLists.length, label: 'My Lists' },
             ].map((s, i) => (
               <div key={i} className="stat-card">
                 <span className="stat-value">{s.value}</span>
@@ -576,7 +606,6 @@ export default function Bookshelf() {
             { id: 'list-fav',      icon: '⭐', title: 'Favourites',        badgeClass: 'badge-fav',     key: 'favourites' },
             { id: 'list-reading',  icon: '📖', title: 'Currently Reading', badgeClass: 'badge-reading', key: 'reading'    },
             { id: 'list-wishlist', icon: '🎯', title: 'Want to Read',      badgeClass: 'badge-wishlist',key: 'wishlist'   },
-            { id: 'list-custom',   icon: '📌', title: 'Custom Lists',      badgeClass: 'badge-wishlist',key: 'custom'     },
           ].map(section => (
             <BookListSection
               key={section.key}
@@ -592,6 +621,38 @@ export default function Bookshelf() {
               onOpen={openBook}
               onClear={clearList}
               onNewList={() => setNewListModal(true)}
+            />
+          ))}
+
+          {/* DYNAMIC CUSTOM LISTS */}
+          <div className="custom-lists-header">
+            <span className="list-icon">📌</span>
+            <span>My Custom Lists</span>
+            <button className="btn-new-list" onClick={() => setNewListModal(true)}>＋ New List</button>
+          </div>
+          {customLists.length === 0 && (
+            <div className="empty-state" style={{ marginBottom: '1.5rem' }}>
+              <span className="empty-icon">📌</span>
+              <div className="empty-title">No custom lists yet</div>
+              <div className="empty-desc">Click "＋ New List" to create your first list</div>
+            </div>
+          )}
+          {customLists.map((cl) => (
+            <BookListSection
+              key={cl.id}
+              id={`list-${cl.id}`}
+              icon="📌"
+              title={cl.name}
+              badgeClass="badge-wishlist"
+              books={applyFilters(cl.books)}
+              listKey={cl.id}
+              view={view}
+              onRemove={removeBook}
+              onMove={openMoveModal}
+              onOpen={openBook}
+              onClear={clearList}
+              onNewList={() => setNewListModal(true)}
+              onDelete={() => deleteCustomList(cl.id)}
             />
           ))}
 
@@ -636,9 +697,17 @@ export default function Bookshelf() {
         <h3>Move to List</h3>
         <p>Choose which list to move this book to.</p>
         <div>
-          {[['favourites','⭐ Favourites'],['reading','📖 Currently Reading'],['wishlist','🎯 Want to Read'],['custom','📌 Custom Lists']].map(([key, label]) => (
+          {[['favourites','⭐ Favourites'],['reading','📖 Currently Reading'],['wishlist','🎯 Want to Read']].map(([key, label]) => (
             <div key={key} className="move-option" onClick={() => moveToList(key)}>{label}</div>
           ))}
+          {customLists.length > 0 && (
+            <>
+              <div className="move-option-divider">── My Custom Lists ──</div>
+              {customLists.map(cl => (
+                <div key={cl.id} className="move-option" onClick={() => moveToList(cl.id)}>📌 {cl.name}</div>
+              ))}
+            </>
+          )}
         </div>
         <div className="modal-actions" style={{ marginTop: 16 }}>
           <button className="btn-modal-cancel" onClick={() => setMoveModal(false)}>Cancel</button>
