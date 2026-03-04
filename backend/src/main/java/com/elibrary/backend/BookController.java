@@ -7,7 +7,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookshelf")
-@CrossOrigin(origins = "http://localhost:5173") // React dev server port
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"}) // React dev server port
 public class BookController {
 
     @Autowired
