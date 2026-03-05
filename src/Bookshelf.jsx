@@ -254,7 +254,8 @@ export default function Bookshelf() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMode,    setSortMode]    = useState('date');
 
-  const [favAdded, setFavAdded] = useState(false);
+  const [favAdded, setFavAdded]       = useState(new Set());
+  const [demoBookIdx, setDemoBookIdx] = useState(0);
 
   // Modals
   const [newListModal,  setNewListModal]  = useState(false);
@@ -314,7 +315,7 @@ export default function Bookshelf() {
       if (!res.ok) { const msg = await res.text(); showToast('❌', msg); return; }
       const saved = await res.json();
       setBookshelf(prev => ({ ...prev, favourites: [...prev.favourites, saved] }));
-      setFavAdded(true);
+      setFavAdded(prev => new Set([...prev, title]));
       showToast('⭐', `"${title}" added to Favourites!`);
       setTimeout(() => document.getElementById('list-fav')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 600);
     } catch { showToast('❌', 'Server error — could not add book'); }
@@ -327,6 +328,10 @@ export default function Bookshelf() {
       if (listKey.startsWith('custom_')) {
         setCustomLists(prev => prev.map(l => l.id === listKey ? { ...l, books: l.books.filter(b => b.id !== id) } : l));
       } else {
+        if (listKey === 'favourites') {
+          const removed = bookshelf.favourites.find(b => b.id === id);
+          if (removed) setFavAdded(prev => { const next = new Set(prev); next.delete(removed.title); return next; });
+        }
         setBookshelf(prev => ({ ...prev, [listKey]: prev[listKey].filter(b => b.id !== id) }));
       }
       showToast('🗑️', 'Book removed');
@@ -357,6 +362,7 @@ export default function Bookshelf() {
         setCustomLists(prev => prev.map(l => l.id === pendingClear ? { ...l, books: [] } : l));
       } else {
         setBookshelf(prev => ({ ...prev, [pendingClear]: [] }));
+        if (pendingClear === 'favourites') setFavAdded(new Set());
       }
       setConfirmModal(false);
       showToast('🗑️', 'List cleared');
@@ -417,6 +423,17 @@ export default function Bookshelf() {
   };
 
   // ── OPEN BOOK ────────────────────────────────────────────────
+  const DEMO_BOOKS = [
+    { title: 'Dune: The Desert Planet',     author: 'Frank Herbert',      year: 1965, emoji: '🌏', genre: 'Sci-Fi',   rating: 4.8, reviews: '12,403', category: 'Science Fiction' },
+    { title: 'The Name of the Wind',        author: 'Patrick Rothfuss',   year: 2007, emoji: '🌬️', genre: 'Fantasy',  rating: 4.7, reviews: '9,812',  category: 'Fantasy' },
+    { title: 'Gone Girl',                   author: 'Gillian Flynn',       year: 2012, emoji: '🔪', genre: 'Mystery',  rating: 4.5, reviews: '8,201',  category: 'Mystery' },
+    { title: 'Sapiens',                     author: 'Yuval Noah Harari',   year: 2011, emoji: '🦴', genre: 'History',  rating: 4.6, reviews: '15,334', category: 'History' },
+    { title: 'Pride and Prejudice',         author: 'Jane Austen',         year: 1813, emoji: '💌', genre: 'Romance',  rating: 4.9, reviews: '20,117', category: 'Romance' },
+    { title: 'The Hitchhiker\'s Guide',     author: 'Douglas Adams',       year: 1979, emoji: '🚀', genre: 'Sci-Fi',   rating: 4.7, reviews: '11,559', category: 'Science Fiction' },
+    { title: 'A Game of Thrones',           author: 'George R.R. Martin',  year: 1996, emoji: '⚔️', genre: 'Fantasy',  rating: 4.8, reviews: '18,440', category: 'Fantasy' },
+    { title: 'The Da Vinci Code',           author: 'Dan Brown',           year: 2003, emoji: '🗝️', genre: 'Mystery',  rating: 4.3, reviews: '13,672', category: 'Mystery' },
+  ];
+  const currentDemo = DEMO_BOOKS[demoBookIdx];
   const openBook = (title) => {
     showToast('📖', `Opening "${title}"...`);
     // In integration: navigate(`/read?title=${encodeURIComponent(title)}`);
@@ -470,25 +487,38 @@ export default function Bookshelf() {
       <div className="demo-banner">
         <div className="demo-book-cover" />
         <div className="demo-book-info">
-          <div className="book-category">Science Fiction</div>
-          <h2>Dune: The Desert Planet</h2>
-          <div className="author">Frank Herbert · 1965</div>
+          <div className="book-category">{currentDemo.category}</div>
+          <h2>{currentDemo.title}</h2>
+          <div className="author">{currentDemo.author} · {currentDemo.year}</div>
           <div className="rating">
             <span className="stars">★★★★★</span>
-            <span style={{ color: 'var(--gold)', fontWeight: 700 }}>4.8</span>
-            <span className="rating-count">(12,403 reviews)</span>
+            <span style={{ color: 'var(--gold)', fontWeight: 700 }}>{currentDemo.rating}</span>
+            <span className="rating-count">({currentDemo.reviews} reviews)</span>
           </div>
           <div className="demo-actions">
             {/* ⭐ THE ADD TO FAVOURITES BUTTON ⭐ */}
             <button
-              className={`btn-add-fav ${favAdded ? 'added' : ''}`}
-              onClick={() => addToFavourites('Dune: The Desert Planet', 'Frank Herbert', '🌏', 'Sci-Fi', 4.8)}
-              disabled={favAdded}
+              className={`btn-add-fav ${favAdded.has(currentDemo.title) ? 'added' : ''}`}
+              onClick={() => addToFavourites(currentDemo.title, currentDemo.author, currentDemo.emoji, currentDemo.genre, currentDemo.rating)}
+              disabled={favAdded.has(currentDemo.title)}
             >
-              <span>{favAdded ? '✅' : '⭐'}</span>
-              <span>{favAdded ? 'ADDED TO FAVOURITES' : 'ADD TO FAVOURITES'}</span>
+              <span>{favAdded.has(currentDemo.title) ? '✅' : '⭐'}</span>
+              <span>{favAdded.has(currentDemo.title) ? 'ADDED TO FAVOURITES' : 'ADD TO FAVOURITES'}</span>
             </button>
             <button className="btn-read">📖 Read Now</button>
+          </div>
+          {/* Book navigation */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.85rem' }}>
+            <button
+              onClick={() => setDemoBookIdx(i => (i - 1 + DEMO_BOOKS.length) % DEMO_BOOKS.length)}
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', borderRadius: '6px', padding: '4px 12px', cursor: 'pointer', fontSize: '1rem' }}
+            >‹</button>
+            <span style={{ color: '#aaa', fontSize: '0.82rem' }}>{demoBookIdx + 1} / {DEMO_BOOKS.length}</span>
+            <button
+              onClick={() => setDemoBookIdx(i => (i + 1) % DEMO_BOOKS.length)}
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', borderRadius: '6px', padding: '4px 12px', cursor: 'pointer', fontSize: '1rem' }}
+            >›</button>
+            <span style={{ color: '#555', fontSize: '0.78rem', marginLeft: '0.25rem' }}>browse books</span>
           </div>
         </div>
       </div>
