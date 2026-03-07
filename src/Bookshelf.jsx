@@ -2,6 +2,22 @@
 // Bookshelf.jsx — Feature 4: Personal Bookshelf / Favourites
 // e-Library Project | IT2150 | DS 2.2 G17
 // React Version
+//
+// CHANGES:
+//  • BookCard now shows real cover images (book.coverImage)
+//    with graceful fallback to emoji placeholder on load error
+//  • useEffect normalises SQL list_name values:
+//      currentlyReading → reading (Currently Reading list)
+//      read             → favourites (Favourites list)
+//      wantToRead       → wishlist (Want to Read list)
+//  • Handles both snake_case (cover_image) and camelCase
+//    (coverImage) from the backend JSON
+//
+// ADD THIS TO Bookshelf.css:
+//   .cover-img {
+//     width: 100%; height: 100%; object-fit: cover;
+//     display: block; border-radius: 8px 8px 0 0;
+//   }
 // ============================================================
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -115,19 +131,30 @@ function Modal({ id, isOpen, onClose, children }) {
 // BOOK CARD COMPONENT
 // ============================================================
 function BookCard({ book, listKey, index, onRemove, onMove, onOpen }) {
+  const [imgError, setImgError] = useState(false);
+
   const gradient = {
-    'Sci-Fi':  'linear-gradient(160deg,#0d1a2e,#1a3a5c)',
-    'Fantasy': 'linear-gradient(160deg,#1a0d2e,#3a1a5c)',
-    'Mystery': 'linear-gradient(160deg,#1a1a0d,#3a3a1a)',
-    'History': 'linear-gradient(160deg,#2e1a0d,#5c3a1a)',
-    'Classic': 'linear-gradient(160deg,#0d2e1a,#1a5c3a)',
-    'Romance': 'linear-gradient(160deg,#2e0d1a,#5c1a3a)',
+    'Sci-Fi':      'linear-gradient(160deg,#0d1a2e,#1a3a5c)',
+    'Fantasy':     'linear-gradient(160deg,#1a0d2e,#3a1a5c)',
+    'Mystery':     'linear-gradient(160deg,#1a1a0d,#3a3a1a)',
+    'History':     'linear-gradient(160deg,#2e1a0d,#5c3a1a)',
+    'Classic':     'linear-gradient(160deg,#0d2e1a,#1a5c3a)',
+    'Romance':     'linear-gradient(160deg,#2e0d1a,#5c1a3a)',
+    'Horror':      'linear-gradient(160deg,#1a0000,#3a0d0d)',
+    'Thriller':    'linear-gradient(160deg,#0d0d1a,#1a1a3a)',
+    'Non-Fiction': 'linear-gradient(160deg,#0d1a1a,#1a3a3a)',
+    'Biography':   'linear-gradient(160deg,#1a1a0d,#3a3a1a)',
+    'Self-Help':   'linear-gradient(160deg,#0d2e0d,#1a5c1a)',
+    'Children':    'linear-gradient(160deg,#2e200d,#5c401a)',
+    'Fiction':     'linear-gradient(160deg,#1a0d2e,#2a1a4a)',
   }[book.genre] || 'linear-gradient(160deg,#1a1a2e,#2a2a4a)';
 
   const statusBadge =
-    book.status === 'currently reading' ? <span className="status-badge status-reading">Reading</span>   :
-    book.status === 'completed'         ? <span className="status-badge status-completed">Done</span>     :
-    book.status === 'new'               ? <span className="status-badge status-new">New</span>            : null;
+    book.status === 'reading'   ? <span className="status-badge status-reading">Reading</span>   :
+    book.status === 'completed' ? <span className="status-badge status-completed">Done</span>     :
+    book.status === 'new'       ? <span className="status-badge status-new">New</span>            : null;
+
+  const hasCover = book.coverImage && !imgError;
 
   return (
     <div
@@ -136,10 +163,19 @@ function BookCard({ book, listKey, index, onRemove, onMove, onOpen }) {
       onClick={() => onOpen(book.title)}
     >
       <div className="book-cover">
-        <div className="cover-placeholder" style={{ background: gradient }}>
-          <span>{book.emoji}</span>
-          <div className="cover-title">{book.title}</div>
-        </div>
+        {hasCover ? (
+          <img
+            src={book.coverImage}
+            alt={book.title}
+            className="cover-img"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="cover-placeholder" style={{ background: gradient }}>
+            <span>{book.emoji}</span>
+            <div className="cover-title">{book.title}</div>
+          </div>
+        )}
         <div className="cover-gradient" />
         {statusBadge}
         {book.progress > 0 && (
@@ -279,14 +315,39 @@ export default function Bookshelf() {
   useEffect(() => {
     fetch(`${API}/all`)
       .then(r => r.json())
-      .then(books => {
-        // Standard lists
+      .then(rawBooks => {
+        // Normalise SQL list_name values → UI list keys
+        // SQL:  currentlyReading → reading
+        //       read             → favourites  (completed books go to Favourites)
+        //       wantToRead       → wishlist
+        const LIST_MAP = {
+          currentlyReading: 'reading',
+          read:             'favourites',
+          wantToRead:       'wishlist',
+          // already-correct keys pass through unchanged:
+          reading:          'reading',
+          favourites:       'favourites',
+          wishlist:         'wishlist',
+        };
+
+        const books = rawBooks.map(b => ({
+          ...b,
+          // map cover_image (snake_case from DB) → coverImage (camelCase)
+          coverImage: b.coverImage || b.cover_image || null,
+          // map status values from SQL to UI
+          status: b.status === 'reading'   ? 'reading'
+                : b.status === 'completed' ? 'completed'
+                : b.status === 'wantToRead'? 'new'
+                : b.status,
+          listName: LIST_MAP[b.listName] || LIST_MAP[b.list_name] || b.listName || b.list_name,
+        }));
+
         const favourites = books.filter(b => b.listName === 'favourites');
         const reading    = books.filter(b => b.listName === 'reading');
         const wishlist   = books.filter(b => b.listName === 'wishlist');
         setBookshelf({ favourites, reading, wishlist });
 
-        // Custom lists — any listName that isn't a standard one
+        // Custom lists — any listName not in standard set
         const standardLists = ['favourites', 'reading', 'wishlist'];
         const customBooks   = books.filter(b => !standardLists.includes(b.listName));
         const groupedCustom = customBooks.reduce((acc, book) => {

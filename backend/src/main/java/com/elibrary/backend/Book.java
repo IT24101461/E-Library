@@ -19,5 +19,15 @@ public class Book {
     private double rating;
     private String status;
     private int progress;
+
+    @Column(name = "list_name")
     private String listName;
+
+    @Column(name = "cover_image")
+    private String coverImage;
+
+    @Column(name = "publication_year")
+    private Integer publicationYear;
+
+    private String keywords;
 }
