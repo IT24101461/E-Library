@@ -1,0 +1,60 @@
+/* Tailwind-based custom styles for Login page */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.login-page {
+  @apply min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-12;
+}
+
+.login-card {
+  @apply w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 border border-gray-100 backdrop-blur-sm;
+}
+
+.login-header {
+  @apply flex items-center gap-4 mb-8;
+}
+
+.login-icon {
+  @apply bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl p-3 shadow-lg text-2xl flex items-center justify-center;
+}
+
+.login-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.login-subtitle {
+  @apply text-sm text-gray-500 font-medium;
+}
+
+.login-error {
+  @apply mb-6 text-sm text-red-700 bg-red-50 p-4 rounded-lg border border-red-200 font-medium;
+}
+
+.login-success {
+  @apply mb-6 text-sm text-green-700 bg-green-50 p-4 rounded-lg border border-green-200 font-medium;
+}
+
+.form-group {
+  @apply mb-5;
+}
+
+.login-label {
+  @apply block text-sm font-bold text-gray-700 mb-2;
+}
+
+.login-input {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white text-gray-900 placeholder-gray-400;
+}
+
+.login-btn {
+  @apply w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl;
+}
+
+.login-footer {
+  @apply mt-8 text-center text-sm text-gray-600;
+}
+
+.login-link {
+  @apply text-indigo-600 font-bold hover:text-indigo-700 transition;
+}
