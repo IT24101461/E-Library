@@ -53,7 +53,7 @@ function App() {
       </nav>
 
       {/* Pages */}
-      {activePage === "bookshelf" && <Bookshelf />}
+      {activePage === "bookshelf" && <Bookshelf onNavigate={setActivePage} />}
       {activePage === "ranker" && <BookRankerApp />}
     </div>
   );

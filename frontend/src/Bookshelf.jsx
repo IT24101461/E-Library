@@ -1,31 +1,11 @@
 // ============================================================
 // Bookshelf.jsx — Feature 4: Personal Bookshelf / Favourites
 // e-Library Project | IT2150 | DS 2.2 G17
-// React Version
-//
-// CHANGES:
-//  • BookCard now shows real cover images (book.coverImage)
-//    with graceful fallback to emoji placeholder on load error
-//  • useEffect normalises SQL list_name values:
-//      currentlyReading → reading (Currently Reading list)
-//      read             → favourites (Favourites list)
-//      wantToRead       → wishlist (Want to Read list)
-//  • Handles both snake_case (cover_image) and camelCase
-//    (coverImage) from the backend JSON
-//
-// ADD THIS TO Bookshelf.css:
-//   .cover-img {
-//     width: 100%; height: 100%; object-fit: cover;
-//     display: block; border-radius: 8px 8px 0 0;
-//   }
 // ============================================================
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import './Bookshelf.css';
 
-// ============================================================
-// CUSTOM CURSOR COMPONENT
-// ============================================================
 function CustomCursor() {
   const ringRef = useRef(null);
   const dotRef  = useRef(null);
@@ -40,8 +20,6 @@ function CustomCursor() {
         dotRef.current.style.left = `${e.clientX}px`;
         dotRef.current.style.top  = `${e.clientY}px`;
       }
-
-      // Trail particle
       const trail = document.createElement('div');
       trail.className = 'cursor-trail';
       trail.style.left = `${e.clientX}px`;
@@ -49,17 +27,10 @@ function CustomCursor() {
       document.body.appendChild(trail);
       setTimeout(() => trail.remove(), 700);
     };
-
-    const onEnter = () => {
-      ringRef.current?.classList.add('hovering');
-      dotRef.current?.classList.add('hovering');
-    };
-    const onLeave = () => {
-      ringRef.current?.classList.remove('hovering');
-      dotRef.current?.classList.remove('hovering');
-    };
-    const onDown = () => ringRef.current?.classList.add('clicking');
-    const onUp   = () => ringRef.current?.classList.remove('clicking');
+    const onEnter = () => { ringRef.current?.classList.add('hovering'); dotRef.current?.classList.add('hovering'); };
+    const onLeave = () => { ringRef.current?.classList.remove('hovering'); dotRef.current?.classList.remove('hovering'); };
+    const onDown  = () => ringRef.current?.classList.add('clicking');
+    const onUp    = () => ringRef.current?.classList.remove('clicking');
 
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mousedown', onDown);
@@ -67,7 +38,6 @@ function CustomCursor() {
     document.querySelectorAll('button, a, .chip, .sidebar-item, .book-card, .sort-select, .card-action-btn')
       .forEach(el => { el.addEventListener('mouseenter', onEnter); el.addEventListener('mouseleave', onLeave); });
 
-    // Lerp ring to cursor
     const lerp = (a, b, t) => a + (b - a) * t;
     const animate = () => {
       ring.current.x = lerp(ring.current.x, pos.current.x, 0.12);
@@ -96,9 +66,6 @@ function CustomCursor() {
   );
 }
 
-// ============================================================
-// TOAST COMPONENT
-// ============================================================
 function Toast({ toast }) {
   return (
     <div className={`toast ${toast.show ? 'show' : ''}`}>
@@ -108,18 +75,13 @@ function Toast({ toast }) {
   );
 }
 
-// ============================================================
-// MODAL COMPONENT
-// ============================================================
-function Modal({ id, isOpen, onClose, children }) {
+function Modal({ isOpen, onClose, children }) {
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
     if (isOpen) document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
-
   if (!isOpen) return null;
-
   return (
     <div className="modal-overlay open" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal">{children}</div>
@@ -127,9 +89,6 @@ function Modal({ id, isOpen, onClose, children }) {
   );
 }
 
-// ============================================================
-// BOOK CARD COMPONENT
-// ============================================================
 function BookCard({ book, listKey, index, onRemove, onMove, onOpen }) {
   const [imgError, setImgError] = useState(false);
 
@@ -157,19 +116,10 @@ function BookCard({ book, listKey, index, onRemove, onMove, onOpen }) {
   const hasCover = book.coverImage && !imgError;
 
   return (
-    <div
-      className="book-card"
-      style={{ animationDelay: `${index * 0.05}s` }}
-      onClick={() => onOpen(book.title)}
-    >
+    <div className="book-card" style={{ animationDelay: `${index * 0.05}s` }} onClick={() => onOpen(book.title)}>
       <div className="book-cover">
         {hasCover ? (
-          <img
-            src={book.coverImage}
-            alt={book.title}
-            className="cover-img"
-            onError={() => setImgError(true)}
-          />
+          <img src={book.coverImage} alt={book.title} className="cover-img" onError={() => setImgError(true)} />
         ) : (
           <div className="cover-placeholder" style={{ background: gradient }}>
             <span>{book.emoji}</span>
@@ -184,16 +134,10 @@ function BookCard({ book, listKey, index, onRemove, onMove, onOpen }) {
           </div>
         )}
         <div className="card-actions">
-          <button
-            className="card-action-btn btn-move"
-            title="Move to list"
-            onClick={(e) => { e.stopPropagation(); onMove(book.id, listKey); }}
-          >↔</button>
-          <button
-            className="card-action-btn"
-            title="Remove"
-            onClick={(e) => { e.stopPropagation(); onRemove(book.id, listKey); }}
-          >✕</button>
+          <button className="card-action-btn btn-move" title="Move to list"
+            onClick={(e) => { e.stopPropagation(); onMove(book.id, listKey); }}>↔</button>
+          <button className="card-action-btn" title="Remove"
+            onClick={(e) => { e.stopPropagation(); onRemove(book.id, listKey); }}>✕</button>
         </div>
       </div>
       <div className="book-info">
@@ -211,9 +155,6 @@ function BookCard({ book, listKey, index, onRemove, onMove, onOpen }) {
   );
 }
 
-// ============================================================
-// BOOK LIST SECTION COMPONENT
-// ============================================================
 function BookListSection({ id, icon, title, badgeClass, books, listKey, view, onRemove, onMove, onOpen, onClear, onNewList, onDelete }) {
   const emptyMessages = {
     favourites: ['⭐', 'No favourites yet',        'Click "Add to Favourites" on any book page'],
@@ -240,14 +181,11 @@ function BookListSection({ id, icon, title, badgeClass, books, listKey, view, on
               <button className="list-action-btn danger" onClick={onDelete} title="Delete this list">🗑 Delete List</button>
             </>
           ) : (
-            <button
-              className={`list-action-btn ${listKey === 'wishlist' ? 'danger' : ''}`}
-              onClick={() => onClear(listKey)}
-            >Clear All</button>
+            <button className={`list-action-btn ${listKey === 'wishlist' ? 'danger' : ''}`}
+              onClick={() => onClear(listKey)}>Clear All</button>
           )}
         </div>
       </div>
-
       <div className={`book-grid ${view === 'list' ? 'book-list-view' : ''}`}>
         {books.length === 0 ? (
           <div className="empty-state">
@@ -257,15 +195,8 @@ function BookListSection({ id, icon, title, badgeClass, books, listKey, view, on
           </div>
         ) : (
           books.map((book, i) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              listKey={listKey}
-              index={i}
-              onRemove={onRemove}
-              onMove={onMove}
-              onOpen={onOpen}
-            />
+            <BookCard key={book.id} book={book} listKey={listKey} index={i}
+              onRemove={onRemove} onMove={onMove} onOpen={onOpen} />
           ))
         )}
       </div>
@@ -276,74 +207,58 @@ function BookListSection({ id, icon, title, badgeClass, books, listKey, view, on
 // ============================================================
 // MAIN BOOKSHELF COMPONENT
 // ============================================================
-export default function Bookshelf() {
+export default function Bookshelf({ onNavigate }) {
 
   const API = 'http://localhost:8080/api/bookshelf';
 
-  // ── State ──────────────────────────────────────────────────
-  const [bookshelf, setBookshelf] = useState({ favourites: [], reading: [], wishlist: [] });
-  const [customLists, setCustomLists]       = useState([]);
-  const [loading, setLoading]               = useState(true);
+  const [bookshelf,   setBookshelf]   = useState({ favourites: [], reading: [], wishlist: [] });
+  const [customLists, setCustomLists] = useState([]);
+  const [loading,     setLoading]     = useState(true);
 
-  const [view,        setView]        = useState('grid');
-  const [genreFilter, setGenreFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortMode,    setSortMode]    = useState('date');
+  const [view,         setView]         = useState('grid');
+  const [genreFilter,  setGenreFilter]  = useState('all');
+  const [searchQuery,  setSearchQuery]  = useState('');
+  const [sortMode,     setSortMode]     = useState('date');
+  const [activeFilter, setActiveFilter] = useState('all'); // all | reading | completed | new
 
-  // Global search across all 4800+ books
-  const [globalSearch,        setGlobalSearch]        = useState('');
-  const [globalResults,       setGlobalResults]       = useState([]);
-  const [globalSearchLoading, setGlobalSearchLoading] = useState(false);
-  const globalSearchTimer = useRef(null);
-
-  const [favAdded, setFavAdded]       = useState(new Set());
+  const [favAdded,    setFavAdded]    = useState(new Set());
   const [demoBookIdx, setDemoBookIdx] = useState(0);
 
-  // Modals
-  const [newListModal,  setNewListModal]  = useState(false);
-  const [confirmModal,  setConfirmModal]  = useState(false);
-  const [moveModal,     setMoveModal]     = useState(false);
-  const [newListName,   setNewListName]   = useState('');
-  const [pendingClear,  setPendingClear]  = useState(null);
-  const [pendingMove,   setPendingMove]   = useState({ id: null, from: null });
+  const [newListModal, setNewListModal] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [moveModal,    setMoveModal]    = useState(false);
+  const [newListName,  setNewListName]  = useState('');
+  const [pendingClear, setPendingClear] = useState(null);
+  const [pendingMove,  setPendingMove]  = useState({ id: null, from: null });
 
   const [toast,    setToast]    = useState({ show: false, icon: '', message: '' });
   const toastTimer = useRef(null);
 
-  // ── Helpers ──────────────────────────────────────────────────
   const showToast = useCallback((icon, message) => {
     clearTimeout(toastTimer.current);
     setToast({ show: true, icon, message });
     toastTimer.current = setTimeout(() => setToast(t => ({ ...t, show: false })), 3000);
   }, []);
 
-  // ── LOAD all books from backend on mount ─────────────────────
+  // ── LOAD books ───────────────────────────────────────────────
   useEffect(() => {
     fetch(`${API}/all`)
       .then(r => r.json())
       .then(rawBooks => {
-        // Normalise SQL list_name values → UI list keys
-        // SQL:  currentlyReading → reading
-        //       read             → favourites  (completed books go to Favourites)
-        //       wantToRead       → wishlist
         const LIST_MAP = {
           currentlyReading: 'reading',
           read:             'favourites',
           wantToRead:       'wishlist',
-          // already-correct keys pass through unchanged:
           reading:          'reading',
           favourites:       'favourites',
           wishlist:         'wishlist',
         };
-
         const books = rawBooks.map(b => ({
           ...b,
-          // map cover_image (snake_case from DB) → coverImage (camelCase)
           coverImage: b.coverImage || b.cover_image || null,
-          // map status values from SQL to UI
-          status: b.status === 'reading'   ? 'reading'
-                : b.status === 'completed' ? 'completed'
-                : b.status === 'wantToRead'? 'new'
+          status: b.status === 'reading'    ? 'reading'
+                : b.status === 'completed'  ? 'completed'
+                : b.status === 'wantToRead' ? 'new'
                 : b.status,
           listName: LIST_MAP[b.listName] || LIST_MAP[b.list_name] || b.listName || b.list_name,
         }));
@@ -353,7 +268,6 @@ export default function Bookshelf() {
         const wishlist   = books.filter(b => b.listName === 'wishlist');
         setBookshelf({ favourites, reading, wishlist });
 
-        // Custom lists — any listName not in standard set
         const standardLists = ['favourites', 'reading', 'wishlist'];
         const customBooks   = books.filter(b => !standardLists.includes(b.listName));
         const groupedCustom = customBooks.reduce((acc, book) => {
@@ -372,14 +286,13 @@ export default function Bookshelf() {
   const addToFavourites = async (title, author, emoji, genre, rating) => {
     const exists = bookshelf.favourites.find(b => b.title === title);
     if (exists) { showToast('⭐', `"${title}" is already in Favourites!`); return; }
-
     try {
-      const res  = await fetch(`${API}/add`, {
+      const res = await fetch(`${API}/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, author, emoji: emoji || '📚', genre: genre || 'General', rating: rating || 0, status: 'new', progress: 0, listName: 'favourites' }),
       });
-      if (!res.ok) { const msg = await res.text(); showToast('❌', msg); return; }
+      if (!res.ok) { showToast('❌', await res.text()); return; }
       const saved = await res.json();
       setBookshelf(prev => ({ ...prev, favourites: [...prev.favourites, saved] }));
       setFavAdded(prev => new Set([...prev, title]));
@@ -388,7 +301,7 @@ export default function Bookshelf() {
     } catch { showToast('❌', 'Server error — could not add book'); }
   };
 
-  // ── REMOVE BOOK ──────────────────────────────────────────────
+  // ── REMOVE ───────────────────────────────────────────────────
   const removeBook = async (id, listKey) => {
     try {
       await fetch(`${API}/remove/${id}`, { method: 'DELETE' });
@@ -405,8 +318,8 @@ export default function Bookshelf() {
     } catch { showToast('❌', 'Could not remove book'); }
   };
 
-  // ── CLEAR LIST ───────────────────────────────────────────────
-  const clearList    = (listKey) => { setPendingClear(listKey); setConfirmModal(true); };
+  // ── CLEAR ────────────────────────────────────────────────────
+  const clearList = (listKey) => { setPendingClear(listKey); setConfirmModal(true); };
 
   const deleteCustomList = async (listId) => {
     const list = customLists.find(l => l.id === listId);
@@ -437,50 +350,40 @@ export default function Bookshelf() {
     } catch { showToast('❌', 'Could not clear list'); }
   };
 
-  // ── MOVE BOOK ────────────────────────────────────────────────
+  // ── MOVE ─────────────────────────────────────────────────────
   const openMoveModal = (id, from) => { setPendingMove({ id, from }); setMoveModal(true); };
 
   const moveToList = async (targetList) => {
     const { id, from } = pendingMove;
     if (!id || targetList === from) { setMoveModal(false); return; }
-
-    // resolve real listName for custom lists
     const resolvedTarget = targetList.startsWith('custom_')
       ? customLists.find(l => l.id === targetList)?.name
       : targetList;
-
     try {
       const res = await fetch(`${API}/move/${id}?targetList=${encodeURIComponent(resolvedTarget)}`, { method: 'PUT' });
       if (!res.ok) { showToast('⚠️', await res.text()); setMoveModal(false); return; }
       const moved = await res.json();
-
-      // Remove from source in UI
       if (from.startsWith('custom_')) {
         setCustomLists(prev => prev.map(l => l.id === from ? { ...l, books: l.books.filter(b => b.id !== id) } : l));
       } else {
         setBookshelf(prev => ({ ...prev, [from]: prev[from].filter(b => b.id !== id) }));
       }
-      // Add to target in UI
       if (targetList.startsWith('custom_')) {
         setCustomLists(prev => prev.map(l => l.id === targetList ? { ...l, books: [...l.books, moved] } : l));
       } else {
         setBookshelf(prev => ({ ...prev, [targetList]: [...prev[targetList], moved] }));
       }
-
       setMoveModal(false);
       showToast('✅', `Moved to ${resolvedTarget}`);
       setPendingMove({ id: null, from: null });
     } catch { showToast('❌', 'Could not move book'); }
   };
 
-  // ── CREATE NEW CUSTOM LIST ───────────────────────────────────
+  // ── CREATE CUSTOM LIST ────────────────────────────────────────
   const createNewList = async () => {
     if (!newListName.trim()) { showToast('⚠️', 'Please enter a list name'); return; }
     const duplicate = customLists.find(l => l.name.toLowerCase() === newListName.trim().toLowerCase());
     if (duplicate) { showToast('⚠️', `"${newListName}" already exists`); return; }
-
-    // Lists are identified purely by listName in the books table — no separate API call needed.
-    // The list will appear in DB as soon as the first book is added to it.
     const newList = { id: `custom_${newListName.trim()}`, name: newListName.trim(), books: [] };
     setCustomLists(prev => [...prev, newList]);
     showToast('📌', `List "${newListName.trim()}" created!`);
@@ -489,73 +392,31 @@ export default function Bookshelf() {
     setTimeout(() => document.getElementById(`list-${newList.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
   };
 
-  // ── OPEN BOOK ────────────────────────────────────────────────
-  const DEMO_BOOKS = [
-    { title: 'Dune: The Desert Planet',     author: 'Frank Herbert',      year: 1965, emoji: '🌏', genre: 'Sci-Fi',   rating: 4.8, reviews: '12,403', category: 'Science Fiction' },
-    { title: 'The Name of the Wind',        author: 'Patrick Rothfuss',   year: 2007, emoji: '🌬️', genre: 'Fantasy',  rating: 4.7, reviews: '9,812',  category: 'Fantasy' },
-    { title: 'Gone Girl',                   author: 'Gillian Flynn',       year: 2012, emoji: '🔪', genre: 'Mystery',  rating: 4.5, reviews: '8,201',  category: 'Mystery' },
-    { title: 'Sapiens',                     author: 'Yuval Noah Harari',   year: 2011, emoji: '🦴', genre: 'History',  rating: 4.6, reviews: '15,334', category: 'History' },
-    { title: 'Pride and Prejudice',         author: 'Jane Austen',         year: 1813, emoji: '💌', genre: 'Romance',  rating: 4.9, reviews: '20,117', category: 'Romance' },
-    { title: 'The Hitchhiker\'s Guide',     author: 'Douglas Adams',       year: 1979, emoji: '🚀', genre: 'Sci-Fi',   rating: 4.7, reviews: '11,559', category: 'Science Fiction' },
-    { title: 'A Game of Thrones',           author: 'George R.R. Martin',  year: 1996, emoji: '⚔️', genre: 'Fantasy',  rating: 4.8, reviews: '18,440', category: 'Fantasy' },
-    { title: 'The Da Vinci Code',           author: 'Dan Brown',           year: 2003, emoji: '🗝️', genre: 'Mystery',  rating: 4.3, reviews: '13,672', category: 'Mystery' },
-  ];
-  const currentDemo = DEMO_BOOKS[demoBookIdx];
-  const openBook = (title) => {
-    showToast('📖', `Opening "${title}"...`);
-    // In integration: navigate(`/read?title=${encodeURIComponent(title)}`);
-  };
+  const openBook = (title) => showToast('📖', `Opening "${title}"...`);
 
-  // ── GLOBAL SEARCH (all 4800+ books) ─────────────────────────
-  const handleGlobalSearch = (value) => {
-    setGlobalSearch(value);
-    clearTimeout(globalSearchTimer.current);
-    if (!value.trim()) { setGlobalResults([]); return; }
-    setGlobalSearchLoading(true);
-    globalSearchTimer.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`${API}/search?q=${encodeURIComponent(value)}`);
-        const data = await res.json();
-        setGlobalResults(data);
-      } catch { showToast('❌', 'Search failed'); }
-      finally { setGlobalSearchLoading(false); }
-    }, 400);
-  };
-
-  // ── ADD DISCOVERED BOOK TO MY LIBRARY ───────────────────────
-  const addToMyLibrary = async (bookId, title) => {
-    try {
-      const res = await fetch(`${API}/add-to-library/${bookId}?listName=wishlist`, { method: 'POST' });
-      if (!res.ok) { showToast('⚠️', await res.text()); return; }
-      const saved = await res.json();
-      setBookshelf(prev => ({ ...prev, wishlist: [...prev.wishlist, saved] }));
-      showToast('✅', `"${title}" added to Want to Read!`);
-      // Remove from search results
-      setGlobalResults(prev => prev.filter(b => b.id !== bookId));
-    } catch { showToast('❌', 'Could not add book'); }
-  };
-
-  // ── FILTER & SORT ───────────────────────────────────────────
+  // ── FILTER & SORT ─────────────────────────────────────────────
   const applyFilters = (books) => {
     let result = [...books];
-    if (genreFilter !== 'all') result = result.filter(b => b.genre === genreFilter);
-    if (searchQuery)           result = result.filter(b =>
-      b.title.toLowerCase().includes(searchQuery) ||
-      b.author.toLowerCase().includes(searchQuery)
-    );
+    if (genreFilter !== 'all')    result = result.filter(b => b.genre === genreFilter);
+    if (searchQuery)              result = result.filter(b =>
+      b.title.toLowerCase().includes(searchQuery) || b.author.toLowerCase().includes(searchQuery));
+    if (activeFilter === 'reading')   result = result.filter(b => b.status === 'reading');
+    if (activeFilter === 'completed') result = result.filter(b => b.status === 'completed');
+    if (activeFilter === 'new')       result = result.filter(b => b.status === 'new');
     if (sortMode === 'title')  result.sort((a, b) => a.title.localeCompare(b.title));
     if (sortMode === 'author') result.sort((a, b) => a.author.localeCompare(b.author));
     if (sortMode === 'rating') result.sort((a, b) => b.rating - a.rating);
     return result;
   };
 
-  // ── COUNTS ──────────────────────────────────────────────────
+  // ── COUNTS ────────────────────────────────────────────────────
   const allBooks   = [...Object.values(bookshelf).flat(), ...customLists.flatMap(l => l.books)];
+  const featuredBooks = allBooks;
+  const currentDemo   = featuredBooks.length > 0 ? featuredBooks[demoBookIdx % featuredBooks.length] : null;
   const totalBooks = allBooks.length;
   const readingCnt = bookshelf.reading.length;
   const doneCnt    = allBooks.filter(b => b.status === 'completed').length;
 
-  // ── RENDER ──────────────────────────────────────────────────
   if (loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', color:'#aaa', fontSize:'1.2rem' }}>
       📚 Loading your bookshelf...
@@ -579,44 +440,89 @@ export default function Bookshelf() {
         <div className="topbar-user">U</div>
       </nav>
 
-      {/* ── BOOK DETAIL BANNER (simulate other member's page) ── */}
-      <div className="demo-banner">
-        <div className="demo-book-cover" />
-        <div className="demo-book-info">
-          <div className="book-category">{currentDemo.category}</div>
-          <h2>{currentDemo.title}</h2>
-          <div className="author">{currentDemo.author} · {currentDemo.year}</div>
-          <div className="rating">
-            <span className="stars">★★★★★</span>
-            <span style={{ color: 'var(--gold)', fontWeight: 700 }}>{currentDemo.rating}</span>
-            <span className="rating-count">({currentDemo.reviews} reviews)</span>
+      {/* ── AI DISCOVERY BANNER ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, #0f172a 0%, #0d2137 50%, #0f172a 100%)',
+        borderBottom: '1px solid #1e3a5f',
+        padding: '24px 40px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '32px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Glow blobs */}
+        <div style={{ position:'absolute', width:300, height:300, borderRadius:'50%',
+          background:'rgba(0,229,255,0.04)', top:-100, left:-50, pointerEvents:'none' }} />
+        <div style={{ position:'absolute', width:200, height:200, borderRadius:'50%',
+          background:'rgba(99,102,241,0.06)', bottom:-80, right:100, pointerEvents:'none' }} />
+
+        {/* Robot character */}
+        <div style={{ flexShrink: 0, position: 'relative' }}>
+          <div style={{
+            width: 80, height: 80, borderRadius: 20,
+            background: 'linear-gradient(135deg,#1e3a5f,#0ea5e9)',
+            border: '2px solid rgba(0,229,255,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 40,
+            boxShadow: '0 0 24px rgba(0,229,255,0.2)',
+            animation: 'robotFloat 3s ease-in-out infinite',
+          }}>🤖</div>
+          {/* Wave hand */}
+          <div style={{
+            position: 'absolute', top: -8, right: -12,
+            fontSize: 22,
+            animation: 'wave 1.5s ease-in-out infinite',
+            transformOrigin: 'bottom center',
+          }}>👋</div>
+          {/* Speech bubble dot */}
+          <div style={{
+            position: 'absolute', bottom: -4, left: '50%', transform: 'translateX(-50%)',
+            width: 8, height: 8, borderRadius: '50%',
+            background: '#00e5ff', boxShadow: '0 0 8px #00e5ff',
+            animation: 'pulse 2s ease-in-out infinite',
+          }} />
+        </div>
+
+        {/* Text content */}
+        <div style={{ flex: 1 }}>
+          <div style={{ color: '#00e5ff', fontSize: 11, fontWeight: 700,
+            letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 6 }}>
+            AI-Powered Discovery
           </div>
-          <div className="demo-actions">
-            {/* ⭐ THE ADD TO FAVOURITES BUTTON ⭐ */}
-            <button
-              className={`btn-add-fav ${favAdded.has(currentDemo.title) ? 'added' : ''}`}
-              onClick={() => addToFavourites(currentDemo.title, currentDemo.author, currentDemo.emoji, currentDemo.genre, currentDemo.rating)}
-              disabled={favAdded.has(currentDemo.title)}
-            >
-              <span>{favAdded.has(currentDemo.title) ? '✅' : '⭐'}</span>
-              <span>{favAdded.has(currentDemo.title) ? 'ADDED TO FAVOURITES' : 'ADD TO FAVOURITES'}</span>
-            </button>
-            <button className="btn-read">📖 Read Now</button>
+          <div style={{ color: '#f0f0f0', fontSize: 20, fontWeight: 800,
+            fontFamily: "'Syne', sans-serif", marginBottom: 6, lineHeight: 1.3 }}>
+            Didn't find what you're looking for?
           </div>
-          {/* Book navigation */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.85rem' }}>
-            <button
-              onClick={() => setDemoBookIdx(i => (i - 1 + DEMO_BOOKS.length) % DEMO_BOOKS.length)}
-              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', borderRadius: '6px', padding: '4px 12px', cursor: 'pointer', fontSize: '1rem' }}
-            >‹</button>
-            <span style={{ color: '#aaa', fontSize: '0.82rem' }}>{demoBookIdx + 1} / {DEMO_BOOKS.length}</span>
-            <button
-              onClick={() => setDemoBookIdx(i => (i + 1) % DEMO_BOOKS.length)}
-              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', borderRadius: '6px', padding: '4px 12px', cursor: 'pointer', fontSize: '1rem' }}
-            >›</button>
-            <span style={{ color: '#555', fontSize: '0.78rem', marginLeft: '0.25rem' }}>browse books</span>
+          <div style={{ color: '#94a3b8', fontSize: 13, lineHeight: 1.6, maxWidth: 480 }}>
+            Explore <span style={{ color:'#00e5ff', fontWeight:600 }}>4,800+ books</span> ranked by our
+            AI algorithm. Search by genre, mood, or just chat — our bot will find your next read! 📚
           </div>
         </div>
+
+        {/* CTA Button */}
+        <div style={{ flexShrink: 0, textAlign: 'center' }}>
+          <button
+            onClick={() => onNavigate && onNavigate('ranker')}
+            style={{
+              background: 'linear-gradient(135deg,#1d4ed8,#0ea5e9)',
+              color: '#fff', border: 'none', borderRadius: 12,
+              padding: '14px 28px', fontSize: 14, fontWeight: 700,
+              cursor: 'pointer', fontFamily: "'Syne', sans-serif",
+              boxShadow: '0 4px 20px rgba(0,229,255,0.25)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              display: 'block', marginBottom: 8,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 28px rgba(0,229,255,0.4)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 4px 20px rgba(0,229,255,0.25)'; }}
+          >
+            🏆 Explore Book Ranker
+          </button>
+          <div style={{ color:'#475569', fontSize:11 }}>Powered by weighted AI scoring</div>
+        </div>
+
+        {/* CSS animations */}
+        <style>{}</style>
       </div>
 
       {/* ── MAIN LAYOUT ── */}
@@ -627,12 +533,19 @@ export default function Bookshelf() {
           <div className="sidebar-section">
             <div className="sidebar-label">Library</div>
             {[
-              { label: 'All Books',    icon: '📚', count: totalBooks },
-              { label: 'Reading',      icon: '📖', count: readingCnt },
-              { label: 'Completed',    icon: '✅', count: doneCnt },
-              { label: 'New Arrivals', icon: '✨', count: allBooks.filter(b => b.status === 'new').length },
-            ].map((item, i) => (
-              <div key={i} className={`sidebar-item ${i === 0 ? 'active' : ''}`}>
+              { label: 'All Books',    icon: '📚', count: totalBooks,                                      filter: 'all'       },
+              { label: 'Reading',      icon: '📖', count: readingCnt,                                      filter: 'reading'   },
+              { label: 'Completed',    icon: '✅', count: doneCnt,                                         filter: 'completed' },
+              { label: 'New Arrivals', icon: '✨', count: allBooks.filter(b => b.status === 'new').length, filter: 'new'       },
+            ].map(item => (
+              <div key={item.filter}
+                className={`sidebar-item ${activeFilter === item.filter ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveFilter(item.filter);
+                  setGenreFilter('all');
+                  setSearchQuery('');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}>
                 <span className="icon">{item.icon}</span>
                 {item.label}
                 <span className="count">{item.count}</span>
@@ -643,12 +556,13 @@ export default function Bookshelf() {
           <div className="sidebar-section">
             <div className="sidebar-label">My Lists</div>
             {[
-              { label: 'Favourites',   icon: '⭐', count: bookshelf.favourites.length, target: 'list-fav' },
+              { label: 'Favourites',   icon: '⭐', count: bookshelf.favourites.length, target: 'list-fav'      },
               { label: 'Want to Read', icon: '🎯', count: bookshelf.wishlist.length,   target: 'list-wishlist' },
-              { label: 'Custom Lists', icon: '📌', count: customLists.reduce((s,l) => s + l.books.length, 0), target: 'list-custom_1' },
+              { label: 'Custom Lists', icon: '📌', count: customLists.reduce((s,l) => s + l.books.length, 0),
+                target: customLists[0] ? `list-${customLists[0].id}` : 'list-fav' },
             ].map((item, i) => (
               <div key={i} className="sidebar-item"
-                onClick={() => document.getElementById(item.target)?.scrollIntoView({ behavior: 'smooth' })}>
+                onClick={() => { setActiveFilter('all'); document.getElementById(item.target)?.scrollIntoView({ behavior: 'smooth' }); }}>
                 <span className="icon">{item.icon}</span>
                 {item.label}
                 <span className="count">{item.count}</span>
@@ -659,8 +573,8 @@ export default function Bookshelf() {
           <div className="sidebar-section">
             <div className="sidebar-label">Genres</div>
             {[['🚀','Sci-Fi'],['🐉','Fantasy'],['🔍','Mystery'],['📜','History']].map(([icon, genre]) => (
-              <div key={genre} className="sidebar-item"
-                onClick={() => setGenreFilter(genre)}>
+              <div key={genre} className={`sidebar-item ${genreFilter === genre ? 'active' : ''}`}
+                onClick={() => { setGenreFilter(g => g === genre ? 'all' : genre); setActiveFilter('all'); }}>
                 <span className="icon">{icon}</span>{genre}
               </div>
             ))}
@@ -708,117 +622,117 @@ export default function Bookshelf() {
           {/* SEARCH */}
           <div className="search-bar">
             <span className="search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="Search your bookshelf..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value.toLowerCase())}
-            />
+            <input type="text" placeholder="Search your bookshelf..."
+              value={searchQuery} onChange={e => setSearchQuery(e.target.value.toLowerCase())} />
           </div>
 
           {/* GENRE CHIPS */}
           <div className="filter-bar">
             {[['all','All Genres'],['Sci-Fi','🚀 Sci-Fi'],['Fantasy','🐉 Fantasy'],['Mystery','🔍 Mystery'],['History','📜 History'],['Romance','💕 Romance']].map(([val, label]) => (
-              <div
-                key={val}
-                className={`chip ${genreFilter === val ? 'active' : ''}`}
-                onClick={() => setGenreFilter(val)}
-              >{label}</div>
+              <div key={val} className={`chip ${genreFilter === val ? 'active' : ''}`}
+                onClick={() => setGenreFilter(val)}>{label}</div>
             ))}
           </div>
 
           {/* BOOK LISTS */}
-          {[
-            { id: 'list-fav',      icon: '⭐', title: 'Favourites',        badgeClass: 'badge-fav',     key: 'favourites' },
-            { id: 'list-reading',  icon: '📖', title: 'Currently Reading', badgeClass: 'badge-reading', key: 'reading'    },
-            { id: 'list-wishlist', icon: '🎯', title: 'Want to Read',      badgeClass: 'badge-wishlist',key: 'wishlist'   },
-          ].map(section => (
+          {activeFilter !== 'all' ? (
             <BookListSection
-              key={section.key}
-              id={section.id}
-              icon={section.icon}
-              title={section.title}
-              badgeClass={section.badgeClass}
-              books={applyFilters(bookshelf[section.key])}
-              listKey={section.key}
+              id="list-filtered"
+              icon={activeFilter === 'reading' ? '📖' : activeFilter === 'completed' ? '✅' : '✨'}
+              title={activeFilter === 'reading' ? 'Currently Reading' : activeFilter === 'completed' ? 'Completed Books' : 'New Arrivals'}
+              badgeClass="badge-reading"
+              books={applyFilters(allBooks)}
+              listKey="favourites"
               view={view}
               onRemove={removeBook}
               onMove={openMoveModal}
               onOpen={openBook}
-              onClear={clearList}
+              onClear={() => {}}
               onNewList={() => setNewListModal(true)}
             />
-          ))}
+          ) : (
+            <>
+              {[
+                { id: 'list-fav',      icon: '⭐', title: 'Favourites',        badgeClass: 'badge-fav',     key: 'favourites' },
+                { id: 'list-reading',  icon: '📖', title: 'Currently Reading', badgeClass: 'badge-reading', key: 'reading'    },
+                { id: 'list-wishlist', icon: '🎯', title: 'Want to Read',      badgeClass: 'badge-wishlist',key: 'wishlist'   },
+              ].map(section => (
+                <BookListSection
+                  key={section.key}
+                  id={section.id}
+                  icon={section.icon}
+                  title={section.title}
+                  badgeClass={section.badgeClass}
+                  books={applyFilters(bookshelf[section.key])}
+                  listKey={section.key}
+                  view={view}
+                  onRemove={removeBook}
+                  onMove={openMoveModal}
+                  onOpen={openBook}
+                  onClear={clearList}
+                  onNewList={() => setNewListModal(true)}
+                />
+              ))}
 
-          {/* DYNAMIC CUSTOM LISTS */}
-          <div className="custom-lists-header">
-            <span className="list-icon">📌</span>
-            <span>My Custom Lists</span>
-            <button className="btn-new-list" onClick={() => setNewListModal(true)}>＋ New List</button>
-          </div>
-          {customLists.length === 0 && (
-            <div className="empty-state" style={{ marginBottom: '1.5rem' }}>
-              <span className="empty-icon">📌</span>
-              <div className="empty-title">No custom lists yet</div>
-              <div className="empty-desc">Click "＋ New List" to create your first list</div>
-            </div>
+              {/* CUSTOM LISTS */}
+              <div className="custom-lists-header">
+                <span className="list-icon">📌</span>
+                <span>My Custom Lists</span>
+                <button className="btn-new-list" onClick={() => setNewListModal(true)}>＋ New List</button>
+              </div>
+              {customLists.length === 0 && (
+                <div className="empty-state" style={{ marginBottom: '1.5rem' }}>
+                  <span className="empty-icon">📌</span>
+                  <div className="empty-title">No custom lists yet</div>
+                  <div className="empty-desc">Click "＋ New List" to create your first list</div>
+                </div>
+              )}
+              {customLists.map(cl => (
+                <BookListSection
+                  key={cl.id}
+                  id={`list-${cl.id}`}
+                  icon="📌"
+                  title={cl.name}
+                  badgeClass="badge-wishlist"
+                  books={applyFilters(cl.books)}
+                  listKey={cl.id}
+                  view={view}
+                  onRemove={removeBook}
+                  onMove={openMoveModal}
+                  onOpen={openBook}
+                  onClear={clearList}
+                  onNewList={() => setNewListModal(true)}
+                  onDelete={() => deleteCustomList(cl.id)}
+                />
+              ))}
+            </>
           )}
-          {customLists.map((cl) => (
-            <BookListSection
-              key={cl.id}
-              id={`list-${cl.id}`}
-              icon="📌"
-              title={cl.name}
-              badgeClass="badge-wishlist"
-              books={applyFilters(cl.books)}
-              listKey={cl.id}
-              view={view}
-              onRemove={removeBook}
-              onMove={openMoveModal}
-              onOpen={openBook}
-              onClear={clearList}
-              onNewList={() => setNewListModal(true)}
-              onDelete={() => deleteCustomList(cl.id)}
-            />
-          ))}
 
         </main>
       </div>
 
       {/* ── MODALS ── */}
-
-      {/* New List Modal */}
       <Modal isOpen={newListModal} onClose={() => setNewListModal(false)}>
         <h3>Create New List</h3>
         <p>Give your reading list a name to organise your books.</p>
-        <input
-          type="text"
-          placeholder="e.g. Summer Reads, Must Read..."
-          maxLength={40}
-          value={newListName}
-          onChange={e => setNewListName(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && createNewList()}
-          autoFocus
-        />
+        <input type="text" placeholder="e.g. Summer Reads, Must Read..." maxLength={40}
+          value={newListName} onChange={e => setNewListName(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && createNewList()} autoFocus />
         <div className="modal-actions">
           <button className="btn-modal-cancel" onClick={() => setNewListModal(false)}>Cancel</button>
           <button className="btn-modal-create" onClick={createNewList}>Create List</button>
         </div>
       </Modal>
 
-      {/* Confirm Clear Modal */}
       <Modal isOpen={confirmModal} onClose={() => setConfirmModal(false)}>
         <h3>Clear List?</h3>
-        <p className="confirm-text">
-          This will remove all books from your "{pendingClear}" list. This cannot be undone.
-        </p>
+        <p className="confirm-text">This will remove all books from your "{pendingClear}" list. This cannot be undone.</p>
         <div className="modal-actions">
           <button className="btn-modal-cancel" onClick={() => setConfirmModal(false)}>Cancel</button>
           <button className="btn-danger-confirm" onClick={confirmClear}>Yes, Clear All</button>
         </div>
       </Modal>
 
-      {/* Move Modal */}
       <Modal isOpen={moveModal} onClose={() => setMoveModal(false)}>
         <h3>Move to List</h3>
         <p>Choose which list to move this book to.</p>
@@ -840,7 +754,6 @@ export default function Bookshelf() {
         </div>
       </Modal>
 
-      {/* ── TOAST ── */}
       <Toast toast={toast} />
     </>
   );
