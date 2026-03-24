@@ -10,22 +10,38 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
-    // ── GET all books in a list (favourites / reading / wishlist / custom) ──
-    public List<Book> getBooksByList(String listName) {
-        return bookRepository.findByListName(listName);
-    }
-
-    // ── GET all books ──
+    // ── GET all personal books (bookshelf view — your 60 books) ──
     public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+        return bookRepository.findByIsPersonal(true);
     }
 
-    // ── ADD book to a list (favourites, reading, wishlist, or custom list name) ──
+    // ── GET books by list name (only personal books) ──
+    public List<Book> getBooksByList(String listName) {
+        return bookRepository.findByListNameAndIsPersonal(listName, true);
+    }
+
+    // ── SEARCH across all 4800+ books ──
+    public List<Book> searchBooks(String query) {
+        return bookRepository.searchAllBooks(query);
+    }
+
+    // ── ADD book to a list ──
     public Book addBook(Book book) {
-        // Prevent duplicates in the same list
         if (bookRepository.existsByTitleAndListName(book.getTitle(), book.getListName())) {
             throw new RuntimeException("\"" + book.getTitle() + "\" is already in " + book.getListName());
         }
+        book.setIsPersonal(true); // always personal when manually added
+        return bookRepository.save(book);
+    }
+
+    // ── ADD discovered book to personal library ──
+    public Book addToMyLibrary(Long id, String listName) {
+        Book book = bookRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+        book.setIsPersonal(true);
+        book.setListName(listName != null ? listName : "wantToRead");
+        book.setStatus("wantToRead");
+        book.setProgress(0);
         return bookRepository.save(book);
     }
 
@@ -44,7 +60,7 @@ public class BookService {
 
     // ── CLEAR all books from a list ──
     public void clearList(String listName) {
-        List<Book> books = bookRepository.findByListName(listName);
+        List<Book> books = bookRepository.findByListNameAndIsPersonal(listName, true);
         bookRepository.deleteAll(books);
     }
 }

@@ -293,55 +293,182 @@ const StarRating = ({ rating }) => {
   );
 };
 
-// ─── Book Row ─────────────────────────────────────────────────────────────
-const BookRow = ({ book, index }) => {
-  const cls = index === 0 ? "br-book-row gold" : index === 1 ? "br-book-row silver" : index === 2 ? "br-book-row bronze" : "br-book-row";
+// ─── List Picker Modal ────────────────────────────────────────────────────
+const SHELF_API = "http://localhost:8080/api/bookshelf";
+const LISTS = [
+  { key: "favourites", label: "⭐ Favourites" },
+  { key: "reading",    label: "📖 Currently Reading" },
+  { key: "wishlist",   label: "🎯 Want to Read" },
+];
+
+function ListPickerModal({ book, onClose }) {
+  const [adding, setAdding]   = useState(false);
+  const [added,  setAdded]    = useState(false);
+  const [msg,    setMsg]      = useState("");
+
+  const addToList = async (listKey) => {
+    setAdding(true);
+    try {
+      // First check if book exists in MySQL by searching title
+      const searchRes = await fetch(`${SHELF_API}/search?q=${encodeURIComponent(book.title)}`);
+      const searchData = await searchRes.json();
+      const match = searchData.find(b => b.title.toLowerCase() === book.title.toLowerCase());
+
+      if (match) {
+        // Book exists in DB — use add-to-library endpoint
+        const res = await fetch(`${SHELF_API}/add-to-library/${match.id}?listName=${listKey}`, { method: "POST" });
+        if (!res.ok) { setMsg(await res.text()); setAdding(false); return; }
+      } else {
+        // Book not in DB — add fresh via /add
+        const res = await fetch(`${SHELF_API}/add`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: book.title,
+            author: book.authors,
+            genre: "Fiction",
+            emoji: "📖",
+            rating: book.average_rating,
+            status: listKey === "reading" ? "reading" : "wantToRead",
+            progress: 0,
+            listName: listKey,
+            coverImage: book.image_url,
+            publicationYear: book.publication_year,
+            keywords: book.description?.slice(0, 200) || "",
+            isPersonal: true,
+          }),
+        });
+        if (!res.ok) { setMsg(await res.text()); setAdding(false); return; }
+      }
+      setAdded(true);
+      setMsg(`Added to ${LISTS.find(l => l.key === listKey)?.label}!`);
+    } catch { setMsg("Could not connect to bookshelf."); }
+    setAdding(false);
+  };
+
   return (
-    <div className={cls} style={{ animationDelay: `${index * 0.04}s` }}>
-      {book.image_url && (
-        <img src={book.image_url} alt={book.title}
-          style={{ width: 46, height: 66, objectFit: "cover", borderRadius: 6, flexShrink: 0, boxShadow: "4px 4px 12px rgba(0,0,0,.6)" }} />
-      )}
-      <div style={{ flex: 1, minWidth: 0, position: "relative", zIndex: 1 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-          {index < 3 && (
-            <span style={{
-              background: index === 0 ? "var(--gold)" : index === 1 ? "#94a3b8" : "#b45309",
-              color: "#000", fontSize: "10px", fontWeight: 800,
-              padding: "2px 7px", borderRadius: 4, fontFamily: "'Syne', sans-serif",
-              letterSpacing: ".04em"
-            }}>#{index + 1}</span>
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)",
+      zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center",
+    }} onClick={onClose}>
+      <div style={{
+        background: "#1e293b", border: "1px solid #00e5ff", borderRadius: 16,
+        padding: "28px 32px", minWidth: 320, maxWidth: 400,
+        boxShadow: "0 0 40px rgba(0,229,255,0.2)",
+      }} onClick={e => e.stopPropagation()}>
+
+        {/* Book info */}
+        <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+          {book.image_url && (
+            <img src={book.image_url} alt=""
+              style={{ width: 48, height: 68, objectFit: "cover", borderRadius: 6, flexShrink: 0 }} />
           )}
-          <span style={{
-            color: "var(--text-primary)", fontWeight: 700, fontSize: "14px",
-            fontFamily: "'Syne', sans-serif",
-            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
-          }}>{book.title}</span>
+          <div>
+            <div style={{ color: "#e2e8f0", fontWeight: 700, fontSize: 14, fontFamily: "'Syne', sans-serif" }}>{book.title}</div>
+            <div style={{ color: "#64748b", fontSize: 12, marginTop: 4 }}>{book.authors}</div>
+            <div style={{ color: "#f59e0b", fontSize: 12, marginTop: 4 }}>⭐ {book.average_rating?.toFixed(2)}</div>
+          </div>
         </div>
-        <div style={{ color: "var(--text-secondary)", fontSize: "12px", marginBottom: 5 }}>
-          {book.authors}{book.publication_year ? ` · ${book.publication_year}` : ""}
-        </div>
-        <StarRating rating={book.average_rating} />
-        {book.description && (
-          <div style={{
-            color: "var(--text-dim)", fontSize: "11px", marginTop: 5,
-            display: "-webkit-box", WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.5
-          }}>{book.description}</div>
+
+        {added ? (
+          <div style={{ textAlign: "center", padding: "16px 0" }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>✅</div>
+            <div style={{ color: "#22c55e", fontWeight: 700, fontSize: 14 }}>{msg}</div>
+            <button onClick={onClose} style={{
+              marginTop: 16, background: "#1d4ed8", color: "#fff", border: "none",
+              borderRadius: 8, padding: "8px 24px", cursor: "pointer", fontWeight: 600,
+            }}>Done</button>
+          </div>
+        ) : (
+          <>
+            <div style={{ color: "#94a3b8", fontSize: 12, marginBottom: 14, fontWeight: 600,
+              textTransform: "uppercase", letterSpacing: 1 }}>Add to which list?</div>
+            {msg && <div style={{ color: "#f87171", fontSize: 12, marginBottom: 12 }}>{msg}</div>}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {LISTS.map(list => (
+                <button key={list.key} onClick={() => addToList(list.key)} disabled={adding}
+                  style={{
+                    background: "#0f172a", border: "1px solid #1e3a5f", color: "#e2e8f0",
+                    borderRadius: 10, padding: "12px 16px", cursor: "pointer",
+                    fontSize: 14, fontWeight: 600, textAlign: "left",
+                    transition: "border-color 0.2s, background 0.2s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor="#00e5ff"; e.currentTarget.style.background="#1e293b"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor="#1e3a5f"; e.currentTarget.style.background="#0f172a"; }}
+                >{list.label}</button>
+              ))}
+            </div>
+            <button onClick={onClose} style={{
+              marginTop: 16, width: "100%", background: "none", border: "1px solid #334155",
+              color: "#64748b", borderRadius: 10, padding: "10px", cursor: "pointer", fontSize: 13,
+            }}>Cancel</button>
+          </>
         )}
       </div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "center", flexShrink: 0, gap: 6, position: "relative", zIndex: 1 }}>
-        <div style={{
-          background: "var(--accent-dim)", color: "var(--accent)",
-          fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: 12,
-          fontFamily: "'Syne', sans-serif", border: "1px solid var(--border-hover)",
-          boxShadow: "0 0 10px var(--accent-dim)"
-        }}>
-          {book.score?.toFixed(3)}
-        </div>
-        <div style={{ color: "var(--text-dim)", fontSize: "10px", fontWeight: 600, letterSpacing: ".06em", textTransform: "uppercase" }}>score</div>
-      </div>
     </div>
+  );
+}
+
+// ─── Book Row ─────────────────────────────────────────────────────────────
+const BookRow = ({ book, index }) => {
+  const [showPicker, setShowPicker] = useState(false);
+  const cls = index === 0 ? "br-book-row gold" : index === 1 ? "br-book-row silver" : index === 2 ? "br-book-row bronze" : "br-book-row";
+  return (
+    <>
+      {showPicker && <ListPickerModal book={book} onClose={() => setShowPicker(false)} />}
+      <div className={cls} style={{ animationDelay: `${index * 0.04}s` }}>
+        {book.image_url && (
+          <img src={book.image_url} alt={book.title}
+            style={{ width: 46, height: 66, objectFit: "cover", borderRadius: 6, flexShrink: 0, boxShadow: "4px 4px 12px rgba(0,0,0,.6)" }} />
+        )}
+        <div style={{ flex: 1, minWidth: 0, position: "relative", zIndex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+            {index < 3 && (
+              <span style={{
+                background: index === 0 ? "var(--gold)" : index === 1 ? "#94a3b8" : "#b45309",
+                color: "#000", fontSize: "10px", fontWeight: 800,
+                padding: "2px 7px", borderRadius: 4, fontFamily: "'Syne', sans-serif",
+                letterSpacing: ".04em"
+              }}>#{index + 1}</span>
+            )}
+            <span style={{
+              color: "var(--text-primary)", fontWeight: 700, fontSize: "14px",
+              fontFamily: "'Syne', sans-serif",
+              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
+            }}>{book.title}</span>
+          </div>
+          <div style={{ color: "var(--text-secondary)", fontSize: "12px", marginBottom: 5 }}>
+            {book.authors}{book.publication_year ? ` · ${book.publication_year}` : ""}
+          </div>
+          <StarRating rating={book.average_rating} />
+          {book.description && (
+            <div style={{
+              color: "var(--text-dim)", fontSize: "11px", marginTop: 5,
+              display: "-webkit-box", WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.5
+            }}>{book.description}</div>
+          )}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "center", flexShrink: 0, gap: 6, position: "relative", zIndex: 1 }}>
+          <div style={{
+            background: "var(--accent-dim)", color: "var(--accent)",
+            fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: 12,
+            fontFamily: "'Syne', sans-serif", border: "1px solid var(--border-hover)",
+            boxShadow: "0 0 10px var(--accent-dim)"
+          }}>
+            {book.score?.toFixed(3)}
+          </div>
+          <div style={{ color: "var(--text-dim)", fontSize: "10px", fontWeight: 600, letterSpacing: ".06em", textTransform: "uppercase" }}>score</div>
+          {/* ADD TO LIBRARY BUTTON */}
+          <button onClick={() => setShowPicker(true)} style={{
+            marginTop: 4, background: "linear-gradient(135deg,#1d4ed8,#0ea5e9)",
+            color: "#fff", border: "none", borderRadius: 8,
+            padding: "6px 12px", fontSize: "11px", fontWeight: 700,
+            cursor: "pointer", whiteSpace: "nowrap",
+          }}>+ Add</button>
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -478,7 +605,7 @@ export default function BookRankerApp() {
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: 13, marginTop: 8 }}>
             {tab === "ranked"
-              ? `Powered by Weighted Scoring Algorithm · ${rankedBooks.length} books loaded`
+              ? `Powered by Weighted Scoring Algorithm · ${rankedBooks.length} books loaded among 4500+ records`
               : "Ask me anything — genre, mood, author, or just say 'top books'"}
           </p>
         </div>

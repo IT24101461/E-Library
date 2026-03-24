@@ -7,13 +7,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookshelf")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"}) // React dev server port
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
 public class BookController {
 
     @Autowired
     private BookService bookService;
 
-    // ── GET all books ──────────────────────────────────────────
+    // ── GET all personal books (bookshelf — your 60) ──────────
     // GET /api/bookshelf/all
     @GetMapping("/all")
     public List<Book> getAllBooks() {
@@ -22,17 +22,34 @@ public class BookController {
 
     // ── GET books by list name ─────────────────────────────────
     // GET /api/bookshelf/list/favourites
-    // GET /api/bookshelf/list/reading
-    // GET /api/bookshelf/list/wishlist
-    // GET /api/bookshelf/list/Summer Reads   (custom list)
     @GetMapping("/list/{listName}")
     public List<Book> getByList(@PathVariable String listName) {
         return bookService.getBooksByList(listName);
     }
 
-    // ── ADD book to a list ────────────────────────────────────
+    // ── SEARCH all 4800+ books ────────────────────────────────
+    // GET /api/bookshelf/search?q=harry potter
+    @GetMapping("/search")
+    public List<Book> searchBooks(@RequestParam String q) {
+        return bookService.searchBooks(q);
+    }
+
+    // ── ADD book to personal library from search results ──────
+    // POST /api/bookshelf/add-to-library/5?listName=wantToRead
+    @PostMapping("/add-to-library/{id}")
+    public ResponseEntity<?> addToMyLibrary(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "wantToRead") String listName) {
+        try {
+            Book book = bookService.addToMyLibrary(id, listName);
+            return ResponseEntity.ok(book);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // ── ADD a brand new book manually ────────────────────────
     // POST /api/bookshelf/add
-    // Body: { title, author, genre, emoji, rating, status, progress, listName }
     @PostMapping("/add")
     public ResponseEntity<?> addBook(@RequestBody Book book) {
         try {

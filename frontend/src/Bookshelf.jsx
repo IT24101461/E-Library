@@ -290,6 +290,12 @@ export default function Bookshelf() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMode,    setSortMode]    = useState('date');
 
+  // Global search across all 4800+ books
+  const [globalSearch,        setGlobalSearch]        = useState('');
+  const [globalResults,       setGlobalResults]       = useState([]);
+  const [globalSearchLoading, setGlobalSearchLoading] = useState(false);
+  const globalSearchTimer = useRef(null);
+
   const [favAdded, setFavAdded]       = useState(new Set());
   const [demoBookIdx, setDemoBookIdx] = useState(0);
 
@@ -498,6 +504,35 @@ export default function Bookshelf() {
   const openBook = (title) => {
     showToast('📖', `Opening "${title}"...`);
     // In integration: navigate(`/read?title=${encodeURIComponent(title)}`);
+  };
+
+  // ── GLOBAL SEARCH (all 4800+ books) ─────────────────────────
+  const handleGlobalSearch = (value) => {
+    setGlobalSearch(value);
+    clearTimeout(globalSearchTimer.current);
+    if (!value.trim()) { setGlobalResults([]); return; }
+    setGlobalSearchLoading(true);
+    globalSearchTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API}/search?q=${encodeURIComponent(value)}`);
+        const data = await res.json();
+        setGlobalResults(data);
+      } catch { showToast('❌', 'Search failed'); }
+      finally { setGlobalSearchLoading(false); }
+    }, 400);
+  };
+
+  // ── ADD DISCOVERED BOOK TO MY LIBRARY ───────────────────────
+  const addToMyLibrary = async (bookId, title) => {
+    try {
+      const res = await fetch(`${API}/add-to-library/${bookId}?listName=wishlist`, { method: 'POST' });
+      if (!res.ok) { showToast('⚠️', await res.text()); return; }
+      const saved = await res.json();
+      setBookshelf(prev => ({ ...prev, wishlist: [...prev.wishlist, saved] }));
+      showToast('✅', `"${title}" added to Want to Read!`);
+      // Remove from search results
+      setGlobalResults(prev => prev.filter(b => b.id !== bookId));
+    } catch { showToast('❌', 'Could not add book'); }
   };
 
   // ── FILTER & SORT ───────────────────────────────────────────

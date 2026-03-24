@@ -30,4 +30,7 @@ public class Book {
     private Integer publicationYear;
 
     private String keywords;
+
+    @Column(name = "is_personal")
+    private Boolean isPersonal = false;
 }
