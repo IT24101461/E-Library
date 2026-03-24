@@ -28,13 +28,26 @@ const Reading = () => {
   const [authUser, setAuthUser] = useState(null);
   const [focusMode, setFocusMode] = useState(false);
   const [zoom, setZoom] = useState(1);
+  
   useEffect(() => {
-    const raw = localStorage.getItem('user');
-    if (raw) setAuthUser(JSON.parse(raw));
+    const raw = localStorage.getItem('authUser');
+    if (raw) {
+      try {
+        setAuthUser(JSON.parse(raw));
+      } catch (e) {
+        console.error('Failed to parse stored user:', e);
+        setAuthUser(null);
+      }
+    }
   }, []);
-  const userId = authUser ? authUser.id : 1;
+  
+  // IMPORTANT: userId must be recalculated whenever authUser changes
+  // This ensures new users are correctly identified
+  const userId = authUser?.id || 1;
   const saveTimeoutRef = useRef(null);
   const sessionTimerRef = useRef(null);
+  const savingInProgressRef = useRef(false);
+  const lastSentPageRef = useRef(0);
   const WORDS_PER_PAGE = 250;
 
   useEffect(() => {
@@ -78,7 +91,7 @@ const Reading = () => {
     }
   }, [pdfDoc, currentPage, fullContent, zoom]);
 
-  // Auto-save effect
+  // Auto-save effect with improved concurrency handling
   useEffect(() => {
     if (currentPage !== lastSavedPage && book && currentPage > 0) {
       if (saveTimeoutRef.current) {
@@ -86,7 +99,10 @@ const Reading = () => {
       }
 
       saveTimeoutRef.current = setTimeout(() => {
-        handleAutoSave();
+        // Only save if not already saving and page is different from what was sent
+        if (!savingInProgressRef.current && currentPage !== lastSentPageRef.current) {
+          handleAutoSave();
+        }
       }, 2000);
     }
 
@@ -207,8 +223,9 @@ const Reading = () => {
   };
 
   const handleAutoSave = async () => {
-    if (saving || !book || currentPage === lastSavedPage) return;
+    if (savingInProgressRef.current || !book || currentPage === lastSavedPage) return;
 
+    savingInProgressRef.current = true;
     setSaving(true);
     try {
       console.log(`[AutoSave] Saving: userId=${userId}, bookId=${bookId}, currentPage=${currentPage}, totalPages=${totalPages}`);
@@ -217,12 +234,15 @@ const Reading = () => {
         currentPage: currentPage,
         totalPages: totalPages
       });
-      console.log('[AutoSave] Success:', response);
+      console.log('[AutoSave] Success - Data saved for user:', userId, 'Response:', response);
       setLastSavedPage(currentPage);
+      lastSentPageRef.current = currentPage;
     } catch (err) {
       console.error('[AutoSave] Failed:', err);
       console.error('[AutoSave] Error details:', err.response?.data || err.message);
+      // Don't mark as saved on error, allow retry on next page change
     } finally {
+      savingInProgressRef.current = false;
       setSaving(false);
     }
   };
@@ -235,7 +255,7 @@ const Reading = () => {
     setIsTiming(false);
 
     try {
-      const uid = authUser ? authUser.id : 1;
+      const uid = userId; // Use the component-level userId which is always up-to-date
       const pages = Number(pagesReadDuringSession || 0);
       const prev = Number(currentPage || 1);
       const newCurrent = Math.min(prev + pages, totalPages || Number.MAX_SAFE_INTEGER);

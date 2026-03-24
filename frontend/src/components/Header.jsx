@@ -9,7 +9,7 @@ const Header = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const raw = localStorage.getItem('user');
+    const raw = localStorage.getItem('authUser');
     if (raw) setUser(JSON.parse(raw));
   }, []);
 
@@ -46,7 +46,32 @@ const Header = () => {
           {user ? (
             <>
               <button onClick={() => navigate('/dashboard')} className={styles.userButton}>{user.fullName}</button>
-              <button onClick={() => { localStorage.removeItem('user'); setUser(null); navigate('/login'); }} className={styles.userButtonPrimary}>Log Out</button>
+              {/* Dev-only helper: promote current session user to ADMIN (client-side only) */}
+              {process.env.NODE_ENV === 'development' && user.role !== 'ADMIN' && (
+                <button
+                  onClick={() => {
+                    try {
+                      const raw = localStorage.getItem('authUser');
+                      if (!raw) return;
+                      const u = JSON.parse(raw);
+                      u.role = 'ADMIN';
+                      localStorage.setItem('authUser', JSON.stringify(u));
+                      setUser(u);
+                      // small visual confirmation
+                      // eslint-disable-next-line no-alert
+                      alert('Local session promoted to ADMIN (development only)');
+                    } catch (e) {
+                      // eslint-disable-next-line no-console
+                      console.error('Failed to promote to admin', e);
+                    }
+                  }}
+                  title="Temporarily promote this session to ADMIN (dev only)"
+                  className={styles.userButtonSecondary}
+                >
+                  Promote to Admin
+                </button>
+              )}
+              <button onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }} className={styles.userButtonPrimary}>Log Out</button>
             </>
           ) : (
             <>
@@ -67,7 +92,7 @@ const Header = () => {
           <Link to="/books" className={styles.mobileNavLink}>📖 Books</Link>
           <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={styles.mobileNavLink}>🤖 AI Recs</Link>
           {user ? (
-            <button onClick={() => { localStorage.removeItem('user'); setUser(null); navigate('/login'); }} className={styles.mobileNavLink}>Log Out</button>
+            <button onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }} className={styles.mobileNavLink}>Log Out</button>
           ) : (
             <>
               <Link to="/login" className={styles.mobileNavLink}>Sign in</Link>

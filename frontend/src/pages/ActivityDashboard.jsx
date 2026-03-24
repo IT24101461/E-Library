@@ -18,7 +18,7 @@ const ActivityDashboard = () => {
   const [authUser, setAuthUser] = useState(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem('user');
+    const raw = localStorage.getItem('authUser');
     if (raw) setAuthUser(JSON.parse(raw));
   }, []);
 
@@ -206,7 +206,12 @@ const ActivityDashboard = () => {
         <div className={styles['activitydashboard-hero']}>
           <div className={styles['activitydashboard-hero-inner']}>
             <div className={styles['activitydashboard-hero-content']}>
-              <h1 className={styles['activitydashboard-hero-title']}>Welcome Back, Reader!</h1>
+                <h1 className={styles['activitydashboard-hero-title']}>Welcome Back, Reader!</h1>
+                {authUser && authUser.role === 'ADMIN' && (
+                  <div className="mt-3 inline-block text-sm bg-yellow-50 text-yellow-800 px-3 py-2 rounded shadow-sm">
+                    Admin mode: <strong className="ml-1">Elevated privileges enabled</strong>
+                  </div>
+                )}
               <p className={styles['activitydashboard-hero-sub']}>Track your reading journey, set daily goals, and continue where you left off — all in one beautiful place.</p>
 
               <div className={styles['activitydashboard-hero-ctas']}>
@@ -285,7 +290,10 @@ const ActivityDashboard = () => {
                   <p className="text-gray-600 text-sm mt-1">{history.length} books in your library</p>
                 </div>
                 {authUser && authUser.role === 'ADMIN' ? (
-                  <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                  <button
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                    onClick={() => navigate('/books/add')}
+                  >
                     + Add Book
                   </button>
                 ) : (

@@ -16,7 +16,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
-@Component
+// @Component - Disabled to prevent startup data initialization issues
 public class DataLoader implements CommandLineRunner {
 
     @Autowired
@@ -30,13 +30,14 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Clear all related records first (respect foreign key constraints)
-        readingProgressRepository.deleteAll();
-        activityLogRepository.deleteAll();
-        bookRepository.deleteAll();
-        
-        // Then load fresh data
-        loadData();
+        // DataLoader disabled - use schema.sql for data initialization instead
+        // // Clear all related records first (respect foreign key constraints)
+        // readingProgressRepository.deleteAll();
+        // activityLogRepository.deleteAll();
+        // bookRepository.deleteAll();
+        // 
+        // // Then load fresh data
+        // loadData();
     }
 
     private void loadData() {

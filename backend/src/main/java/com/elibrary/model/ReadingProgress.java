@@ -37,6 +37,10 @@ public class ReadingProgress {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
+    @Version
+    @Column(name = "version")
+    private Long version = 0L;
+
     // Constructors
     public ReadingProgress() {
     }
@@ -98,6 +102,14 @@ public class ReadingProgress {
 
     public void setTotalPages(Integer totalPages) {
         this.totalPages = totalPages;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public Double getPercentageComplete() {

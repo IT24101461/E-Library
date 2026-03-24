@@ -6,6 +6,7 @@ import com.elibrary.repository.BookRepository;
 import com.elibrary.model.Book;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
@@ -20,7 +21,8 @@ public class ProgressService {
     @Autowired
     private BookRepository bookRepository;
 
-    // UPDATE - Update reading progress
+    // UPDATE - Update reading progress with optimistic locking and concurrency handling
+    @Transactional
     public ReadingProgress updateProgress(Long userId, Long bookId, Integer currentPage, Integer totalPages) {
         logger.debug("Updating progress for userId={}, bookId={}, currentPage={}, totalPages={}", userId, bookId, currentPage, totalPages);
         
@@ -30,11 +32,24 @@ public class ProgressService {
             ReadingProgress progress;
             if (existing.isPresent()) {
                 progress = existing.get();
-                logger.debug("Found existing progress record");
-                progress.setCurrentPage(currentPage);
+                Integer prevPage = progress.getCurrentPage();
+                logger.debug("Found existing progress record with version={}, currentPage={}", progress.getVersion(), prevPage);
+                
+                // Only update if new page is greater than current (prevent overwriting with older data)
+                // If current page is null (shouldn't happen), treat as 0 for comparison
+                int existingPage = (prevPage != null) ? prevPage : 0;
+                if (currentPage != null && currentPage >= existingPage) {  // >= to allow same page updates
+                    progress.setCurrentPage(currentPage);
+                    logger.debug("Updating currentPage from {} to {}", prevPage, currentPage);
+                } else if (currentPage != null) {
+                    logger.debug("Skipping update: new page {} not greater than current {}", currentPage, existingPage);
+                    return progress; // Return existing without updating
+                }
+                
                 // update totalPages if a meaningful value was provided
-                if (totalPages != null && totalPages > 0) {
+                if (totalPages != null && totalPages > 0 && (progress.getTotalPages() == null || progress.getTotalPages() <= 0)) {
                     progress.setTotalPages(totalPages);
+                    logger.debug("Setting totalPages to {}", totalPages);
                 }
             } else {
                 logger.debug("Creating new progress record");
@@ -43,6 +58,8 @@ public class ProgressService {
                 progress.setBookId(bookId);
                 progress.setCurrentPage(currentPage);
                 progress.setTotalPages(totalPages);
+                progress.setVersion(0L);
+                logger.debug("Created new progress: currentPage={}, totalPages={}", currentPage, totalPages);
             }
             
             progress.setLastReadAt(LocalDateTime.now());

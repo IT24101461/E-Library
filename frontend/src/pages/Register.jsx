@@ -7,9 +7,11 @@ import styles from './Register.module.css';
 const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
 const Register = () => {
-  const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('USER');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -23,9 +25,9 @@ const Register = () => {
     }
     try {
       setLoading(true);
-      const res = await axios.post(`${API}/auth/register`, { email, fullName, password });
+      const res = await axios.post(`${API}/auth/register`, { email, fullName, password, role });
       // Auto-login (server returns user info)
-      localStorage.setItem('user', JSON.stringify(res.data));
+      localStorage.setItem('authUser', JSON.stringify(res.data));
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
@@ -53,6 +55,7 @@ const Register = () => {
     if (!fullName) return setError('Please enter your full name');
     if (!validateEmail(email)) return setError('Please enter a valid email address');
     if (!passwordStrength(password)) return setError('Password must be at least 8 characters and include letters and numbers');
+    if (password !== confirmPassword) return setError('Passwords do not match');
     setConfirmOpen(true);
   };
 
@@ -60,10 +63,13 @@ const Register = () => {
     setConfirmOpen(false);
     try {
       setLoading(true);
-      const res = await axios.post(`${API}/auth/register`, { email, fullName, password });
-      localStorage.setItem('user', JSON.stringify(res.data));
+      const res = await axios.post(`${API}/auth/register`, { fullName, email, password, role });
+      localStorage.setItem('authUser', JSON.stringify(res.data));
       setSuccessMsg('Account created successfully — redirecting...');
-      setTimeout(() => navigate('/'), 1400);
+      setTimeout(() => {
+        // Navigate to login with pre-filled credentials
+        navigate(`/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
+      }, 1400);
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
     } finally {
@@ -74,26 +80,8 @@ const Register = () => {
   return (
     <div className={styles['auth-page']}>
       <div className={styles['auth-card']}>
-        <div className={styles['auth-illustration']}>
-          <div style={{maxWidth: 260}}>
-            <svg width="100%" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-              <rect x="0" y="0" width="240" height="200" rx="12" fill="url(#g)" />
-              <defs>
-                <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#eef2ff" />
-                  <stop offset="1" stopColor="#f8fafc" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="mt-4">
-              <h3 className={"text-lg font-semibold"} style={{color:'#3730a3'}}>Welcome to E-Library</h3>
-              <p className={styles['small-muted']}>Organize your reading, track progress, and discover new books.</p>
-            </div>
-          </div>
-        </div>
-
         <div className={styles['auth-form-wrap']}>
-          <div className="mb-6">
+          <div className="mb-8 text-center">
             <h2 className={styles['auth-title']}>Create account</h2>
             <p className={styles['auth-subtitle']}>Secure account with a strong password and get started</p>
           </div>
@@ -108,6 +96,14 @@ const Register = () => {
             </div>
 
             <div>
+              <label className={styles['form-label']}>Role</label>
+              <select className={styles['form-input']} value={role} onChange={e=>setRole(e.target.value)}>
+                <option value="USER">User</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+
+            <div>
               <label className={styles['form-label']}>Email</label>
               <input className={styles['form-input']} placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)} />
             </div>
@@ -118,6 +114,11 @@ const Register = () => {
               <div className="mt-2">
                 <span className={styles['small-muted']}>Password must be at least 8 characters and include letters and numbers.</span>
               </div>
+            </div>
+
+            <div>
+              <label className={styles['form-label']}>Confirm Password</label>
+              <input type="password" className={styles['form-input']} placeholder="Confirm your password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} />
             </div>
 
             <div>
@@ -139,7 +140,7 @@ const Register = () => {
         <div className={styles['modal-backdrop']}>
           <div className={styles['modal-card']}>
             <h3 className="text-lg font-bold mb-2">Confirm account creation</h3>
-            <p className="text-sm text-gray-600 mb-4">Create account for <span className="font-medium">{fullName}</span> ({email})?</p>
+            <p className="text-sm text-gray-600 mb-4">Create account for <span className="font-medium">{fullName}</span> (<span className="font-medium">{email}</span>)?</p>
             <div className="flex justify-end gap-3">
               <button onClick={() => setConfirmOpen(false)} className={styles['btn-secondary']}>Cancel</button>
               <button onClick={confirmCreate} className={styles['btn-primary']}>Create</button>

@@ -29,7 +29,7 @@ public class User {
     private String readingPreference;
 
     @Column(name = "role")
-    private String role = "USER";
+    private String role;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -58,7 +58,6 @@ public class User {
         this.profilePictureUrl = profilePictureUrl;
         this.bio = bio;
         this.readingPreference = readingPreference;
-        this.role = "USER";
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.isDeleted = isDeleted;

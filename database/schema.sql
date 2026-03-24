@@ -16,11 +16,13 @@ CREATE TABLE users (
   profile_picture_url VARCHAR(500),
   bio TEXT,
   reading_preference VARCHAR(100),
+  role VARCHAR(50) DEFAULT 'USER',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   is_deleted BOOLEAN DEFAULT FALSE,
   INDEX idx_email (email),
-  INDEX idx_created_at (created_at)
+  INDEX idx_created_at (created_at),
+  INDEX idx_role (role)
 );
 
 -- Books Table
@@ -74,6 +76,7 @@ CREATE TABLE reading_progress (
   started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   completed_at TIMESTAMP,
   is_deleted BOOLEAN DEFAULT FALSE,
+  version BIGINT DEFAULT 0 NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (book_id) REFERENCES books(id),
   UNIQUE KEY unique_user_book (user_id, book_id),
@@ -85,19 +88,19 @@ CREATE TABLE reading_progress (
 -- Sample Data (Optional - for testing)
 -- ============================================
 
--- Insert sample user
-INSERT INTO users (email, full_name, password, reading_preference) VALUES
-('user@elibrary.com', 'John Doe', 'hashed_password_here', 'Fiction');
+-- Insert sample users FIRST (important for foreign key references)
+INSERT INTO users (id, email, full_name, password, reading_preference) VALUES
+(1, 'user@elibrary.com', 'John Doe', 'hashed_password_here', 'Fiction');
 
 -- Insert sample books
-INSERT INTO books (title, author, description, total_pages, category, publication_year) VALUES
-('The Great Gatsby', 'F. Scott Fitzgerald', 'A classic American novel', 180, 'Fiction', 1925),
-('To Kill a Mockingbird', 'Harper Lee', 'A gripping tale of racial injustice', 281, 'Fiction', 1960),
-('1984', 'George Orwell', 'A dystopian novel', 328, 'Science Fiction', 1949),
-('The Catcher in the Rye', 'J.D. Salinger', 'A coming-of-age narrative', 277, 'Fiction', 1951),
-('Brave New World', 'Aldous Huxley', 'A dystopian future society', 352, 'Science Fiction', 1932);
+INSERT INTO books (id, title, author, description, total_pages, category, publication_year) VALUES
+(1, 'The Great Gatsby', 'F. Scott Fitzgerald', 'A classic American novel', 180, 'Fiction', 1925),
+(2, 'To Kill a Mockingbird', 'Harper Lee', 'A gripping tale of racial injustice', 281, 'Fiction', 1960),
+(3, '1984', 'George Orwell', 'A dystopian novel', 328, 'Science Fiction', 1949),
+(4, 'The Catcher in the Rye', 'J.D. Salinger', 'A coming-of-age narrative', 277, 'Fiction', 1951),
+(5, 'Brave New World', 'Aldous Huxley', 'A dystopian future society', 352, 'Science Fiction', 1932);
 
--- Insert sample activity logs
+-- Insert sample activity logs (only after users and books exist)
 INSERT INTO activity_logs (user_id, book_id, action, current_page, time_spent_minutes, high_interest) VALUES
 (1, 1, 'BORROW', NULL, NULL, FALSE),
 (1, 1, 'START', 0, 30, TRUE),
@@ -105,7 +108,4 @@ INSERT INTO activity_logs (user_id, book_id, action, current_page, time_spent_mi
 (1, 2, 'BORROW', NULL, NULL, FALSE),
 (1, 2, 'START', 0, 60, TRUE);
 
--- Insert sample reading progress
-INSERT INTO reading_progress (user_id, book_id, current_page, total_pages, percentage_complete, last_read_at) VALUES
-(1, 1, 45, 180, 25.0, NOW()),
-(1, 2, 75, 281, 26.7, NOW());
+-- Note: reading_progress data initialization removed - will be created via API/frontend usage

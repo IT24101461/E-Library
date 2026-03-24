@@ -1,17 +1,26 @@
 
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import styles from './Login.module.css';
 
 const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
 const Login = () => {
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Pre-fill credentials from registration
+  useEffect(() => {
+    const userEmail = searchParams.get('email');
+    const pwd = searchParams.get('password');
+    if (userEmail) setEmail(userEmail);
+    if (pwd) setPassword(pwd);
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +32,7 @@ const Login = () => {
     try {
       setLoading(true);
       const res = await axios.post(`${API}/auth/login`, { email, password });
-      localStorage.setItem('user', JSON.stringify(res.data));
+      localStorage.setItem('authUser', JSON.stringify(res.data));
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
@@ -38,7 +47,7 @@ const Login = () => {
     try {
       setLoading(true);
       const res = await axios.post(`${API}/auth/login`, { email, password });
-      localStorage.setItem('user', JSON.stringify(res.data));
+      localStorage.setItem('authUser', JSON.stringify(res.data));
       setSuccessMsg('Signed in successfully — redirecting...');
       setTimeout(() => navigate('/'), 900);
     } catch (err) {

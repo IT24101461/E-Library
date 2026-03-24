@@ -1,6 +1,8 @@
 package com.elibrary.controller;
 
 import com.elibrary.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.elibrary.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,8 @@ import java.util.Map;
 @RequestMapping("/auth")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -43,13 +47,29 @@ public class AuthController {
             user.setFullName(fullName);
             user.setPassword(passwordEncoder.encode(password));
 
-            // If no users exist yet, make the first user an ADMIN
-            long userCount = userRepository.count();
-            if (userCount == 0) {
-                user.setRole("ADMIN");
-            } else {
-                user.setRole("USER");
+            // Determine role: prefer client-provided role (if valid), otherwise
+            // make the first registered user an ADMIN for initial setup.
+            String requestedRole = body.get("role");
+            if (requestedRole != null) {
+                requestedRole = requestedRole.trim();
+                if (requestedRole.isEmpty()) requestedRole = null;
             }
+            long userCount = userRepository.count();
+            if (requestedRole != null) {
+                if ("ADMIN".equalsIgnoreCase(requestedRole)) {
+                    user.setRole("ADMIN");
+                } else {
+                    user.setRole("USER");
+                }
+            } else {
+                if (userCount == 0) {
+                    user.setRole("ADMIN");
+                } else {
+                    user.setRole("USER");
+                }
+            }
+
+            logger.info("Register request: email={}, requestedRole={}, assignedRole={}", email, requestedRole, user.getRole());
 
             User saved = userRepository.save(user);
             // Do not return password

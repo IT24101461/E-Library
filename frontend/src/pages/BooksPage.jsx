@@ -11,7 +11,15 @@ const BooksPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBook, setSelectedBook] = useState(null);
   const [borrowing, setBorrowing] = useState(false);
-  const userId = 1;
+  const [authUser, setAuthUser] = useState(null);
+
+  useEffect(() => {
+    const raw = localStorage.getItem('authUser');
+    if (raw) setAuthUser(JSON.parse(raw));
+    else setAuthUser(null);
+  }, []);
+
+  const userId = authUser?.id || 1;
 
   useEffect(() => {
     fetchBooks();
@@ -81,7 +89,7 @@ const BooksPage = () => {
             <p className={styles['books-desc']}>Browse, preview and borrow books from the collection.</p>
           </div>
 
-          <div className={styles['books-search-row']}>
+            <div className={styles['books-search-row']}>
             <div className={styles['books-search-container']}>
               <input
                 type="search"
@@ -96,12 +104,18 @@ const BooksPage = () => {
               </svg>
             </div>
 
-            <button
-              onClick={() => navigate('/books/add')}
-              className={styles['books-add-btn']}
-            >
-              + Add Book
-            </button>
+            {authUser && authUser.role === 'ADMIN' ? (
+              <button
+                onClick={() => navigate('/books/add')}
+                className={styles['books-add-btn']}
+              >
+                + Add Book
+              </button>
+            ) : (
+              <button className={styles['books-add-btn']} disabled>
+                + Add Book
+              </button>
+            )}
           </div>
         </header>
 

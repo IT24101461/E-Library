@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ActivityService } from '../services/ActivityService';
 import styles from './AddBook.module.css';
@@ -14,10 +14,25 @@ const AddBook = () => {
     isbn: '',
     publicationYear: new Date().getFullYear(),
     coverUrl: '',
+    pdfUrl: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [authUser, setAuthUser] = useState(null);
+  useEffect(() => {
+    const raw = localStorage.getItem('authUser');
+    if (raw) setAuthUser(JSON.parse(raw));
+    else setAuthUser(null);
+  }, []);
+
+  useEffect(() => {
+    if (authUser && authUser.role !== 'ADMIN') {
+      // non-admins should not be able to add books
+      setError('Only administrators can add books.');
+      setTimeout(() => navigate('/books'), 1200);
+    }
+  }, [authUser, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,8 +54,11 @@ const AddBook = () => {
       setLoading(true);
       setError(null);
       
-      const raw = localStorage.getItem('user');
+      const raw = localStorage.getItem('authUser');
       const user = raw ? JSON.parse(raw) : null;
+      if (!user || user.role !== 'ADMIN') {
+        throw new Error('Unauthorized: only admins can add books');
+      }
       const response = await ActivityService.createBook(formData, user ? user.id : null);
       
       if (response.data) {
@@ -237,6 +255,24 @@ const AddBook = () => {
                   />
                 </div>
               )}
+            </div>
+
+            {/* PDF URL */}
+            <div>
+              <label className={styles['addbook-label']}>
+                📄 PDF URL
+              </label>
+              <input
+                type="url"
+                name="pdfUrl"
+                value={formData.pdfUrl}
+                onChange={handleChange}
+                placeholder="e.g., http://localhost:8080/files/Pride-and-Prejudice-Jane-Austen.txt"
+                className={styles['addbook-input']}
+              />
+              <p className={styles['addbook-hint']}>
+                Use our API: http://localhost:8080/files/[filename] or external PDF URLs
+              </p>
             </div>
 
             {/* Buttons */}

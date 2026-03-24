@@ -9,7 +9,7 @@ const StartPage = () => {
   const [userId, setUserId] = useState(1);
 
   useEffect(() => {
-    const raw = localStorage.getItem('user');
+    const raw = localStorage.getItem('authUser');
     if (raw) {
       try {
         const u = JSON.parse(raw);
