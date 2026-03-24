@@ -349,7 +349,7 @@ function ListPickerModal({ book, onClose }) {
   return (
     <div style={{
       position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)",
-      zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center",
+      zIndex: 9999, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: "80px",
     }} onClick={onClose}>
       <div style={{
         background: "#1e293b", border: "1px solid #00e5ff", borderRadius: 16,
@@ -605,7 +605,7 @@ export default function BookRankerApp() {
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: 13, marginTop: 8 }}>
             {tab === "ranked"
-              ? `Powered by Weighted Scoring Algorithm · ${rankedBooks.length} books loaded among 4500+ records`
+              ? `Powered by Weighted Scoring Algorithm · ${rankedBooks.length} books loaded`
               : "Ask me anything — genre, mood, author, or just say 'top books'"}
           </p>
         </div>
