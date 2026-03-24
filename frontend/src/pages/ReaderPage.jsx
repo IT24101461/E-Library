@@ -21,6 +21,8 @@ export default function ReaderPage() {
   const [bookmarks, setBookmarks] = useState([]);
   const [highlights, setHighlights] = useState([]);
   const [selectedText, setSelectedText] = useState("");
+  const [aiResults, setAiResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
   const vibeOptions = [
     "dark",
@@ -124,8 +126,54 @@ Accessibility matters because every reader should have a smooth and comfortable 
       alert("Enter a vibe or select at least one vibe.");
       return;
     }
-
-    alert("Searching...");
+  
+    setSearching(true);
+  
+    const queryText = `${vibeInput} ${selectedVibes.join(" ")}`.toLowerCase().trim();
+    const queryWords = queryText.split(/\s+/).filter(Boolean);
+  
+    const sourceBooks =
+      mockRecommendations && mockRecommendations.length > 0
+        ? mockRecommendations
+        : books;
+  
+    const scoredResults = sourceBooks.map((book) => {
+      const title = (book.title || "").toLowerCase();
+      const author = (book.author || "").toLowerCase();
+      const genre = (book.genre || "").toLowerCase();
+      const vibes = (book.vibes || "").toLowerCase();
+      const why = (book.why || "").toLowerCase();
+      const description = (book.description || "").toLowerCase();
+  
+      let score = 0;
+  
+      queryWords.forEach((word) => {
+        if (title.includes(word)) score += 5;
+        if (author.includes(word)) score += 3;
+        if (genre.includes(word)) score += 3;
+        if (vibes.includes(word)) score += 6;
+        if (why.includes(word)) score += 2;
+        if (description.includes(word)) score += 2;
+      });
+  
+      return { ...book, score };
+    });
+  
+    let results = scoredResults
+      .filter((book) => book.score > 0)
+      .sort((a, b) => b.score - a.score);
+  
+    if (results.length === 0) {
+      results = sourceBooks.slice(0, 3).map((book) => ({
+        ...book,
+        score: 1,
+      }));
+    }
+  
+    setTimeout(() => {
+      setAiResults(results);
+      setSearching(false);
+    }, 800);
   };
 
   const handleViewBook = (book) => {
@@ -332,49 +380,50 @@ Accessibility matters because every reader should have a smooth and comfortable 
       <div className="px-6 py-8">
         <div className="mx-auto grid max-w-[1500px] grid-cols-12 gap-6">
           <div className="col-span-12 space-y-6 lg:col-span-8">
-            <div className="panel space-y-5">
-              <div>
-                <h2 className="text-3xl font-semibold md:text-4xl">
-                  Find Books by Vibe
-                </h2>
-                <p className="mt-2 text-secondary">
-                  Search by vibe, mood, theme, title, or author
-                </p>
-              </div>
+          <div className="panel space-y-5">
+  <div>
+    <h2 className="text-3xl font-semibold md:text-4xl">
+      Find Books by Vibe
+    </h2>
+    <p className="mt-2 text-secondary">
+      Search by vibe, mood, theme, title, or author
+    </p>
+  </div>
 
-              <div className="flex flex-wrap gap-3">
-                {vibeOptions.map((vibe) => (
-                  <button
-                    key={vibe}
-                    type="button"
-                    onClick={() => handleToggleVibe(vibe)}
-                    className={`badge transition ${
-                      selectedVibes.includes(vibe)
-                        ? "bg-cyan-400/20 text-cyan-300 border border-cyan-300/40"
-                        : ""
-                    }`}
-                  >
-                    {vibe}
-                  </button>
-                ))}
-              </div>
+  <div className="flex flex-wrap gap-3">
+    {vibeOptions.map((vibe) => (
+      <button
+        key={vibe}
+        type="button"
+        onClick={() => handleToggleVibe(vibe)}
+        className={`badge transition ${
+          selectedVibes.includes(vibe)
+            ? "bg-cyan-400/20 text-cyan-300 border border-cyan-300/40"
+            : ""
+        }`}
+      >
+        {vibe}
+      </button>
+    ))}
+  </div>
 
-              <div className="flex flex-col gap-4 md:flex-row">
-                <input
-                  type="text"
-                  value={vibeInput}
-                  onChange={(e) => setVibeInput(e.target.value)}
-                  placeholder="Type a vibe, title, or author..."
-                  className="input flex-1"
-                />
-                <button
-                  onClick={handleSearchVibe}
-                  className="btn btn-accent w-full md:w-auto"
-                >
-                  Search
-                </button>
-              </div>
-            </div>
+  <div className="flex flex-col gap-4 md:flex-row">
+    <input
+      type="text"
+      value={vibeInput}
+      onChange={(e) => setVibeInput(e.target.value)}
+      placeholder="Type a vibe, title, or author..."
+      className="flex-1 rounded-xl border border-white/10 bg-white px-4 py-3 text-black placeholder:text-gray-400 outline-none"
+    />
+    <button
+      onClick={handleSearchVibe}
+      className="btn btn-accent w-full md:w-auto"
+    >
+      Search
+    </button>
+  </div>
+</div>
+                
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div className="panel-hover cursor-default transition hover:scale-[1.02]">
@@ -417,7 +466,7 @@ Accessibility matters because every reader should have a smooth and comfortable 
               <div className="flex flex-wrap items-center gap-4">
                 <span className="badge flex items-center gap-2">
                   <span style={{ color: "var(--gold)" }}>★</span>
-                  <span>{currentBook?.averageRating || "N/A"} (Reader rating)</span>
+                  <span>{currentBook?.averageRating || currentBook?.rating || "N/A"} (Reader rating)</span>
                 </span>
 
                 <button className="btn btn-accent transition hover:scale-[1.03]">
@@ -489,11 +538,22 @@ Accessibility matters because every reader should have a smooth and comfortable 
                 </div>
               </div>
             </div>
+            {searching ? (
+  <div className="panel text-white">Searching...</div>
+) : aiResults.length > 0 ? (
+  <AIRecommendations
+    recommendations={aiResults}
+    onView={handleViewBook}
+  />
+) : (
+  <div className="panel space-y-3">
+    <h3 className="text-2xl font-semibold">AI Recommendations</h3>
+    <p className="text-secondary">
+      No matching books found. Try another vibe or title.
+    </p>
+  </div>
+)}
 
-            <AIRecommendations
-              recommendations={recommendations}
-              onView={handleViewBook}
-            />
           </div>
 
           <div className="col-span-12 space-y-6 lg:col-span-4 lg:sticky lg:top-24 h-fit">

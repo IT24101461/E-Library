@@ -59,11 +59,11 @@ export default function AIRecommendations({ recommendations = [], onView }) {
               </div>
 
               <button
-                className="btn btn-accent mt-5 w-full"
-                onClick={() => onView?.(book)}
-              >
-                View Details
-              </button>
+  onClick={() => onView(book)}
+  className="btn btn-accent mt-3 w-full"
+>
+  View Details
+</button>
             </div>
           ))}
         </div>

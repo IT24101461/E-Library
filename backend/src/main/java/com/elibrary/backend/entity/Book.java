@@ -7,22 +7,26 @@ import jakarta.persistence.*;
 public class Book {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "book_id")
     private Long id;
 
     @Column(nullable = false, length = 500)
     private String title;
 
-    @Column(length = 500)
+    @Column(name = "authors", length = 500)
     private String author;
 
+    @Column(name = "publication_year")
     private Integer publicationYear;
 
-    @Column(length = 20)
+    @Column(name = "language_code", length = 20)
     private String languageCode;
 
+    @Column(name = "average_rating")
     private Double averageRating;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(columnDefinition = "TEXT")
@@ -31,12 +35,13 @@ public class Book {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    // Default constructor
     public Book() {
     }
 
-    public Book(Long id, String title, String author, Integer publicationYear, String languageCode,
-                Double averageRating, String imageUrl, String description) {
-        this.id = id;
+    // Constructor without ID (recommended)
+    public Book(String title, String author, Integer publicationYear, String languageCode,
+                Double averageRating, String imageUrl, String description, String content) {
         this.title = title;
         this.author = author;
         this.publicationYear = publicationYear;
@@ -44,7 +49,10 @@ public class Book {
         this.averageRating = averageRating;
         this.imageUrl = imageUrl;
         this.description = description;
+        this.content = content;
     }
+
+    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -109,6 +117,7 @@ public class Book {
     public void setDescription(String description) {
         this.description = description;
     }
+
     public String getContent() {
         return content;
     }
