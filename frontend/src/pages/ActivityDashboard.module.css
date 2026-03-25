@@ -1,0 +1,351 @@
+/* Tailwind-based custom styles for ActivityDashboard page */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   ACTIVITY DASHBOARD - Professional High-Quality Styling
+   ========================================================================== */
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.activitydashboard-loading {
+  @apply flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50;
+}
+
+.activitydashboard-loading-content {
+  @apply text-center;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.activitydashboard-loading-spinner {
+  @apply rounded-full h-16 w-16 border-4 border-indigo-200 border-t-indigo-600 mx-auto mb-4;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.activitydashboard-loading-title {
+  @apply text-gray-700 font-bold text-lg;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+.activitydashboard-loading-subtitle {
+  @apply text-gray-500 text-sm mt-2;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
+}
+
+.activitydashboard-main {
+  @apply min-h-screen relative;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #ede9fe 100%);
+  animation: fadeIn 0.4s ease-out;
+}
+
+.activitydashboard-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(79, 70, 229, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.activitydashboard-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10;
+}
+
+.activitydashboard-alert {
+  @apply mb-8 bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 rounded-xl p-6 shadow-lg;
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-top: 1px solid rgba(254, 242, 242, 0.5);
+  border-right: 1px solid rgba(254, 242, 242, 0.5);
+  border-bottom: 1px solid rgba(254, 242, 242, 0.5);
+}
+
+.activitydashboard-alert-content {
+  @apply flex items-start gap-4;
+}
+
+.activitydashboard-alert-icon {
+  @apply text-2xl flex-shrink-0;
+}
+
+.activitydashboard-alert-title {
+  @apply font-bold text-red-900 text-lg;
+}
+
+.activitydashboard-alert-message {
+  @apply text-red-800 text-sm mt-1 font-medium;
+}
+
+.activitydashboard-welcome-title {
+  @apply text-4xl md:text-5xl font-bold text-gray-900 mb-3;
+}
+
+.activitydashboard-welcome-subtitle {
+  @apply text-gray-600 text-lg md:text-xl;
+}
+
+/* Hero section styles */
+.activitydashboard-hero {
+  @apply bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-10 shadow-lg overflow-hidden relative;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.activitydashboard-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.activitydashboard-hero-inner {
+  @apply max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 items-center relative z-10;
+}
+
+.activitydashboard-hero-content {
+  @apply pr-4;
+}
+
+.activitydashboard-hero-title {
+  @apply text-3xl md:text-4xl font-extrabold leading-tight mb-3;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+  letter-spacing: -0.5px;
+}
+
+.activitydashboard-hero-sub {
+  @apply text-indigo-100 mb-6 text-lg leading-relaxed;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+  font-weight: 500;
+}
+
+.activitydashboard-hero-ctas {
+  @apply flex items-center gap-3 flex-wrap;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+}
+
+.activitydashboard-hero-cta-primary {
+  @apply inline-flex items-center gap-2 px-6 py-3 bg-white text-indigo-700 font-semibold rounded-lg shadow-md;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.activitydashboard-hero-cta-primary:hover {
+  @apply scale-105 shadow-lg;
+}
+
+.activitydashboard-hero-cta-primary:active {
+  @apply scale-100;
+}
+
+.activitydashboard-hero-cta-secondary {
+  @apply inline-flex items-center gap-2 px-5 py-3 border-2 border-white bg-transparent text-white rounded-lg font-semibold;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.activitydashboard-hero-cta-secondary:hover {
+  @apply bg-white bg-opacity-15 shadow-md;
+}
+
+.activitydashboard-hero-cta-tertiary {
+  @apply inline-flex items-center gap-2 px-5 py-3 bg-white bg-opacity-10 text-white rounded-lg border border-white border-opacity-30 font-semibold;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.activitydashboard-hero-cta-tertiary:hover {
+  @apply bg-opacity-20 border-opacity-50;
+}
+
+.activitydashboard-hero-illustration {
+  @apply hidden lg:flex items-center justify-center;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+.activitydashboard-hero-illus-card {
+  @apply bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-6 shadow-inner border border-white border-opacity-10;
+  animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+}
+
+.activitydashboard-stats {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12;
+}
+
+.activitydashboard-history {
+  @apply grid grid-cols-1 lg:grid-cols-3 gap-8;
+}
+
+.activitydashboard-history-main {
+  @apply lg:col-span-2;
+}
+
+.activitydashboard-history-empty {
+  @apply bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center shadow-sm;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.4s ease-out;
+}
+
+.activitydashboard-history-empty:hover {
+  @apply border-indigo-300 shadow-md;
+  background: linear-gradient(135deg, rgba(249, 250, 252, 0.8) 0%, rgba(239, 246, 255, 0.8) 100%);
+}
+
+.activitydashboard-history-empty-icon {
+  @apply text-6xl mb-4 block;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.activitydashboard-history-empty-title {
+  @apply text-gray-700 font-bold text-lg;
+}
+
+.activitydashboard-history-empty-subtitle {
+  @apply text-gray-500 text-sm;
+}
+
+.activitydashboard-history-card {
+  @apply transition-all duration-300;
+}
+
+.activitydashboard-sidebar {
+  @apply lg:col-span-1;
+}
+
+.activitydashboard-sidebar-sticky {
+  @apply sticky top-8;
+}
+
+.activitydashboard-sidebar-title {
+  @apply text-2xl font-bold text-gray-900 flex items-center gap-2 mb-6;
+}
+
+.activitydashboard-sidebar-card {
+  @apply bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.4s ease-out;
+}
+
+.activitydashboard-sidebar-card:hover {
+  @apply shadow-xl border-gray-200;
+  transform: translateY(-4px);
+}
+
+.activitydashboard-sidebar-img {
+  @apply w-full h-64 object-cover;
+}
+
+.activitydashboard-sidebar-empty-icon {
+  @apply text-6xl;
+}
+
+.activitydashboard-sidebar-content {
+  @apply p-6;
+}
+
+.activitydashboard-sidebar-book-title {
+  @apply font-bold text-lg text-gray-900 line-clamp-2 mb-2;
+  letter-spacing: -0.3px;
+}
+
+.activitydashboard-sidebar-book-author {
+  @apply text-gray-600 text-sm mb-4 font-medium;
+}
+
+.activitydashboard-sidebar-progress {
+  @apply bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4 mb-6 border border-indigo-200;
+  animation: slideUp 0.4s ease-out 0.1s both;
+}
+
+.activitydashboard-sidebar-meta {
+  @apply grid grid-cols-2 gap-3 mb-6;
+}
+
+.activitydashboard-sidebar-meta-card {
+  @apply bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200 shadow-sm;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.4s ease-out 0.15s both;
+}
+
+.activitydashboard-sidebar-meta-card:hover {
+  @apply shadow-md border-blue-300;
+  transform: translateY(-2px);
+}
+
+.activitydashboard-sidebar-meta-label {
+  @apply text-xs text-blue-700 font-bold uppercase tracking-widest;
+}
+
+.activitydashboard-sidebar-meta-value {
+  @apply text-2xl font-bold text-blue-900 mt-1;
+  letter-spacing: -0.5px;
+}
+
+.activitydashboard-sidebar-category-card {
+  @apply bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200 shadow-sm;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.4s ease-out 0.2s both;
+}
+
+.activitydashboard-sidebar-category-card:hover {
+  @apply shadow-md border-purple-300;
+  transform: translateY(-2px);
+}
+
+.activitydashboard-sidebar-category-label {
+  @apply text-xs text-purple-700 font-bold uppercase tracking-widest;
+}
+
+.activitydashboard-sidebar-category-value {
+  @apply text-sm font-bold text-purple-900 mt-1;
+}

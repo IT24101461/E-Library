@@ -1,0 +1,145 @@
+/* Tailwind-based custom styles for BooksPage */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   BOOKS PAGE - Professional High-Quality Styling
+   ========================================================================== */
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.books-page {
+  @apply min-h-screen;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #ede9fe 100%);
+  animation: fadeIn 0.4s ease-out;
+}
+
+.books-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(79, 70, 229, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.books-container {
+  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10;
+}
+
+.books-header {
+  @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-12;
+  animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.books-title {
+  @apply text-4xl md:text-5xl font-bold text-gray-900;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #1e293b 0%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.books-desc {
+  @apply mt-2 text-base text-gray-600 font-medium;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+.books-search-row {
+  @apply flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto;
+}
+
+.books-search-container {
+  @apply relative flex items-center w-full sm:w-80;
+}
+
+.books-search-input {
+  @apply w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm hover:shadow-md placeholder-gray-400;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.books-search-input:hover {
+  @apply shadow-md border-gray-400;
+}
+
+.books-search-input:focus {
+  @apply shadow-lg border-indigo-500;
+}
+
+.books-search-icon {
+  @apply absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none flex-shrink-0;
+  transition: color 0.3s ease;
+}
+
+.books-search-input:focus ~ .books-search-icon {
+  @apply text-indigo-500;
+}
+
+.books-add-btn {
+  @apply inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg text-sm font-bold transition shadow-lg whitespace-nowrap;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+.books-add-btn:hover {
+  @apply shadow-xl;
+  background: linear-gradient(to right, #4f46e5, #7c3aed);
+  transform: translateY(-2px);
+}
+
+.books-add-btn:active {
+  transform: translateY(0);
+}
