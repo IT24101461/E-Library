@@ -10,7 +10,7 @@ const RecommendationEngine = ({ currentBookId }) => {
   useEffect(() => {
     if (!currentBookId) return;
     // We dynamically pass the currentBookId so it updates based on what the user is reading!
-    fetch(`http://localhost:5000/api/recommend/${currentBookId}`)
+    fetch(`http://localhost:8080/recommend/${currentBookId}`)
       .then((response) => {
         if (!response.ok) throw new Error('Failed to fetch AI data');
         return response.json();

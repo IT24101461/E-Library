@@ -8,8 +8,8 @@ import AddBook from './pages/AddBook';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import StartPage from './pages/StartPage';
-import Bookshelf from './Bookshelf';
-import BookRankerApp from './BookRankerApp';
+import Bookshelf from './pages/Bookshelf';
+import BookRankerApp from './pages/BookRankerApp';
 import './App.css';
 
 // ✅ FIX 1: Passes onNavigate to Bookshelf so "Explore Book Ranker" button works

@@ -219,7 +219,7 @@ const ActivityDashboard = () => {
                   <ThemeToggle />
                 </div>
                 <button className={styles['activitydashboard-hero-cta-primary']} onClick={() => navigate('/books')}>Browse Books</button>
-                <button className={styles['activitydashboard-hero-cta-secondary']} onClick={() => navigate('/books')}>Your Library</button>
+                <button className={styles['activitydashboard-hero-cta-secondary']} onClick={() => navigate('/bookshelf')}>Your Library</button>
                 <button className={styles['activitydashboard-hero-cta-tertiary']} onClick={() => navigate('/history')}>View History</button>
               </div>
             </div>
