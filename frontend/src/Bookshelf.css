@@ -30,8 +30,8 @@
 /* ============================================================
    CUSTOM CURSOR
    ============================================================ */
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; cursor:none !important; }
-
+*, *::before, *::after { box-sizing:border-box; }
+.bookshelf-root, .bookshelf-root *{ cursor:none !important; }
 .cursor-ring {
   position:fixed; width:36px; height:36px;
   border:1.5px solid var(--accent); border-radius:50%;
@@ -76,12 +76,10 @@
    ============================================================ */
 html { scroll-behavior:smooth; }
 
-body {
+.bookshelf-root {
   font-family:'DM Sans',sans-serif;
   background:var(--bg-primary);
   color:var(--text-primary);
-  min-height:100vh;
-  overflow-x:hidden;
 }
 
 /* Animated grid background */

@@ -34,9 +34,9 @@ const Header = () => {
           <Link to="/dashboard" className={`${styles.navLink} ${isActive('/dashboard') ? styles.navLinkActive : ''}`}>
             🏠 Dashboard
           </Link>
-          <Link to="/books" className={`${styles.navLink} ${isActive('/books') ? styles.navLinkActive : ''}`}>
-            📖 Books
-          </Link>
+          <Link to="/bookshelf" className={`${styles.navLink} ${isActive('/bookshelf') ? styles.navLinkActive : ''}`}>
+  📖 Books
+</Link>
           <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={`${styles.navLink}`}>
             🤖 AI Recs
           </Link>
@@ -89,7 +89,7 @@ const Header = () => {
       {mobileMenuOpen && (
         <nav className={styles.mobileNav}>
           <Link to="/dashboard" className={styles.mobileNavLink}>🏠 Dashboard</Link>
-          <Link to="/books" className={styles.mobileNavLink}>📖 Books</Link>
+          <Link to="/bookshelf" className={styles.mobileNavLink}>📖 Books</Link>
           <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={styles.mobileNavLink}>🤖 AI Recs</Link>
           {user ? (
             <button onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }} className={styles.mobileNavLink}>Log Out</button>

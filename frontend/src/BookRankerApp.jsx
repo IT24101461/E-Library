@@ -498,7 +498,7 @@ const ChatMessage = ({ msg }) => (
 );
 
 // ─── Main App ─────────────────────────────────────────────────────────────
-export default function BookRankerApp() {
+export default function BookRankerApp({ onNavigate }) {
   const [tab, setTab] = useState("ranked");
   const [rankedBooks, setRankedBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -579,6 +579,15 @@ export default function BookRankerApp() {
           e<span style={{ color: "var(--accent)", textShadow: "0 0 20px var(--accent-glow)" }}>Library</span>
           <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: 13, marginLeft: 12, letterSpacing: ".04em" }}>/ Book Ranker</span>
         </div>
+
+        {/* Back button */}
+<button
+  className="br-nav-btn"
+  onClick={() => onNavigate && onNavigate('bookshelf')}
+  style={{ marginRight: 'auto' }}
+>
+  ← Back to Bookshelf
+</button>
 
         <div style={{ display: "flex", gap: 8 }}>
           {["ranked", "chat"].map(t => (

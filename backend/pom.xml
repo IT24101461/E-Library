@@ -37,6 +37,12 @@
 			<artifactId>spring-boot-starter-web</artifactId> <!-- ✅ FIXED: spring-boot-starter-webmvc does not exist -->
 		</dependency>
 
+        <!-- Spring Security -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+
 		<!-- JPA / Hibernate (auto-creates tables) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -64,6 +70,30 @@
 			<scope>test</scope>
 		</dependency>
 
+        <!-- JWT -->
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.11.5</version>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+
+    <dependency>
+    <groupId>org.apache.pdfbox</groupId>
+    <artifactId>pdfbox</artifactId>
+    <version>2.0.28</version>
+</dependency>
 	</dependencies>
 
 	<build>
@@ -84,6 +114,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+                    <mainClass>com.elibrary.ELibraryApplication</mainClass>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>

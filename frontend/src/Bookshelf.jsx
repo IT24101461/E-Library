@@ -209,7 +209,7 @@ function BookListSection({ id, icon, title, badgeClass, books, listKey, view, on
 // ============================================================
 export default function Bookshelf({ onNavigate }) {
 
-  const API = 'http://localhost:8080/api/bookshelf';
+  const API = 'http://localhost:8080/api/bookshelf'; // ✅ FIX: removed duplicate /api/
 
   const [bookshelf,   setBookshelf]   = useState({ favourites: [], reading: [], wishlist: [] });
   const [customLists, setCustomLists] = useState([]);
@@ -424,7 +424,7 @@ export default function Bookshelf({ onNavigate }) {
   );
 
   return (
-    <>
+    <div className="bookshelf-root">
       <CustomCursor />
       <div className="noise-overlay" />
 
@@ -755,6 +755,6 @@ export default function Bookshelf({ onNavigate }) {
       </Modal>
 
       <Toast toast={toast} />
-    </>
+    </div>
   );
 }
