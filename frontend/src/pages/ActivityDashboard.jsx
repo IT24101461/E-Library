@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatsCard from '../components/StatsCard';
 import HistoryCard from '../components/HistoryCard';
@@ -7,6 +7,76 @@ import ThemeToggle from '../components/ThemeToggle';
 import RecommendationEngine from '../components/RecommendationEngine';
 import { ActivityService } from '../services/ActivityService';
 import styles from './ActivityDashboard.module.css';
+
+// ── Custom cursor (ported from Bookshelf) ────────────────────────────────────
+function CustomCursor() {
+  const ringRef = useRef(null);
+  const dotRef  = useRef(null);
+  const pos     = useRef({ x: 0, y: 0 });
+  const ring    = useRef({ x: 0, y: 0 });
+  const rafId   = useRef(null);
+
+  useEffect(() => {
+    const onMove = (e) => {
+      pos.current = { x: e.clientX, y: e.clientY };
+      if (dotRef.current) {
+        dotRef.current.style.left = `${e.clientX}px`;
+        dotRef.current.style.top  = `${e.clientY}px`;
+      }
+      const trail = document.createElement('div');
+      trail.className = styles['cursor-trail'];
+      trail.style.left = `${e.clientX}px`;
+      trail.style.top  = `${e.clientY}px`;
+      document.body.appendChild(trail);
+      setTimeout(() => trail.remove(), 700);
+    };
+    const onEnter = () => {
+      ringRef.current?.classList.add(styles['hovering']);
+      dotRef.current?.classList.add(styles['hovering']);
+    };
+    const onLeave = () => {
+      ringRef.current?.classList.remove(styles['hovering']);
+      dotRef.current?.classList.remove(styles['hovering']);
+    };
+    const onDown = () => ringRef.current?.classList.add(styles['clicking']);
+    const onUp   = () => ringRef.current?.classList.remove(styles['clicking']);
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('mouseup',   onUp);
+    document.querySelectorAll('button, a').forEach(el => {
+      el.addEventListener('mouseenter', onEnter);
+      el.addEventListener('mouseleave', onLeave);
+    });
+
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const animate = () => {
+      ring.current.x = lerp(ring.current.x, pos.current.x, 0.12);
+      ring.current.y = lerp(ring.current.y, pos.current.y, 0.12);
+      if (ringRef.current) {
+        ringRef.current.style.left = `${ring.current.x}px`;
+        ringRef.current.style.top  = `${ring.current.y}px`;
+      }
+      rafId.current = requestAnimationFrame(animate);
+    };
+    rafId.current = requestAnimationFrame(animate);
+
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('mouseup',   onUp);
+      cancelAnimationFrame(rafId.current);
+    };
+  }, []);
+
+  return (
+    <>
+      <div className={styles['cursor-ring']} ref={ringRef} />
+      <div className={styles['cursor-dot']}  ref={dotRef}  />
+    </>
+  );
+}
+// ────────────────────────────────────────────────────────────────────────────
 
 const ActivityDashboard = () => {
   const navigate = useNavigate();
@@ -187,6 +257,7 @@ const ActivityDashboard = () => {
 
   return (
     <main className={styles['activitydashboard-main']}>
+      <CustomCursor />
       <div className={styles['activitydashboard-container']}>
         
         {/* Error Message */}
