@@ -46,6 +46,7 @@ backend/.idea/
 backend/.vscode/
 backend/logs/
 backend/*.log
+backend/src/main/resources/application.properties 
 
 # Database
 database/*.bak
