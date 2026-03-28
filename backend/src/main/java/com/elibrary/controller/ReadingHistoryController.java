@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/history")
+@RequestMapping("/api/reading-history")
 @CrossOrigin
 public class ReadingHistoryController {
 

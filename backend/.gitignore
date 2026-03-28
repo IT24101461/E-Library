@@ -31,3 +31,23 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Secrets & Local Config ###
+**/src/main/resources/application.yml
+**/src/main/resources/application-local.yml
+**/src/main/resources/application-prod.yml
+
+### Compiled classes (backend) ###
+backend/target/
+*.class
+
+### Frontend ###
+frontend/node_modules/
+frontend/.env
+frontend/.env.local
+frontend/dist/
+frontend/build/
+
+### OS ###
+.DS_Store
+Thumbs.db

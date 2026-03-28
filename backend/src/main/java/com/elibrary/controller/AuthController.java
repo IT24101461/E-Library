@@ -14,15 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001",
+                         "http://localhost:5173", "http://localhost:5174"})
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-<<<<<<< HEAD
-    private static final String ADMIN_ACCESS_CODE = "ADMIN123"; // Admin code for creating admin accounts
-=======
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+    private static final String ADMIN_ACCESS_CODE = "ADMIN123";
 
     @Autowired
     private UserRepository userRepository;
@@ -51,8 +49,6 @@ public class AuthController {
             user.setFullName(fullName);
             user.setPassword(passwordEncoder.encode(password));
 
-            // Determine role: prefer client-provided role (if valid), otherwise
-            // make the first registered user an ADMIN for initial setup.
             String requestedRole = body.get("role");
             if (requestedRole != null) {
                 requestedRole = requestedRole.trim();
@@ -61,16 +57,12 @@ public class AuthController {
             long userCount = userRepository.count();
             if (requestedRole != null) {
                 if ("ADMIN".equalsIgnoreCase(requestedRole)) {
-<<<<<<< HEAD
-                    // Verify admin code for ADMIN registration
                     String adminCode = body.get("adminCode");
                     if (adminCode == null || !adminCode.trim().equals(ADMIN_ACCESS_CODE)) {
                         logger.warn("Admin code validation failed. Provided: {}, Expected: {}", adminCode, ADMIN_ACCESS_CODE);
                         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Invalid admin code"));
                     }
                     logger.info("Admin code validated successfully for email: {}", email);
-=======
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
                     user.setRole("ADMIN");
                 } else {
                     user.setRole("USER");
@@ -86,7 +78,6 @@ public class AuthController {
             logger.info("Register request: email={}, requestedRole={}, assignedRole={}", email, requestedRole, user.getRole());
 
             User saved = userRepository.save(user);
-            // Do not return password
             Map<String, Object> resp = new HashMap<>();
             resp.put("id", saved.getId());
             resp.put("email", saved.getEmail());

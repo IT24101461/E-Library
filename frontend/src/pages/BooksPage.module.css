@@ -1,12 +1,8 @@
-<<<<<<< HEAD
 /* Tailwind-based custom styles for BooksPage */
-=======
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-<<<<<<< HEAD
 /* ============================================================================
    BOOKS PAGE - Premium Aesthetic with Themes
    ========================================================================== */
@@ -137,7 +133,8 @@
 }
 @media (min-width: 640px) {
   .books-search-row { flex-direction: row; align-items: center; width: auto; }
-=======
+}
+
 /* ============================================================
    BOOKS PAGE — Dark Theme matching Bookshelf style
    ============================================================ */
@@ -247,7 +244,6 @@
     align-items: center;
     width: auto;
   }
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 }
 
 .books-search-container {
@@ -256,19 +252,15 @@
   align-items: center;
   width: 100%;
 }
-<<<<<<< HEAD
 @media (min-width: 640px) {
   .books-search-container { width: 20rem; }
-=======
 
 @media (min-width: 640px) {
   .books-search-container { width: 280px; }
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 }
 
 .books-search-input {
   width: 100%;
-<<<<<<< HEAD
   padding: 0.75rem 1rem 0.75rem 2.5rem;
   border-radius: 0.75rem;
   border: 1px solid var(--input-border);
@@ -520,7 +512,6 @@
   transition: all 0.2s;
 }
 .modal-btn-secondary:hover { background: var(--image-placeholder-bg); }
-=======
   padding: 11px 40px 11px 16px;
   font-size: 13px;
   font-family: 'DM Sans', sans-serif;
@@ -594,4 +585,3 @@
   box-shadow: none;
   cursor: not-allowed;
 }
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5

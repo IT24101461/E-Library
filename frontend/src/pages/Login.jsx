@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
@@ -31,11 +30,7 @@ const Login = () => {
     }
     try {
       setLoading(true);
-<<<<<<< HEAD
       const res = await axios.post(`${API}/api/auth/login`, { email, password });
-=======
-      const res = await axios.post(`${API}/auth/login`, { email, password });
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       localStorage.setItem('authUser', JSON.stringify(res.data));
       navigate('/');
     } catch (err) {
@@ -50,11 +45,7 @@ const Login = () => {
   const doLogin = async () => {
     try {
       setLoading(true);
-<<<<<<< HEAD
         const res = await axios.post(`${API}/api/auth/login`, { email, password });
-=======
-      const res = await axios.post(`${API}/auth/login`, { email, password });
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       localStorage.setItem('authUser', JSON.stringify(res.data));
       setSuccessMsg('Signed in successfully — redirecting...');
       setTimeout(() => navigate('/'), 900);
@@ -122,14 +113,11 @@ const Login = () => {
 
         <div className={styles['login-footer']}>
           Don't have an account? <Link to="/register" className={styles['login-link']}>Create one</Link>
-<<<<<<< HEAD
           <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #ddd', fontSize: '0.85rem'}}>
             <Link to="/admin-login" style={{color: '#667eea', textDecoration: 'none', fontWeight: '600'}}>
               🔐 Admin Access
             </Link>
           </div>
-=======
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
         </div>
       </div>
     </div>

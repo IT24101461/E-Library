@@ -1,25 +1,28 @@
 import { useParams } from "react-router-dom";
-import { Document, Page } from "react-pdf";
-import * as pdfjsLib from "pdfjs-dist";
+import { Document, Page, pdfjs } from "react-pdf";
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+// Point worker to the public folder copy — avoids unpkg CDN fetch failures
+pdfjs.GlobalWorkerOptions.workerSrc = `${process.env.PUBLIC_URL}/pdf.worker.min.mjs`;
+
+const PDF_OPTIONS = {
+  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+  cMapPacked: true,
+  standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+};
 
 export default function Reader() {
   const { id } = useParams();
   const [pageNumber, setPageNumber] = useState(1);
   const [numPages, setNumPages] = useState(null);
   const [pdfError, setPdfError] = useState(null);
-  
-  // Custom container width logic
   const [containerWidth, setContainerWidth] = useState(800);
   const containerRef = useRef(null);
-  
+
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.getBoundingClientRect().width - 40); // 40px for padding
+        setContainerWidth(containerRef.current.getBoundingClientRect().width - 40);
       }
     };
     updateWidth();
@@ -27,7 +30,10 @@ export default function Reader() {
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
-  const fileUrl = `http://localhost:8080/api/books/${id}/file`;
+  const fileUrl = {
+    url: `http://localhost:8080/api/books/${id}/file`,
+    withCredentials: false,
+  };
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -39,15 +45,12 @@ export default function Reader() {
     setPdfError(error.message);
   };
 
-
-
   return (
     <div className="main-content">
       <h1 className="page-title">Book Reader</h1>
       <div className="glass-panel" style={{ padding: "30px", display: "flex", flexDirection: "column", alignItems: "center" }}>
 
         <div ref={containerRef} style={{ background: "rgba(0,0,0,0.5)", border: "1px solid var(--border-glass)", borderRadius: "var(--radius-sm)", padding: "20px", width: "100%", maxWidth: "1000px", display: "flex", justifyContent: "center", overflow: "hidden" }}>
-          {/* If actual PDF exists, this mounts. A fallback graphic is useful if nothing exists. */}
           <div style={{ minHeight: "300px", display: "flex", flexDirection: "column", alignItems: "center", color: "var(--text-muted)" }}>
             {pdfError ? (
               <div style={{ color: "#ff4d4f", padding: "20px", textAlign: "center" }}>
@@ -56,16 +59,20 @@ export default function Reader() {
                 <small>{pdfError}</small>
               </div>
             ) : (
-              <Document file={fileUrl} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError}>
-                <Page 
-                  pageNumber={pageNumber} 
-                  width={containerWidth} 
-                  renderTextLayer={false} 
-                  renderAnnotationLayer={false} 
+              <Document
+                file={fileUrl}
+                options={PDF_OPTIONS}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+              >
+                <Page
+                  pageNumber={pageNumber}
+                  width={containerWidth}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
                 />
               </Document>
             )}
-            {!pdfError && <p style={{ marginTop: "10px" }}>Visualizing Book {id} - Canvas Space</p>}
           </div>
         </div>
 

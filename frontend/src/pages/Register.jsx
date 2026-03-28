@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -25,11 +24,7 @@ const Register = () => {
     }
     try {
       setLoading(true);
-<<<<<<< HEAD
       const res = await axios.post(`${API}/api/auth/register`, { email, fullName, password, role });
-=======
-      const res = await axios.post(`${API}/auth/register`, { email, fullName, password, role });
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       // Auto-login (server returns user info)
       localStorage.setItem('authUser', JSON.stringify(res.data));
       navigate('/');
@@ -67,11 +62,7 @@ const Register = () => {
     setConfirmOpen(false);
     try {
       setLoading(true);
-<<<<<<< HEAD
       const res = await axios.post(`${API}/api/auth/register`, { fullName, email, password, role });
-=======
-      const res = await axios.post(`${API}/auth/register`, { fullName, email, password, role });
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       localStorage.setItem('authUser', JSON.stringify(res.data));
       setSuccessMsg('Account created successfully — redirecting...');
       setTimeout(() => {

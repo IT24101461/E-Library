@@ -12,14 +12,11 @@ const BooksPage = () => {
   const [selectedBook, setSelectedBook] = useState(null);
   const [borrowing, setBorrowing] = useState(false);
   const [authUser, setAuthUser] = useState(null);
-<<<<<<< HEAD
   const [theme, setTheme] = useState(localStorage.getItem('appTheme') || 'light');
 
   useEffect(() => {
     localStorage.setItem('appTheme', theme);
   }, [theme]);
-=======
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 
   useEffect(() => {
     const raw = localStorage.getItem('authUser');
@@ -89,11 +86,7 @@ const BooksPage = () => {
   }, [books, searchTerm]);
 
   return (
-<<<<<<< HEAD
     <main className={styles['books-page']} data-theme={theme}>
-=======
-    <main className={styles['books-page']}>
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       <div className={styles['books-container']}>
         <header className={styles['books-header']}>
           <div>
@@ -101,7 +94,6 @@ const BooksPage = () => {
             <p className={styles['books-desc']}>Browse, preview and borrow books from the collection.</p>
           </div>
 
-<<<<<<< HEAD
           <div className={styles['books-search-row']}>
             <div className={styles['theme-options']}>
               <button className={theme === 'light' ? styles['theme-btn-active'] : ''} onClick={() => setTheme('light')}>Light</button>
@@ -109,9 +101,6 @@ const BooksPage = () => {
               <button className={theme === 'sepia' ? styles['theme-btn-active'] : ''} onClick={() => setTheme('sepia')}>Sepia</button>
             </div>
 
-=======
-            <div className={styles['books-search-row']}>
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
             <div className={styles['books-search-container']}>
               <input
                 type="search"
@@ -147,7 +136,6 @@ const BooksPage = () => {
           </div>
         ) : (
           <>
-<<<<<<< HEAD
             <div className="mb-4 text-sm font-semibold opacity-70" style={{color: 'var(--text-secondary)'}}>{filteredBooks.length} books available</div>
 
             {filteredBooks.length === 0 ? (
@@ -159,25 +147,11 @@ const BooksPage = () => {
                     <div className={styles['book-card-image-wrapper']}>
                       {book.coverUrl ? (
                         <img src={book.coverUrl} alt={book.title} className={styles['book-card-image']} />
-=======
-            <div className="mb-4 text-sm text-gray-600">{filteredBooks.length} books</div>
-
-            {filteredBooks.length === 0 ? (
-              <div className="py-12 text-center text-gray-500">No books match your search.</div>
-            ) : (
-              <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredBooks.map((book) => (
-                  <article key={book.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                    <div className="h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
-                      {book.coverUrl ? (
-                        <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
                       ) : (
                         <div className="text-6xl">📚</div>
                       )}
                     </div>
 
-<<<<<<< HEAD
                     <div className={styles['book-card-content']}>
                       <h3 className={styles['book-card-title']} title={book.title}>{book.title}</h3>
                       <p className={styles['book-card-author']}>{book.author}</p>
@@ -204,33 +178,6 @@ const BooksPage = () => {
                         >
                           {book.isAvailable ? 'Borrow' : 'Unavailable'}
                         </button>
-=======
-                    <div className="p-4">
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">{book.title}</h3>
-                      <p className="text-sm text-gray-600 truncate">{book.author}</p>
-
-                      <div className="mt-3 flex items-center justify-between">
-                        <div className="text-xs text-gray-500">
-                          <span className="inline-block mr-2">{book.totalPages || book.pages || '-'} pages</span>
-                          <span className="inline-block px-2 py-0.5 bg-gray-100 rounded text-xs">{book.category || 'General'}</span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => openPdfUrl(book.pdfUrl || book.pdfUrl)}
-                            className="text-sm text-indigo-600 hover:underline"
-                          >
-                            Preview
-                          </button>
-                          <button
-                            onClick={() => setSelectedBook(book)}
-                            className={`px-3 py-1 rounded-md text-sm font-medium ${book.isAvailable ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
-                            disabled={!book.isAvailable}
-                          >
-                            {book.isAvailable ? 'Borrow' : 'Unavailable'}
-                          </button>
-                        </div>
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
                       </div>
                     </div>
                   </article>
@@ -242,7 +189,6 @@ const BooksPage = () => {
 
         {/* Modal */}
         {selectedBook && (
-<<<<<<< HEAD
           <div className={styles['modal-overlay']} onClick={() => setSelectedBook(null)}>
             <div className={styles['modal-content']} onClick={(e) => e.stopPropagation()}>
               <div className={styles['modal-grid']}>
@@ -296,59 +242,6 @@ const BooksPage = () => {
                     >
                       {borrowing ? 'Processing...' : (selectedBook.isAvailable ? 'Borrow Book' : 'Unavailable')}
                     </button>
-=======
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg max-w-3xl w-full shadow-xl overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-                <div className="md:col-span-1">
-                  {selectedBook.coverUrl ? (
-                    <img src={selectedBook.coverUrl} alt={selectedBook.title} className="w-full h-64 object-cover rounded" />
-                  ) : (
-                    <div className="w-full h-64 bg-gray-100 rounded flex items-center justify-center text-4xl">📚</div>
-                  )}
-                </div>
-
-                <div className="md:col-span-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900">{selectedBook.title}</h2>
-                      <p className="text-sm text-gray-600 mt-1">{selectedBook.author}</p>
-                    </div>
-                    <button onClick={() => setSelectedBook(null)} className="text-gray-500 hover:text-gray-700">✕</button>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-700">
-                    <div>
-                      <div className="text-xs text-gray-500">Category</div>
-                      <div className="font-medium">{selectedBook.category || '-'}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Pages</div>
-                      <div className="font-medium">{selectedBook.totalPages || selectedBook.pages || '-'}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500">ISBN</div>
-                      <div className="font-mono text-sm">{selectedBook.isbn || '-'}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Status</div>
-                      <div className={`font-medium ${selectedBook.isAvailable ? 'text-green-600' : 'text-red-600'}`}>{selectedBook.isAvailable ? 'Available' : 'Unavailable'}</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 text-gray-700">{selectedBook.description}</div>
-
-                  <div className="mt-6 flex gap-3">
-                    <button onClick={() => openPdfUrl(selectedBook.pdfUrl)} className="flex-1 bg-white border border-gray-200 text-gray-700 py-2 rounded">Preview PDF</button>
-                    <button
-                      onClick={() => handleBorrowBook(selectedBook.id)}
-                      disabled={!selectedBook.isAvailable || borrowing}
-                      className="flex-1 bg-indigo-600 text-white py-2 rounded disabled:opacity-60"
-                    >
-                      {borrowing ? 'Processing...' : (selectedBook.isAvailable ? 'Borrow Book' : 'Unavailable')}
-                    </button>
-                    <button onClick={() => setSelectedBook(null)} className="flex-1 bg-gray-100 text-gray-700 py-2 rounded">Close</button>
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
                   </div>
                 </div>
               </div>

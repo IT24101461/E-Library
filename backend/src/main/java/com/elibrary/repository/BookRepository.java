@@ -2,29 +2,18 @@ package com.elibrary.repository;
 
 import com.elibrary.model.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
-<<<<<<< HEAD
-=======
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
-<<<<<<< HEAD
-    List<Book> findByIsDeletedFalse();
-    Book findByIdAndIsDeletedFalse(Long id);
-    List<Book> findByCategoryAndIsDeletedFalse(String category);
-}
-=======
 
-    // ── Teammate's queries ──
     List<Book> findByIsDeletedFalse();
     Book findByIdAndIsDeletedFalse(Long id);
     List<Book> findByCategoryAndIsDeletedFalse(String category);
 
-    // ── Your queries ──
     List<Book> findByListNameAndIsPersonal(String listName, Boolean isPersonal);
     List<Book> findByIsPersonal(Boolean isPersonal);
     boolean existsByTitleAndListName(String title, String listName);
@@ -35,4 +24,3 @@ public interface BookRepository extends JpaRepository<Book, Long> {
            "LOWER(b.keywords) LIKE LOWER(CONCAT('%', :q, '%'))")
     List<Book> searchAllBooks(@Param("q") String query);
 }
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5

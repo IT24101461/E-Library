@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-<<<<<<< HEAD
-=======
 // ============================================================
 // GLOBAL CUSTOM CURSOR — matches Bookshelf (Feature 4) style
 // ============================================================
@@ -82,14 +80,9 @@ if (document.readyState === 'loading') {
 
 // ============================================================
 
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
-<<<<<<< HEAD
 );
-=======
-);
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
