@@ -1,21 +1,43 @@
 package com.elibrary.model;
 
 import jakarta.persistence.*;
+<<<<<<< HEAD
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "books")
 public class Book {
+=======
+import lombok.Data;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "books")
+public class Book {
+
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+<<<<<<< HEAD
+=======
+    // ── Shared ──
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
     private String author;
 
+<<<<<<< HEAD
+=======
+    @Column(name = "publication_year")
+    private Integer publicationYear;
+
+    // ── Teammate's fields ──
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -31,6 +53,7 @@ public class Book {
     @Column(name = "pdf_url", columnDefinition = "LONGTEXT")
     private String pdfUrl;
 
+<<<<<<< HEAD
     @Column(name = "isbn")
     private String isbn;
 
@@ -38,6 +61,9 @@ public class Book {
     private Integer publicationYear;
 
     @Column(name = "category")
+=======
+    private String isbn;
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     private String category;
 
     @Column(name = "created_at")
@@ -49,6 +75,7 @@ public class Book {
     @Column(name = "is_available")
     private Boolean isAvailable = true;
 
+<<<<<<< HEAD
     // Constructors
     public Book() {
     }
@@ -188,3 +215,23 @@ public class Book {
         this.isAvailable = isAvailable;
     }
 }
+=======
+    // ── Your fields ──
+    private String genre;
+    private String emoji;
+    private double rating;
+    private String status;
+    private int progress;
+
+    @Column(name = "list_name")
+    private String listName;
+
+    @Column(name = "cover_image")
+    private String coverImage;
+
+    private String keywords;
+
+    @Column(name = "is_personal")
+    private Boolean isPersonal = false;
+}
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5

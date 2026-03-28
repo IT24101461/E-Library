@@ -84,6 +84,7 @@ CREATE TABLE reading_progress (
   INDEX idx_book_id (book_id)
 );
 
+<<<<<<< HEAD
 -- Bookmarks Table
 CREATE TABLE bookmarks (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -114,6 +115,8 @@ CREATE TABLE highlights (
   INDEX idx_created_at (created_at)
 );
 
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 -- ============================================
 -- Sample Data (Optional - for testing)
 -- ============================================

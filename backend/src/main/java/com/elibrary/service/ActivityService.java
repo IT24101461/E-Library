@@ -60,6 +60,7 @@ public class ActivityService {
     public ActivityStatsDTO getUserStats(Long userId) {
         List<ActivityLog> activities = getUserHistory(userId);
         
+<<<<<<< HEAD
         // Calculate reading velocity (pages per hour) using explicit SESSION logs
         List<ActivityLog> sessionActivities = activities.stream()
                 .filter(a -> "SESSION".equals(a.getAction()))
@@ -69,6 +70,13 @@ public class ActivityService {
                 .mapToInt(a -> a.getCurrentPage() != null ? a.getCurrentPage() : 0)
                 .sum();
         int totalMinutes = sessionActivities.stream()
+=======
+        // Calculate reading velocity (pages per hour)
+        int totalPages = activities.stream()
+                .mapToInt(a -> a.getCurrentPage() != null ? a.getCurrentPage() : 0)
+                .sum();
+        int totalMinutes = activities.stream()
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
                 .mapToInt(a -> a.getTimeSpentMinutes() != null ? a.getTimeSpentMinutes() : 0)
                 .sum();
         double readingVelocity = totalMinutes > 0 ? (totalPages / (double) totalMinutes) * 60 : 0;
