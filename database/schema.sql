@@ -84,6 +84,39 @@ CREATE TABLE reading_progress (
   INDEX idx_book_id (book_id)
 );
 
+<<<<<<< HEAD
+-- Bookmarks Table
+CREATE TABLE bookmarks (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  book_id BIGINT NOT NULL,
+  page_number INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (book_id) REFERENCES books(id),
+  INDEX idx_user_id (user_id),
+  INDEX idx_book_id (book_id),
+  INDEX idx_created_at (created_at)
+);
+
+-- Highlights Table
+CREATE TABLE highlights (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  book_id BIGINT NOT NULL,
+  page_number INT NOT NULL,
+  content TEXT,
+  color VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (book_id) REFERENCES books(id),
+  INDEX idx_user_id (user_id),
+  INDEX idx_book_id (book_id),
+  INDEX idx_created_at (created_at)
+);
+
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 -- ============================================
 -- Sample Data (Optional - for testing)
 -- ============================================

@@ -4,8 +4,10 @@ import StatsCard from '../components/StatsCard';
 import HistoryCard from '../components/HistoryCard';
 import ProgressBar from '../components/ProgressBar';
 import ThemeToggle from '../components/ThemeToggle';
+import AIRecommendation from '../components/AIRecommendation';
 import RecommendationEngine from '../components/RecommendationEngine';
 import { ActivityService } from '../services/ActivityService';
+import { ReaderService } from '../services/ReaderService';
 import styles from './ActivityDashboard.module.css';
 
 // ── Custom cursor (ported from Bookshelf) ────────────────────────────────────
@@ -82,10 +84,17 @@ const ActivityDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
+  const [totalBookmarks, setTotalBookmarks] = useState(0);
+  const [totalHighlights, setTotalHighlights] = useState(0);
   const [currentBook, setCurrentBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [authUser, setAuthUser] = useState(null);
+  const [theme, setTheme] = useState(localStorage.getItem('appTheme') || 'light');
+
+  useEffect(() => {
+    localStorage.setItem('appTheme', theme);
+  }, [theme]);
 
   useEffect(() => {
     const raw = localStorage.getItem('authUser');
@@ -98,22 +107,13 @@ const ActivityDashboard = () => {
 
   // Listen for progress updates coming from the reader and refresh affected history item
   useEffect(() => {
-    // When reader saves progress, refresh the dashboard data to reflect DB state.
     const onProgressUpdated = async (e) => {
       try {
         const detail = e && e.detail ? e.detail : null;
         if (!detail || !detail.bookId) return;
-        // Coerce to number to avoid string/number mismatches
         const changedBookId = Number(detail.bookId);
         if (Number.isNaN(changedBookId)) return;
-
-        // Quick path: if we already have the affected book in history/currentBook, refetch its progress
-        const uid = authUser ? authUser.id : 1;
-        // Instead of trying to surgically update many structures (which can miss naming mismatches),
-        // refresh the whole dataset so the UI always reflects authoritative DB values.
         await fetchData();
-
-        // If fetchData succeeded, nothing more to do; otherwise try a targeted update as fallback
       } catch (err) {
         console.warn('Failed to handle progressUpdated event', err);
       }
@@ -132,6 +132,15 @@ const ActivityDashboard = () => {
       const historyRes = await ActivityService.getHistory(uid);
       setStats(statsRes.data);
 
+      try {
+        const bRes = await ReaderService.getBookmarks(uid);
+        const hRes = await ReaderService.getHighlights(uid);
+        setTotalBookmarks(bRes.data?.length || 0);
+        setTotalHighlights(hRes.data?.length || 0);
+      } catch (e) {
+        console.warn('Could not fetch reader items', e);
+      }
+
       // enrich history items with persisted progress (currentPage / totalPages)
       const rawHistory = historyRes.data || [];
       console.log('[Dashboard] Raw history:', rawHistory);
@@ -144,17 +153,14 @@ const ActivityDashboard = () => {
             const response = await ActivityService.getProgress(uid, bookId);
             console.log(`[Dashboard] Raw API response for bookId=${bookId}:`, response);
             
-            // The axios response object has data property
             const prog = response?.data || response;
             console.log(`[Dashboard] Progress data object:`, prog);
             
-            // normalize various possible fields for pages
             const hp = h || {};
             const bookMeta = hp.book || {};
             const currentPageFromHistory = hp.currentPage ?? hp.page ?? hp.current ?? 0;
             const totalPagesFromHistory = hp.totalPages ?? bookMeta.totalPages ?? bookMeta.pages ?? bookMeta.pageSize ?? hp.pages ?? 0;
             
-            // Get currentPage and totalPages from progress object
             const currentPage = prog?.currentPage ?? currentPageFromHistory ?? 0;
             const totalPages = prog?.totalPages ?? totalPagesFromHistory ?? 0;
             
@@ -188,7 +194,6 @@ const ActivityDashboard = () => {
       const updatedHistory = history.filter(item => item.id !== activityId);
       setHistory(updatedHistory);
       
-      // If the deleted book was the current book, update currentBook
       if (currentBook && currentBook.id === activityId) {
         if (updatedHistory.length > 0) {
           setCurrentBook(updatedHistory[0]);
@@ -217,16 +222,19 @@ const ActivityDashboard = () => {
   const handleSessionComplete = async (bookId, pagesRead, durationSeconds, velocity) => {
     try {
       const uid = authUser ? authUser.id : 1;
-      // Update server-side progress: increment currentPage by pagesRead
       const existing = history.find((h) => (h.bookId || h.id) === (bookId || 0));
       const prevCurrent = Number(existing?.currentPage || existing?.page || existing?.current || 0);
       const totalPages = Number(existing?.totalPages || existing?.pages || existing?.pageSize || 0) || 0;
       const newCurrent = Math.min(prevCurrent + (pagesRead || 0), totalPages || Number.MAX_SAFE_INTEGER);
 
-      // Send update to backend
       await ActivityService.updateProgress({ userId: uid, bookId, currentPage: newCurrent, totalPages });
 
-      // Update local history state
+      // Log the session explicitly so the backend can permanently calculate Reading Velocity
+      await ActivityService.logActivity(uid, 'SESSION', bookId, {
+        currentPage: pagesRead || 0,
+        timeSpentMinutes: Math.max(1, Math.floor((durationSeconds || 60) / 60))
+      });
+
       const updatedHistory = history.map((h) => {
         const idMatch = (h.bookId || h.id) === (bookId || 0);
         if (!idMatch) return h;
@@ -234,7 +242,6 @@ const ActivityDashboard = () => {
       });
       setHistory(updatedHistory);
 
-      // Update stats: set readingVelocity to the measured velocity (rounded)
       setStats((s) => ({ ...(s || {}), readingVelocity: Math.round(velocity) }));
 
       console.log(`[Dashboard] Session complete for book ${bookId}: pages=${pagesRead}, duration=${durationSeconds}s, velocity=${velocity.toFixed(2)} p/h`);
@@ -245,7 +252,7 @@ const ActivityDashboard = () => {
 
   if (loading) {
     return (
-      <div className={styles['activitydashboard-loading']}>
+      <div className={styles['activitydashboard-loading']} data-theme={theme}>
         <div className={styles['activitydashboard-loading-content']}>
           <div className={styles['activitydashboard-loading-spinner']}></div>
           <p className={styles['activitydashboard-loading-title']}>Loading your library...</p>
@@ -256,7 +263,7 @@ const ActivityDashboard = () => {
   }
 
   return (
-    <main className={styles['activitydashboard-main']}>
+    <main className={styles['activitydashboard-main']} data-theme={theme}>
       <CustomCursor />
       <div className={styles['activitydashboard-container']}>
         
@@ -268,6 +275,14 @@ const ActivityDashboard = () => {
               <div>
                 <p className={styles['activitydashboard-alert-title']}>Connection Issue</p>
                 <p className={styles['activitydashboard-alert-message']}>{error}</p>
+                <div className="mt-2">
+                  <button
+                    className="px-3 py-1 bg-red-600 text-white rounded"
+                    onClick={() => fetchData()}
+                  >
+                    Retry
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -275,23 +290,60 @@ const ActivityDashboard = () => {
 
         {/* Hero / Welcome Section */}
         <div className={styles['activitydashboard-hero']}>
+          {/* Theme Selector */}
+          <div className="absolute top-6 right-6 z-20">
+            <div className={styles['theme-options']}>
+              <button 
+                className={theme === 'light' ? styles['theme-btn-active'] : ''} 
+                onClick={() => setTheme('light')}
+              >
+                Light
+              </button>
+              <button 
+                className={theme === 'dark' ? styles['theme-btn-active'] : ''} 
+                onClick={() => setTheme('dark')}
+              >
+                Dark
+              </button>
+              <button 
+                className={theme === 'sepia' ? styles['theme-btn-active'] : ''} 
+                onClick={() => setTheme('sepia')}
+              >
+                Sepia
+              </button>
+            </div>
+          </div>
+
           <div className={styles['activitydashboard-hero-inner']}>
             <div className={styles['activitydashboard-hero-content']}>
-                <h1 className={styles['activitydashboard-hero-title']}>Welcome Back, Reader!</h1>
-                {authUser && authUser.role === 'ADMIN' && (
-                  <div className="mt-3 inline-block text-sm bg-yellow-50 text-yellow-800 px-3 py-2 rounded shadow-sm">
-                    Admin mode: <strong className="ml-1">Elevated privileges enabled</strong>
-                  </div>
-                )}
-              <p className={styles['activitydashboard-hero-sub']}>Track your reading journey, set daily goals, and continue where you left off — all in one beautiful place.</p>
+              <h1 className={styles['activitydashboard-hero-title']}>
+                Welcome Back, {authUser?.username || 'Reader'}!
+              </h1>
+              {authUser && authUser.role === 'ADMIN' && (
+                <div className="mb-4 inline-block text-xs bg-white bg-opacity-20 text-indigo-50 px-3 py-1.5 rounded-full border border-white border-opacity-30 backdrop-blur-md">
+                  Admin mode enabled
+                </div>
+              )}
+              <p className={styles['activitydashboard-hero-sub']}>
+                Ready to dive into your next adventure? Track your progress, achieve your daily goals, and easily resume your favorite books.
+              </p>
 
               <div className={styles['activitydashboard-hero-ctas']}>
-                <div className="mb-3 ml-auto">
-                  <ThemeToggle />
-                </div>
-                <button className={styles['activitydashboard-hero-cta-primary']} onClick={() => navigate('/books')}>Browse Books</button>
-                <button className={styles['activitydashboard-hero-cta-secondary']} onClick={() => navigate('/bookshelf')}>Your Library</button>
-                <button className={styles['activitydashboard-hero-cta-tertiary']} onClick={() => navigate('/history')}>View History</button>
+                <button className={styles['activitydashboard-hero-cta-primary']} onClick={() => navigate('/books')}>
+                  <span className="text-xl">📚</span> Browse Library
+                </button>
+                <button className={styles['activitydashboard-hero-cta-secondary']} onClick={() => {
+                  if (currentBook) {
+                    navigate(`/reading/${currentBook.bookId || currentBook.id}?page=${currentBook.currentPage || 1}`)
+                  } else {
+                    navigate('/books')
+                  }
+                }}>
+                  <span className="text-xl">✨</span> Continue Reading
+                </button>
+                <button className={styles['activitydashboard-hero-cta-tertiary']} onClick={() => navigate('/history')}>
+                  View History
+                </button>
                 {authUser && authUser.role === 'ADMIN' && (
                   <button
                     className={styles['activitydashboard-hero-cta-tertiary']}
@@ -305,18 +357,35 @@ const ActivityDashboard = () => {
             </div>
 
             <div className={styles['activitydashboard-hero-illustration']}>
-              <div className={styles['activitydashboard-hero-illus-card']}>
-                <svg width="280" height="180" viewBox="0 0 280 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="0" y="0" width="280" height="180" rx="16" fill="white" fillOpacity="0.06" />
-                  <g transform="translate(20,20)">
-                    <rect x="0" y="0" width="80" height="110" rx="8" fill="white" fillOpacity="0.12" />
-                    <rect x="100" y="10" width="120" height="16" rx="6" fill="white" fillOpacity="0.12" />
-                    <rect x="100" y="36" width="80" height="12" rx="6" fill="white" fillOpacity="0.08" />
-                    <rect x="100" y="56" width="100" height="12" rx="6" fill="white" fillOpacity="0.08" />
-                    <rect x="100" y="80" width="60" height="12" rx="6" fill="white" fillOpacity="0.08" />
-                  </g>
-                </svg>
-              </div>
+              {history && history.length > 0 ? (
+                <div className={styles['hero-books-showcase']}>
+                  {history.slice(0, 3).map((item, index) => (
+                    <div 
+                      key={item.id} 
+                      className={`${styles['hero-book-card']} ${styles[`hero-book-pos-${index}`]}`}
+                      style={{ zIndex: 3 - index }}
+                      onClick={() => navigate(`/reading/${item.bookId || item.id}?page=${item.currentPage || 1}`)}
+                      title={`Continue ${item.title}`}
+                    >
+                      {item.coverUrl ? (
+                        <img src={item.coverUrl} alt={item.title} className={styles['hero-book-cover']} />
+                      ) : (
+                        <div className={styles['hero-book-placeholder']}>
+                          <span className="text-5xl">📕</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles['activitydashboard-hero-illus-card']}>
+                  <div className="text-center py-4">
+                    <span className="text-6xl mb-6 block animate-bounce" style={{animationDuration: '3s'}}>🚀</span>
+                    <p className="font-extrabold text-white text-2xl tracking-tight">Your Journey Awaits</p>
+                    <p className="text-indigo-200 mt-2">Discover thousands of books</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -324,34 +393,14 @@ const ActivityDashboard = () => {
         {/* Stats Grid */}
         {stats && (
           <div className={styles['activitydashboard-stats']}>
-            <StatsCard
-              icon="⚡"
-              label="Reading Velocity"
-              value={`${stats.readingVelocity}`}
-              color="blue"
-            />
-            <StatsCard
-              icon="🔥"
-              label="Current Streak"
-              value={`${stats.currentStreak}`}
-              color="orange"
-            />
-            <StatsCard
-              icon="📚"
-              label="Books Read"
-              value={`${stats.booksRead}`}
-              color="purple"
-            />
-            <StatsCard
-              icon="⭐"
-              label="Achievements"
-              value="8"
-              color="pink"
-            />
+            <StatsCard icon="⚡" label="Reading Velocity" value={`${stats.readingVelocity}`} color="blue" />
+            <StatsCard icon="🔥" label="Current Streak" value={`${stats.currentStreak}`} color="orange" />
+            <StatsCard icon="📚" label="Books Read" value={`${stats.booksRead}`} color="purple" />
+            <StatsCard icon="⭐" label="Achievements" value="8" color="pink" />
           </div>
         )}
 
-        {/* Main Content Grid (with full-width AI recommendations above) */}
+        {/* Full-width AI Recommendations */}
         <div className="mb-8">
           <RecommendationEngine currentBookId={currentBook?.bookId || currentBook?.id || 1508} />
         </div>
@@ -393,6 +442,7 @@ const ActivityDashboard = () => {
                         onDelete={handleDeleteActivity}
                         onSessionComplete={handleSessionComplete}
                       />
+                      <AIRecommendation book={book} />
                     </div>
                   ))
                 ) : (
@@ -479,8 +529,6 @@ const ActivityDashboard = () => {
                   <p className="text-gray-500 text-sm mt-1">Pick a book from the list to continue</p>
                 </div>
               )}
-
-              {/* AI Recommendations removed from sidebar (now shown in main area) */}
 
               {/* Quick Stats Box */}
               <div className="mt-8 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">

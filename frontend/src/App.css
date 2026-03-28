@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 /* App.css - reset default Vite styles that interfere with layout */
 #root {
   max-width: 100%;
@@ -13,6 +15,7 @@
 button {
   cursor: pointer;
 }
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 .app {
   min-height: 100vh;
 }

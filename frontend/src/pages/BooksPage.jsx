@@ -12,6 +12,14 @@ const BooksPage = () => {
   const [selectedBook, setSelectedBook] = useState(null);
   const [borrowing, setBorrowing] = useState(false);
   const [authUser, setAuthUser] = useState(null);
+<<<<<<< HEAD
+  const [theme, setTheme] = useState(localStorage.getItem('appTheme') || 'light');
+
+  useEffect(() => {
+    localStorage.setItem('appTheme', theme);
+  }, [theme]);
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 
   useEffect(() => {
     const raw = localStorage.getItem('authUser');
@@ -81,7 +89,11 @@ const BooksPage = () => {
   }, [books, searchTerm]);
 
   return (
+<<<<<<< HEAD
+    <main className={styles['books-page']} data-theme={theme}>
+=======
     <main className={styles['books-page']}>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       <div className={styles['books-container']}>
         <header className={styles['books-header']}>
           <div>
@@ -89,7 +101,17 @@ const BooksPage = () => {
             <p className={styles['books-desc']}>Browse, preview and borrow books from the collection.</p>
           </div>
 
+<<<<<<< HEAD
+          <div className={styles['books-search-row']}>
+            <div className={styles['theme-options']}>
+              <button className={theme === 'light' ? styles['theme-btn-active'] : ''} onClick={() => setTheme('light')}>Light</button>
+              <button className={theme === 'dark' ? styles['theme-btn-active'] : ''} onClick={() => setTheme('dark')}>Dark</button>
+              <button className={theme === 'sepia' ? styles['theme-btn-active'] : ''} onClick={() => setTheme('sepia')}>Sepia</button>
+            </div>
+
+=======
             <div className={styles['books-search-row']}>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
             <div className={styles['books-search-container']}>
               <input
                 type="search"
@@ -125,6 +147,19 @@ const BooksPage = () => {
           </div>
         ) : (
           <>
+<<<<<<< HEAD
+            <div className="mb-4 text-sm font-semibold opacity-70" style={{color: 'var(--text-secondary)'}}>{filteredBooks.length} books available</div>
+
+            {filteredBooks.length === 0 ? (
+              <div className="py-12 text-center text-xl font-medium" style={{color: 'var(--text-secondary)'}}>No books match your search.</div>
+            ) : (
+              <section className={styles['books-grid']}>
+                {filteredBooks.map((book) => (
+                  <article key={book.id} className={styles['book-card']}>
+                    <div className={styles['book-card-image-wrapper']}>
+                      {book.coverUrl ? (
+                        <img src={book.coverUrl} alt={book.title} className={styles['book-card-image']} />
+=======
             <div className="mb-4 text-sm text-gray-600">{filteredBooks.length} books</div>
 
             {filteredBooks.length === 0 ? (
@@ -136,11 +171,40 @@ const BooksPage = () => {
                     <div className="h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
                       {book.coverUrl ? (
                         <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
                       ) : (
                         <div className="text-6xl">📚</div>
                       )}
                     </div>
 
+<<<<<<< HEAD
+                    <div className={styles['book-card-content']}>
+                      <h3 className={styles['book-card-title']} title={book.title}>{book.title}</h3>
+                      <p className={styles['book-card-author']}>{book.author}</p>
+
+                      <div className={styles['book-card-meta']}>
+                        <span style={{fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600}}>
+                          {book.totalPages || book.pages || '-'} PAGES
+                        </span>
+                        <span className={styles['book-card-badge']}>{book.category || 'General'}</span>
+                      </div>
+
+                      <div className={styles['book-card-actions']}>
+                        <button
+                          onClick={() => openPdfUrl(book.pdfUrl || book.pdfUrl)}
+                          className={styles['book-btn-preview']}
+                          style={{marginRight: 'auto'}}
+                        >
+                          Preview ↓
+                        </button>
+                        <button
+                          onClick={() => setSelectedBook(book)}
+                          className={styles['book-btn-borrow']}
+                          disabled={!book.isAvailable}
+                        >
+                          {book.isAvailable ? 'Borrow' : 'Unavailable'}
+                        </button>
+=======
                     <div className="p-4">
                       <h3 className="text-lg font-semibold text-gray-900 truncate">{book.title}</h3>
                       <p className="text-sm text-gray-600 truncate">{book.author}</p>
@@ -166,6 +230,7 @@ const BooksPage = () => {
                             {book.isAvailable ? 'Borrow' : 'Unavailable'}
                           </button>
                         </div>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
                       </div>
                     </div>
                   </article>
@@ -177,6 +242,61 @@ const BooksPage = () => {
 
         {/* Modal */}
         {selectedBook && (
+<<<<<<< HEAD
+          <div className={styles['modal-overlay']} onClick={() => setSelectedBook(null)}>
+            <div className={styles['modal-content']} onClick={(e) => e.stopPropagation()}>
+              <div className={styles['modal-grid']}>
+                <div className="md:col-span-1 border-r border-gray-100 border-opacity-10 pr-0 md:pr-6 flex items-center justify-center">
+                  {selectedBook.coverUrl ? (
+                    <img src={selectedBook.coverUrl} alt={selectedBook.title} className="w-full object-cover rounded-xl shadow-lg border border-white border-opacity-10" style={{maxHeight: '340px'}} />
+                  ) : (
+                    <div className="w-full h-64 rounded-xl flex items-center justify-center text-5xl" style={{background: 'var(--image-placeholder-bg)'}}>📚</div>
+                  )}
+                </div>
+
+                <div className="md:col-span-2 flex flex-col justify-center">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h2 className={styles['modal-title']}>{selectedBook.title}</h2>
+                      <p className={styles['modal-author']}>{selectedBook.author}</p>
+                    </div>
+                    <button onClick={() => setSelectedBook(null)} className={styles['modal-close']}>✕</button>
+                  </div>
+
+                  <div className={styles['modal-details']}>
+                    <div>
+                      <div className={styles['modal-detail-label']}>Category</div>
+                      <div className={styles['modal-detail-value']}>{selectedBook.category || '-'}</div>
+                    </div>
+                    <div>
+                      <div className={styles['modal-detail-label']}>Pages</div>
+                      <div className={styles['modal-detail-value']}>{selectedBook.totalPages || selectedBook.pages || '-'}</div>
+                    </div>
+                    <div>
+                      <div className={styles['modal-detail-label']}>ISBN</div>
+                      <div className={styles['modal-detail-value']} style={{fontFamily: 'monospace'}}>{selectedBook.isbn || '-'}</div>
+                    </div>
+                    <div>
+                      <div className={styles['modal-detail-label']}>Status</div>
+                      <div className={styles['modal-detail-value']} style={{color: selectedBook.isAvailable ? '#10b981' : '#ef4444'}}>
+                        {selectedBook.isAvailable ? '● Available' : '● Unavailable'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles['modal-desc']}>{selectedBook.description}</div>
+
+                  <div className={styles['modal-actions']}>
+                    <button onClick={() => openPdfUrl(selectedBook.pdfUrl)} className={styles['modal-btn-secondary']}>Preview PDF</button>
+                    <button
+                      onClick={() => handleBorrowBook(selectedBook.id)}
+                      disabled={!selectedBook.isAvailable || borrowing}
+                      className={styles['book-btn-borrow']}
+                      style={{flex: 1.5, padding: '0.75rem', fontSize: '1rem'}}
+                    >
+                      {borrowing ? 'Processing...' : (selectedBook.isAvailable ? 'Borrow Book' : 'Unavailable')}
+                    </button>
+=======
           <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg max-w-3xl w-full shadow-xl overflow-hidden">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
@@ -228,6 +348,7 @@ const BooksPage = () => {
                       {borrowing ? 'Processing...' : (selectedBook.isAvailable ? 'Borrow Book' : 'Unavailable')}
                     </button>
                     <button onClick={() => setSelectedBook(null)} className="flex-1 bg-gray-100 text-gray-700 py-2 rounded">Close</button>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
                   </div>
                 </div>
               </div>

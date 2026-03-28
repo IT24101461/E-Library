@@ -56,7 +56,7 @@ const Header = () => {
             <>
               <button onClick={() => navigate('/dashboard')} className={styles.userButton}>{user.fullName}</button>
 
-              {/* Dev-only: promote to admin */}
+              {/* Dev-only helper: promote current session user to ADMIN (client-side only) */}
               {process.env.NODE_ENV === 'development' && user.role !== 'ADMIN' && (
                 <button
                   onClick={() => {

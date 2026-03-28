@@ -1,7 +1,11 @@
 server:
   port: 8080
   servlet:
+<<<<<<< HEAD
+    context-path: /api
+=======
     context-path: /
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 
 spring:
   application:
@@ -15,7 +19,11 @@ spring:
     
   jpa:
     hibernate:
+<<<<<<< HEAD
+      ddl-auto: update
+=======
       ddl-auto: validate
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     show-sql: false
     properties:
       hibernate:

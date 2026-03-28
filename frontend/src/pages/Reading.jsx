@@ -1,7 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ActivityService } from '../services/ActivityService';
+<<<<<<< HEAD
+import { ReaderService } from '../services/ReaderService';
 import * as pdfjsLib from 'pdfjs-dist';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ArrowLeft, Maximize, Minimize, ZoomOut, ZoomIn, Download, 
+  ChevronLeft, ChevronRight, Clock, Award, Bookmark as BookmarkIcon, 
+  Trash2, Plus, Type, Palette, Contrast, Layout
+} from 'lucide-react';
+=======
+import * as pdfjsLib from 'pdfjs-dist';
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 import styles from './Reading.module.css';
 
 // Set up PDF.js worker
@@ -26,9 +37,26 @@ const Reading = () => {
   const [elapsed, setElapsed] = useState(0);
   const [pagesReadDuringSession, setPagesReadDuringSession] = useState(0);
   const [authUser, setAuthUser] = useState(null);
+<<<<<<< HEAD
+  
+  // Reader Settings State
+  const [focusMode, setFocusMode] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [brightness, setBrightness] = useState(100);
+  const [theme, setTheme] = useState('dark'); // 'dark', 'sepia', 'light'
+  const [highContrast, setHighContrast] = useState(false);
+  
+  const [direction, setDirection] = useState(1); 
+  
+  // Bookmarks and Highlights State
+  const [bookmarks, setBookmarks] = useState([]);
+  const [highlights, setHighlights] = useState([]);
+
+=======
   const [focusMode, setFocusMode] = useState(false);
   const [zoom, setZoom] = useState(1);
   
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
   useEffect(() => {
     const raw = localStorage.getItem('authUser');
     if (raw) {
@@ -41,8 +69,11 @@ const Reading = () => {
     }
   }, []);
   
+<<<<<<< HEAD
+=======
   // IMPORTANT: userId must be recalculated whenever authUser changes
   // This ensures new users are correctly identified
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
   const userId = authUser?.id || 1;
   const saveTimeoutRef = useRef(null);
   const sessionTimerRef = useRef(null);
@@ -50,28 +81,61 @@ const Reading = () => {
   const lastSentPageRef = useRef(0);
   const WORDS_PER_PAGE = 250;
 
+<<<<<<< HEAD
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+=======
   useEffect(() => {
     // If URL had a ?page= param, set that as initial page before loading content
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     const params = new URLSearchParams(location.search);
     const pageParam = params.get('page');
     if (pageParam) {
       const p = parseInt(pageParam, 10);
       if (!isNaN(p) && p > 0) setCurrentPage(p);
     }
+<<<<<<< HEAD
+    fetchData();
+    fetchReaderData(); // Fetch marks
+    
+=======
 
     fetchData();
     // detect an active reading session started elsewhere (HistoryCard 'Continue')
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     try {
       const sessRaw = sessionStorage.getItem('readingSession');
       if (sessRaw) {
         const sess = JSON.parse(sessRaw);
         if (sess && String(sess.bookId) === String(bookId)) {
+<<<<<<< HEAD
+=======
           // compute elapsed so far
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
           const started = Number(sess.start || Date.now());
           const now = Date.now();
           setPagesReadDuringSession(Number(sess.pages || 0));
           setElapsed(Math.floor((now - started) / 1000));
           setIsTiming(true);
+<<<<<<< HEAD
+          sessionTimerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
+        }
+      }
+    } catch (e) {}
+  }, [bookId, userId]);
+
+  const fetchReaderData = async () => {
+    try {
+      const bRes = await ReaderService.getBookmarks(userId, bookId);
+      const hRes = await ReaderService.getHighlights(userId, bookId);
+      setBookmarks(bRes.data || []);
+      setHighlights(hRes.data || []);
+    } catch (err) {
+      console.warn("Could not fetch bookmarks or highlights", err);
+    }
+  };
+=======
           // start interval
           sessionTimerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
         }
@@ -80,17 +144,27 @@ const Reading = () => {
       // ignore parse errors
     }
   }, [bookId]);
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 
   // Render PDF page when currentPage changes
   useEffect(() => {
     if (pdfDoc && currentPage <= totalPages) {
       renderPDFPage(currentPage);
     } else if (!pdfDoc && fullContent) {
+<<<<<<< HEAD
+=======
       // Handle text content pagination
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       updateTextPage(currentPage);
     }
   }, [pdfDoc, currentPage, fullContent, zoom]);
 
+<<<<<<< HEAD
+  useEffect(() => {
+    if (currentPage !== lastSavedPage && book && currentPage > 0) {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = setTimeout(() => {
+=======
   // Auto-save effect with improved concurrency handling
   useEffect(() => {
     if (currentPage !== lastSavedPage && book && currentPage > 0) {
@@ -100,11 +174,36 @@ const Reading = () => {
 
       saveTimeoutRef.current = setTimeout(() => {
         // Only save if not already saving and page is different from what was sent
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
         if (!savingInProgressRef.current && currentPage !== lastSentPageRef.current) {
           handleAutoSave();
         }
       }, 2000);
     }
+<<<<<<< HEAD
+    return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
+  }, [currentPage, book]);
+
+  // Apply body classes for global theme/contrast over text
+  useEffect(() => {
+    if (highContrast) {
+      document.body.classList.add('high-contrast');
+    } else {
+      document.body.classList.remove('high-contrast');
+    }
+    return () => document.body.classList.remove('high-contrast');
+  }, [highContrast]);
+
+  const loadPDF = async (pdfUrl) => {
+    try {
+      let source = pdfUrl;
+      const pdf = await pdfjsLib.getDocument(source).promise;
+      setPdfDoc(pdf);
+      setTotalPages(pdf.numPages);
+      setCurrentPage((prev) => (prev && prev > 1 ? prev : 1));
+    } catch (err) {
+      setError('Could not load PDF. Trying fallback text content...');
+=======
 
     return () => {
       if (saveTimeoutRef.current) {
@@ -134,26 +233,44 @@ const Reading = () => {
       console.warn('Error loading PDF:', err);
       setError('Could not load PDF. Trying fallback text content...');
       // Fallback to text content
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     }
   };
 
   const renderPDFPage = async (pageNum) => {
     if (!pdfDoc || !canvasRef.current) return;
+<<<<<<< HEAD
+=======
 
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     try {
       const page = await pdfDoc.getPage(pageNum);
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
+<<<<<<< HEAD
+      const unscaledViewport = page.getViewport({ scale: 1 });
+      const container = canvas.parentElement;
+      const containerWidth = (container && container.clientWidth) || unscaledViewport.width;
+=======
 
       // Compute a responsive scale so PDF fits its container width
       const unscaledViewport = page.getViewport({ scale: 1 });
       const container = canvas.parentElement;
       const containerWidth = (container && container.clientWidth) || unscaledViewport.width;
       // scale to fit container width, limit base scale to 1.5 for quality/stability
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       const baseScale = Math.min(1.5, containerWidth / unscaledViewport.width);
       const scale = Math.max(0.5, Math.min(3, baseScale * zoom));
       const viewport = page.getViewport({ scale });
 
+<<<<<<< HEAD
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+
+      await page.render({ canvasContext: context, viewport }).promise;
+      try { canvas.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+
+=======
       // Set canvas size based on page dimensions
       canvas.width = Math.floor(viewport.width);
       canvas.height = Math.floor(viewport.height);
@@ -166,17 +283,30 @@ const Reading = () => {
       try { canvas.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
 
       // Extract text content
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       const textContent = await page.getTextContent();
       const text = textContent.items.map(item => item.str).join(' ');
       setPageContent(text);
     } catch (err) {
+<<<<<<< HEAD
+=======
       console.error('Error rendering PDF page:', err);
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       setPageContent('Error rendering page content');
     }
   };
 
   const updateTextPage = (pageNum) => {
     if (!fullContent) return;
+<<<<<<< HEAD
+    if (pageNum === 1) {
+      setPageContent(fullContent);
+      return;
+    }
+    const words = fullContent.split(/\s+/).filter(word => word.length > 0);
+    const startIndex = (pageNum - 1) * WORDS_PER_PAGE;
+    const endIndex = Math.min(startIndex + WORDS_PER_PAGE, words.length);
+=======
 
     if (pageNum === 1) {
       // First page shows title and author
@@ -189,6 +319,7 @@ const Reading = () => {
     const startIndex = (pageNum - 1) * WORDS_PER_PAGE;
     const endIndex = Math.min(startIndex + WORDS_PER_PAGE, words.length);
 
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     if (startIndex >= words.length) {
       setPageContent('');
       return;
@@ -199,41 +330,68 @@ const Reading = () => {
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
+<<<<<<< HEAD
+      setDirection(1);
+      const next = currentPage + 1;
+      if (isTiming && next > currentPage) setPagesReadDuringSession((p) => p + (next - currentPage));
+=======
       const next = currentPage + 1;
       // if session running and moving forward, count pages read
       if (isTiming && next > currentPage) {
         setPagesReadDuringSession((p) => p + (next - currentPage));
       }
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       setCurrentPage(next);
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
+<<<<<<< HEAD
+      setDirection(-1);
+      setCurrentPage(currentPage - 1);
+=======
       const prev = currentPage - 1;
       // moving backwards shouldn't increment pages read
       setCurrentPage(prev);
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     }
   };
 
   const handleGoToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
+<<<<<<< HEAD
+      setDirection(page > currentPage ? 1 : -1);
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       setCurrentPage(page);
     }
   };
 
   const handleAutoSave = async () => {
     if (savingInProgressRef.current || !book || currentPage === lastSavedPage) return;
+<<<<<<< HEAD
+    savingInProgressRef.current = true;
+    setSaving(true);
+    try {
+      await ActivityService.logActivity(userId, 'READ', bookId, {
+=======
 
     savingInProgressRef.current = true;
     setSaving(true);
     try {
       console.log(`[AutoSave] Saving: userId=${userId}, bookId=${bookId}, currentPage=${currentPage}, totalPages=${totalPages}`);
       const response = await ActivityService.logActivity(userId, 'READ', bookId, {
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
         progress: Math.round((currentPage / totalPages) * 100),
         currentPage: currentPage,
         totalPages: totalPages
       });
+<<<<<<< HEAD
+      setLastSavedPage(currentPage);
+      lastSentPageRef.current = currentPage;
+    } catch (err) {
+=======
       console.log('[AutoSave] Success - Data saved for user:', userId, 'Response:', response);
       setLastSavedPage(currentPage);
       lastSentPageRef.current = currentPage;
@@ -241,6 +399,7 @@ const Reading = () => {
       console.error('[AutoSave] Failed:', err);
       console.error('[AutoSave] Error details:', err.response?.data || err.message);
       // Don't mark as saved on error, allow retry on next page change
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     } finally {
       savingInProgressRef.current = false;
       setSaving(false);
@@ -253,6 +412,22 @@ const Reading = () => {
       sessionTimerRef.current = null;
     }
     setIsTiming(false);
+<<<<<<< HEAD
+    try {
+      const newCurrent = Math.min(Number(currentPage || 1) + Number(pagesReadDuringSession || 0), totalPages || Number.MAX_SAFE_INTEGER);
+      await ActivityService.updateProgress({ userId, bookId, currentPage: newCurrent, totalPages });
+      
+      // Log explicitly for velocity tracking
+      const minutes = Math.max(1, Math.floor(elapsed / 60));
+      await ActivityService.logActivity(userId, 'SESSION', bookId, {
+        currentPage: pagesReadDuringSession, // Used as 'pagesRead' by backend for SESSION logs
+        timeSpentMinutes: minutes
+      });
+      
+      try { sessionStorage.removeItem('readingSession'); } catch (e) {}
+      window.dispatchEvent(new CustomEvent('progressUpdated', { detail: { bookId, currentPage: newCurrent } }));
+    } catch (err) {} finally {
+=======
 
     try {
       const uid = userId; // Use the component-level userId which is always up-to-date
@@ -272,6 +447,7 @@ const Reading = () => {
     } catch (err) {
       console.error('Failed to stop session and save progress', err);
     } finally {
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       setPagesReadDuringSession(0);
     }
   };
@@ -280,10 +456,24 @@ const Reading = () => {
     setLoading(true);
     setError(null);
     try {
+<<<<<<< HEAD
+      const response = await ActivityService.getBook(bookId);
+      const currentBook = response.data;
+      setBook(currentBook);
+      
+      try {
+          const statsResponse = await ActivityService.getStats(userId);
+          setStats(statsResponse.data);
+      } catch (err) {
+          console.warn("Could not fetch user stats", err);
+          setStats({ readingVelocity: 0 });
+      }
+=======
       // Real API call to fetch book details
       const response = await ActivityService.getBook(bookId);
       const currentBook = response.data;
       setBook(currentBook);
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 
       if (currentBook.pdfUrl) {
         await loadPDF(currentBook.pdfUrl);
@@ -299,15 +489,381 @@ const Reading = () => {
     }
   };
 
+<<<<<<< HEAD
+  // --- Bookmark and Highlight Actions ---
+  const handleAddBookmark = async () => {
+    try {
+      const res = await ReaderService.addBookmark({ 
+        userId: Number(userId), 
+        bookId: Number(bookId), 
+        pageNumber: Number(currentPage) 
+      });
+      if (res.data) {
+        setBookmarks([...bookmarks, res.data]);
+      }
+    } catch (err) {
+      console.error('Failed to add bookmark', err);
+      alert('Failed to save bookmark. Did you restart the Spring Boot backend?');
+    }
+  };
+
+  const handleDeleteBookmark = async (id) => {
+    try {
+      await ReaderService.deleteBookmark(id);
+      setBookmarks(bookmarks.filter(b => b.id !== id));
+    } catch (err) {
+      console.error('Failed to delete bookmark', err);
+    }
+  };
+
+  const handleAddHighlight = async () => {
+    try {
+      // Simulate selecting some text or just highlight the page
+      const res = await ReaderService.addHighlight({ 
+        userId: Number(userId), 
+        bookId: Number(bookId), 
+        pageNumber: Number(currentPage), 
+        content: `Highlighted Page ${currentPage}`, 
+        color: 'yellow' 
+      });
+      if (res.data) {
+         setHighlights([...highlights, res.data]);
+      }
+    } catch (err) {
+      console.error('Failed to add highlight', err);
+      alert('Failed to save highlight. Did you restart the Spring Boot backend?');
+    }
+  };
+
+  const isCompleted = currentPage >= totalPages;
+  const themeClass = theme === 'light' ? styles['theme-light'] : theme === 'sepia' ? styles['theme-sepia'] : '';
+
+  return (
+    <div className={`${styles['reading-container']} ${focusMode ? styles.focused : ''} ${themeClass}`}>
+=======
   const isCompleted = currentPage >= totalPages;
 
   return (
     <div className={`${styles['reading-container']} ${focusMode ? styles.focused : ''}`}>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       {loading ? (
         <div className={styles['reading-loading']}>Loading book content...</div>
       ) : error ? (
         <div className={styles['reading-error']}>{error}</div>
       ) : (
+<<<<<<< HEAD
+        <div className={styles['reading-main-layout']}>
+          {/* Main Content Area */}
+          <div className={styles['reading-content-wrapper']}>
+            
+            {/* Header */}
+            <div className={styles['reading-header']}>
+              <button onClick={() => navigate(-1)} className={styles['reading-back-button']}>
+                <ArrowLeft size={16} /> Back
+              </button>
+              <button 
+                onClick={() => setFocusMode(!focusMode)} 
+                className={styles['reading-back-button']} 
+                style={{ marginLeft: 12 }}
+              >
+                {focusMode ? <><Minimize size={16} /> Exit Focus</> : <><Maximize size={16} /> Focus Mode</>}
+              </button>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginLeft: 12 }}>
+                <button onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.1).toFixed(2)))} className={styles['reading-action-button']} title="Zoom out">
+                  <ZoomOut size={16} />
+                </button>
+                <div style={{ minWidth: 44, textAlign: 'center', color: 'var(--accent-color)', fontWeight: 700 }}>{Math.round(zoom * 100)}%</div>
+                <button onClick={() => setZoom((z) => Math.min(3, +(z + 0.1).toFixed(2)))} className={styles['reading-action-button']} title="Zoom in">
+                  <ZoomIn size={16} />
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      if (!book || !book.pdfUrl) return;
+                      const url = book.pdfUrl;
+                      if (url.startsWith('data:')) {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${(book.title || 'book').replace(/[^a-z0-9]/gi, '_')}.pdf`;
+                        document.body.appendChild(a); a.click(); a.remove();
+                        return;
+                      }
+                      const resp = await fetch(url);
+                      const blob = await resp.blob();
+                      const blobUrl = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = blobUrl;
+                      a.download = `${(book.title || 'book').replace(/[^a-z0-9]/gi, '_')}.pdf`;
+                      document.body.appendChild(a); a.click(); a.remove();
+                      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+                    } catch (e) {
+                      console.error('Download failed', e);
+                    }
+                  }}
+                  className={styles['reading-action-button']}
+                  title="Download PDF"
+                  style={{ marginLeft: 8 }}
+                >
+                  <Download size={16} />
+                </button>
+              </div>
+              <div className={styles['reading-title-section']}>
+                <h1 className={styles['reading-title']}>{book?.title}</h1>
+                <span className={styles['reading-author']}>{book?.author}</span>
+              </div>
+              <div className={styles['reading-progress-section']}>
+                <span className={styles['reading-progress-text']}>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <div className={styles['reading-progress-bar']}>
+                  <div className={styles['reading-progress-fill']} style={{ width: `${(currentPage / totalPages) * 100}%` }}></div>
+                </div>
+                {saving && <span className={styles['reading-saving']}>Saving...</span>}
+                {isTiming && (
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px', color:'var(--text-main)' }}>
+                      <Clock size={14} /> {Math.floor(elapsed / 60)}m {elapsed % 60}s
+                    </div>
+                    <div className="text-sm" style={{color:'var(--text-main)'}}>Pages: {pagesReadDuringSession}</div>
+                    <button onClick={stopSession} className="px-2 py-1 bg-yellow-400 text-black text-xs font-bold rounded">Stop Session</button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+
+
+            {/* Reading Content */}
+            <div className={styles['reading-content-area']}>
+              {pdfDoc ? (
+                <div className={styles['reading-pdf-container']}>
+                  <canvas 
+                    ref={canvasRef} 
+                    className={styles['reading-pdf-canvas']} 
+                    style={{ filter: `brightness(${brightness}%) ${highContrast ? 'contrast(120%) saturate(150%)' : ''}` }}
+                  />
+                </div>
+              ) : (
+                <div className={styles['reading-text-wrapper']}>
+                  <AnimatePresence mode="wait" custom={direction}>
+                    <motion.div
+                      key={currentPage}
+                      custom={direction}
+                      initial={{ rotateY: direction === 1 ? -90 : 90, opacity: 0, x: direction === 1 ? 50 : -50 }}
+                      animate={{ rotateY: 0, opacity: 1, x: 0 }}
+                      exit={{ rotateY: direction === 1 ? 90 : -90, opacity: 0, x: direction === 1 ? -50 : 50 }}
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                      className={styles['reading-text-container']}
+                    >
+                      {currentPage === 1 && (
+                        <>
+                          <h2 className={styles['reading-intro-title']}>{book?.title}</h2>
+                          <h3 className={styles['reading-intro-author']}>By {book?.author}</h3>
+                          <div className={styles['reading-intro-divider']}></div>
+                          <p className={styles['reading-intro-desc']}>Begin your reading journey...</p>
+                        </>
+                      )}
+
+                      {pageContent && (
+                        <p className={styles['reading-page-content']} style={{ filter: `brightness(${brightness}%)` }}>
+                          {pageContent}
+                        </p>
+                      )}
+
+                      {!pageContent && currentPage > 1 && (
+                        <p className={styles['reading-loading']}>Loading page content...</p>
+                      )}
+
+                      {isCompleted && currentPage > totalPages && (
+                        <div className={styles['reading-complete']}>
+                          <div className={styles['reading-complete-emoji']}><Award size={80} color="var(--accent-color)" /></div>
+                          <p className={styles['reading-complete-title']}>Congratulations!</p>
+                          <p className={styles['reading-complete-desc']}>You have completed "{book?.title}"</p>
+                        </div>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className={styles['reading-footer']}>
+              <div className={styles['reading-footer-row']}>
+                <button onClick={handlePrevPage} disabled={currentPage === 1} className={styles['reading-btn-prev']}>
+                  <ChevronLeft size={16} /> Prev
+                </button>
+
+                <div className={styles['reading-footer-controls']}>
+                  <input
+                    type="number"
+                    min="1"
+                    max={totalPages}
+                    value={currentPage}
+                    onChange={(e) => handleGoToPage(parseInt(e.target.value) || 1)}
+                    className={styles['reading-page-input']}
+                  />
+                  <span className={styles['reading-page-total-label']}>/ {totalPages}</span>
+                  <div className={styles['reading-slider-container']}>
+                    <input
+                      type="range"
+                      min="1"
+                      max={totalPages}
+                      value={currentPage}
+                      onChange={(e) => handleGoToPage(parseInt(e.target.value) || 1)}
+                      className={styles['custom-slider']}
+                    />
+                  </div>
+                </div>
+                
+                <div style={{display:'flex', gap:'8px'}}>
+                  <button onClick={handleNextPage} disabled={currentPage >= totalPages} className={styles['reading-btn-next']}>
+                    Next <ChevronRight size={16} />
+                  </button>
+                  <button onClick={handleAddHighlight} className={styles['reading-btn-highlight']} title="Highlight this page">
+                    Highlight
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Right Sidebar (Settings & Bookmarks) */}
+          <div className={styles['reading-sidebar']}>
+            
+            {/* Focus Mode Toggle (Always visible) */}
+            <div className={styles['sidebar-panel']} style={{ padding: '12px 20px' }}>
+              <div className={styles['sidebar-setting-row']}>
+                <div className={styles['sidebar-setting-header']}>
+                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                    {focusMode ? <Minimize size={16} color="var(--accent-color)" /> : <Maximize size={16} color="var(--text-muted)" />}
+                    <span className={styles['sidebar-setting-title']}>Focus Mode</span>
+                  </div>
+                  <div className={styles['switch-container']}>
+                    <label className={styles['switch']}>
+                      <input type="checkbox" checked={focusMode} onChange={(e) => setFocusMode(e.target.checked)} />
+                      <span className={styles['slider']}></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Zoom Level Panel */}
+            <div className={styles['sidebar-panel']}>
+              <div className={styles['sidebar-setting-row']}>
+                <div className={styles['sidebar-setting-header']}>
+                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                    <ZoomIn size={16} color="var(--text-muted)" />
+                    <span className={styles['sidebar-setting-title']}>Zoom Level</span>
+                  </div>
+                  <span className={styles['sidebar-setting-value']}>{Math.round(zoom * 100)}%</span>
+                </div>
+                <span className={styles['sidebar-setting-subtitle']}>Adjust page magnification</span>
+                <input 
+                  type="range" min="0.5" max="3.0" step="0.1" value={zoom} 
+                  onChange={(e) => setZoom(Number(e.target.value))} 
+                  className={styles['custom-slider']} style={{marginTop: 8}}
+                />
+              </div>
+            </div>
+
+            {/* Brightness Panel */}
+            <div className={styles['sidebar-panel']}>
+              <div className={styles['sidebar-setting-row']}>
+                <div className={styles['sidebar-setting-header']}>
+                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                    <Layout size={16} color="var(--text-muted)" />
+                    <span className={styles['sidebar-setting-title']}>Page Brightness</span>
+                  </div>
+                  <span className={styles['sidebar-setting-value']}>{brightness}%</span>
+                </div>
+                <span className={styles['sidebar-setting-subtitle']}>Adjust reading comfort</span>
+                <input 
+                  type="range" min="50" max="150" step="1" value={brightness} 
+                  onChange={(e) => setBrightness(Number(e.target.value))} 
+                  className={styles['custom-slider']} style={{marginTop: 8}}
+                />
+              </div>
+            </div>
+
+            {/* Theme Panel */}
+            <div className={styles['sidebar-panel']}>
+              <div className={styles['sidebar-setting-row']}>
+                <div className={styles['sidebar-setting-header']}>
+                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                    <Palette size={16} color="var(--text-muted)" />
+                    <span className={styles['sidebar-setting-title']}>Theme</span>
+                  </div>
+                </div>
+                <span className={styles['sidebar-setting-subtitle']} style={{marginBottom: 8}}>Dark / Sepia / Light</span>
+                <div className={styles['theme-options']}>
+                  <button className={`${styles['theme-btn']} ${theme === 'dark' ? styles['active'] : ''}`} onClick={() => setTheme('dark')}>Dark</button>
+                  <button className={`${styles['theme-btn']} ${theme === 'sepia' ? styles['active'] : ''}`} onClick={() => setTheme('sepia')}>Sepia</button>
+                  <button className={`${styles['theme-btn']} ${theme === 'light' ? styles['active'] : ''}`} onClick={() => setTheme('light')}>Light</button>
+                </div>
+              </div>
+            </div>
+
+            {/* High Contrast */}
+            <div className={styles['sidebar-panel']}>
+              <div className={styles['sidebar-setting-row']}>
+                <div className={styles['sidebar-setting-header']} style={{marginBottom: 4}}>
+                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                    <Contrast size={16} color="var(--text-muted)" />
+                    <div style={{display:'flex', flexDirection:'column'}}>
+                      <span className={styles['sidebar-setting-title']}>High Contrast</span>
+                      <span className={styles['sidebar-setting-subtitle']}>Better readability</span>
+                    </div>
+                  </div>
+                  <div className={styles['switch-container']}>
+                    <label className={styles['switch']}>
+                      <input type="checkbox" checked={highContrast} onChange={(e) => setHighContrast(e.target.checked)} />
+                      <span className={styles['slider']}></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bookmarks */}
+            <div className={styles['sidebar-panel']} style={{flex: 1, justifyContent:'flex-start'}}>
+              <div className={styles['bookmarks-header']}>
+                <div style={{display:'flex', flexDirection:'column'}}>
+                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                    <BookmarkIcon size={16} color="var(--text-muted)" />
+                    <span className={styles['sidebar-setting-title']}>Bookmarks</span>
+                  </div>
+                  <span className={styles['sidebar-setting-subtitle']}>Create / Open / Delete</span>
+                  <span className={styles['sidebar-setting-subtitle']} style={{marginTop:4, color:'var(--accent-color)'}}>Current Page: {currentPage}</span>
+                </div>
+                <button className={styles['btn-add']} onClick={handleAddBookmark}>
+                  <Plus size={14} /> Add
+                </button>
+              </div>
+              
+              <div className={styles['bookmark-list']} style={{marginTop: 12}}>
+                {bookmarks.length === 0 ? (
+                  <div className={styles['empty-state']}>No bookmarks yet.</div>
+                ) : (
+                  bookmarks.map(bm => (
+                    <div key={bm.id} className={styles['bookmark-item']} onClick={() => handleGoToPage(bm.pageNumber)}>
+                      <div style={{display:'flex', flexDirection:'column'}}>
+                        <span className={styles['bookmark-page']}>Page {bm.pageNumber}</span>
+                        <span className={styles['bookmark-date']}>{new Date(bm.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <button className={styles['bookmark-delete']} onClick={(e) => { e.stopPropagation(); handleDeleteBookmark(bm.id); }} title="Remove bookmark">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+=======
         <>
           {/* Header */}
           <div className={styles['reading-header']}>
@@ -482,6 +1038,7 @@ const Reading = () => {
 
 
         </>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
       )}
     </div>
   );

@@ -10,6 +10,41 @@ const RecommendationEngine = ({ currentBookId }) => {
   useEffect(() => {
     if (!currentBookId) return;
     // We dynamically pass the currentBookId so it updates based on what the user is reading!
+<<<<<<< HEAD
+    const fetchForId = async (id) => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/recommend/${id}`);
+        if (!res.ok) {
+          const body = await res.text().catch(() => '');
+          throw new Error(`HTTP ${res.status} ${res.statusText} ${body}`);
+        }
+        const payload = await res.json();
+        return payload;
+      } catch (err) {
+        throw err;
+      }
+    };
+
+    (async () => {
+      try {
+        const result = await fetchForId(currentBookId);
+        setRecommendations(result.recommendations || []);
+        setLoading(false);
+      } catch (firstErr) {
+        console.warn('Primary recommendation fetch failed, trying fallback id. Error:', firstErr);
+        // Fallback: try a known id from the local `book.csv` dataset (Great Gatsby = 4671)
+        try {
+          const fallback = await fetchForId(4671);
+          setRecommendations(fallback.recommendations || []);
+          setLoading(false);
+        } catch (fallbackErr) {
+          console.error('Fallback recommendation fetch also failed:', fallbackErr);
+          setError(firstErr.message || 'Failed to load recommendations');
+          setLoading(false);
+        }
+      }
+    })();
+=======
     fetch(`http://localhost:8080/recommend/${currentBookId}`)
       .then((response) => {
         if (!response.ok) throw new Error('Failed to fetch AI data');
@@ -24,6 +59,7 @@ const RecommendationEngine = ({ currentBookId }) => {
         setError(error.message);
         setLoading(false);
       });
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
   }, [currentBookId]);
 
   // 3. Simple loading and error screens

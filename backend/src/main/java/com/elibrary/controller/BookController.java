@@ -12,8 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+<<<<<<< HEAD
+@RequestMapping("/books")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+=======
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", 
                          "http://localhost:5173", "http://localhost:5174"})
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 public class BookController {
 
     @Autowired
@@ -22,11 +27,16 @@ public class BookController {
     @Autowired
     private UserRepository userRepository;
 
+<<<<<<< HEAD
+    // GET - Retrieve all books
+    @GetMapping
+=======
     // ─────────────────────────────────────────
     // TEAMMATE'S ENDPOINTS — /books/...
     // ─────────────────────────────────────────
 
     @GetMapping("/books")
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     public ResponseEntity<List<Book>> getAllBooks() {
         try {
             List<Book> books = bookService.getAllBooks();
@@ -36,29 +46,56 @@ public class BookController {
         }
     }
 
+<<<<<<< HEAD
+    // GET - Retrieve single book
+    @GetMapping("/{id}")
+    public ResponseEntity<Book> getBook(@PathVariable Long id) {
+        try {
+            Book book = bookService.getBook(id);
+            if (book != null) {
+                return ResponseEntity.ok(book);
+            }
+=======
     @GetMapping("/books/{id}")
     public ResponseEntity<Book> getBook(@PathVariable Long id) {
         try {
             Book book = bookService.getBook(id);
             if (book != null) return ResponseEntity.ok(book);
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
+<<<<<<< HEAD
+    // GET - Retrieve book content
+    @GetMapping("/{id}/content")
+    public ResponseEntity<String> getBookContent(@PathVariable Long id) {
+        try {
+            Book book = bookService.getBook(id);
+            if (book != null && book.getContent() != null) {
+                return ResponseEntity.ok(book.getContent());
+            }
+=======
     @GetMapping("/books/{id}/content")
     public ResponseEntity<String> getBookContent(@PathVariable Long id) {
         try {
             Book book = bookService.getBook(id);
             if (book != null && book.getContent() != null) return ResponseEntity.ok(book.getContent());
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
+<<<<<<< HEAD
+    // GET - Retrieve books by category
+    @GetMapping("/category/{category}")
+=======
     @GetMapping("/books/category/{category}")
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     public ResponseEntity<List<Book>> getBooksByCategory(@PathVariable String category) {
         try {
             List<Book> books = bookService.getBooksByCategory(category);
@@ -68,6 +105,20 @@ public class BookController {
         }
     }
 
+<<<<<<< HEAD
+    // POST - Create new book (admin only)
+    @PostMapping
+    public ResponseEntity<?> createBook(@RequestParam(required = false) Long userId, @RequestBody Book book) {
+        try {
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Missing userId"));
+            }
+            var optUser = userRepository.findByIdAndIsDeletedFalse(userId);
+            if (optUser.isEmpty() || !"ADMIN".equalsIgnoreCase(optUser.get().getRole())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Only admins can add books"));
+            }
+
+=======
     @PostMapping("/books")
     public ResponseEntity<?> createBook(@RequestParam(required = false) Long userId, @RequestBody Book book) {
         try {
@@ -76,6 +127,7 @@ public class BookController {
             var optUser = userRepository.findByIdAndIsDeletedFalse(userId);
             if (optUser.isEmpty() || !"ADMIN".equalsIgnoreCase(optUser.get().getRole()))
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Only admins can add books"));
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
             Book created = bookService.createBook(book);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (Exception e) {
@@ -83,23 +135,46 @@ public class BookController {
         }
     }
 
+<<<<<<< HEAD
+    // PUT - Update book
+    @PutMapping("/{id}")
+    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
+        try {
+            Book updated = bookService.updateBook(id, bookDetails);
+            if (updated != null) {
+                return ResponseEntity.ok(updated);
+            }
+=======
     @PutMapping("/books/{id}")
     public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
         try {
             Book updated = bookService.updateBook(id, bookDetails);
             if (updated != null) return ResponseEntity.ok(updated);
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
+<<<<<<< HEAD
+    // DELETE - Delete book
+    @DeleteMapping("/{id}")
+=======
     @DeleteMapping("/books/{id}")
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
     public ResponseEntity<String> deleteBook(@PathVariable Long id) {
         try {
             bookService.deleteBook(id);
             return ResponseEntity.ok("{\"message\": \"Book deleted successfully\"}");
         } catch (Exception e) {
+<<<<<<< HEAD
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"Failed to delete book\"}");
+        }
+    }
+}
+=======
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Failed to delete book\"}");
         }
     }
@@ -166,3 +241,4 @@ public class BookController {
         return ResponseEntity.ok("List cleared");
     }
 }
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
