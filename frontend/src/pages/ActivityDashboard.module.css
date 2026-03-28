@@ -1,0 +1,533 @@
+/* Tailwind-based custom styles for ActivityDashboard page - Premium Redesign */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   ACTIVITY DASHBOARD - Premium Aesthetic with Themes
+   ========================================================================== */
+
+/* Theme Variables */
+.activitydashboard-main[data-theme="light"] {
+  --bg-gradient: linear-gradient(-45deg, #f8fafc, #eff6ff, #eef2ff, #f3e8ff);
+  --card-bg: #ffffff;
+  --card-hover-bg: #ffffff;
+  --card-border: #f1f5f9;
+  --card-border-hover: rgba(99, 102, 241, 0.2);
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --hero-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+  --hero-text: #ffffff;
+  --empty-border: #d1d5db;
+}
+
+.activitydashboard-main[data-theme="dark"] {
+  --bg-gradient: linear-gradient(-45deg, #0f172a, #111827, #1e1b4b, #172554);
+  --card-bg: rgba(30, 41, 59, 0.7);
+  --card-hover-bg: rgba(30, 41, 59, 0.95);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-border-hover: rgba(99, 102, 241, 0.5);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --hero-gradient: linear-gradient(135deg, #020617 0%, #0f172a 50%, #172554 100%);
+  --hero-text: #ffffff;
+  --empty-border: #334155;
+}
+
+.activitydashboard-main[data-theme="sepia"] {
+  --bg-gradient: linear-gradient(-45deg, #fdf6e3, #fffbf0, #f8f1e0, #fdf6e3);
+  --card-bg: #fffcf5;
+  --card-hover-bg: #ffffff;
+  --card-border: #eaddc5;
+  --card-border-hover: rgba(180, 83, 9, 0.3);
+  --text-primary: #433422;
+  --text-secondary: #78634a;
+  --hero-gradient: linear-gradient(135deg, #5c4326 0%, #452b11 50%, #2f1905 100%);
+  --hero-text: #fdf6e3;
+  --empty-border: #d4c4a8;
+}
+
+/* Keyframe Animations */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientPan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulseSoft {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* Base Layout & Background */
+.activitydashboard-main {
+  min-height: 100vh;
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+  background: var(--bg-gradient);
+  background-size: 400% 400%;
+  animation: gradientPan 15s ease infinite;
+  color: var(--text-primary);
+  transition: all 0.5s ease;
+}
+
+/* Subtle noise texture for premium matte look */
+.activitydashboard-main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.activitydashboard-container {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2.5rem 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+/* Theme Toggle Buttons matching Reading.jsx */
+.theme-options {
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.theme-options button {
+  padding: 6px 14px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.theme-options button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.theme-btn-active {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: white !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Hero Section - Deep Glassmorphism */
+.activitydashboard-hero {
+  border-radius: 1.5rem;
+  padding: 2.5rem 3.5rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--hero-gradient);
+  color: var(--hero-text);
+  min-height: 280px;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Glowing accent orb behind text */
+.activitydashboard-hero::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  top: -100px;
+  left: -100px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulseSoft 8s ease-in-out infinite;
+}
+
+.activitydashboard-hero-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 2rem;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+@media (min-width: 1024px) {
+  .activitydashboard-hero-inner { flex-direction: row; }
+}
+
+.activitydashboard-hero-content {
+  flex: 1;
+  z-index: 10;
+}
+
+.activitydashboard-hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  letter-spacing: -0.025em;
+  background: linear-gradient(to right, #ffffff, rgba(255, 255, 255, 0.7));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.activitydashboard-hero-sub {
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  max-width: 42rem;
+  line-height: 1.625;
+  opacity: 0.9;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.activitydashboard-hero-ctas {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+/* Hero Buttons */
+.activitydashboard-hero-cta-primary {
+  padding: 0.875rem 2rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.activitydashboard-hero-cta-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.activitydashboard-hero-cta-secondary {
+  padding: 0.875rem 2rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.activitydashboard-hero-cta-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-3px);
+}
+
+/* 3D Floating Illustration */
+.activitydashboard-hero-illustration {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  z-index: 10;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+@media (min-width: 1024px) {
+  .activitydashboard-hero-illustration { display: flex; }
+}
+
+/* 3D Fanned Books Showcase */
+.hero-books-showcase {
+  position: relative;
+  width: 280px;
+  height: 220px;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  animation: float 6s ease-in-out infinite;
+}
+
+.hero-book-card {
+  position: absolute;
+  top: 10px;
+  width: 140px;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: -15px 15px 30px rgba(0,0,0,0.5);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: white;
+}
+
+.hero-book-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-book-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-book-pos-0 {
+  left: 90px;
+  transform: rotateY(-15deg) translateZ(40px) scale(1.1);
+}
+.hero-book-pos-1 {
+  left: 45px;
+  transform: rotateY(-20deg) translateZ(0px) rotate(-5deg);
+  opacity: 0.9;
+}
+.hero-book-pos-2 {
+  left: 0px;
+  transform: rotateY(-25deg) translateZ(-40px) rotate(-10deg);
+  opacity: 0.7;
+}
+
+.hero-book-card:hover {
+  transform: translateY(-20px) rotateY(0deg) translateZ(80px) scale(1.2) !important;
+  opacity: 1 !important;
+  z-index: 20 !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Stats Row */
+.activitydashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+}
+@media (min-width: 640px) { .activitydashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .activitydashboard-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* History Layout */
+.activitydashboard-history {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 2rem;
+}
+@media (min-width: 1024px) {
+  .activitydashboard-history { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .activitydashboard-history-main { grid-column: span 2 / span 2; }
+  .activitydashboard-sidebar { grid-column: span 1 / span 1; }
+}
+.activitydashboard-sidebar-sticky { position: sticky; top: 2rem; }
+
+/* Sidebar "Continue Reading" Premium Card */
+.activitydashboard-sidebar-card {
+  background: var(--card-bg);
+  border-radius: 1.5rem;
+  border: 1px solid var(--card-border);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+}
+
+.activitydashboard-sidebar-card:hover {
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  border-color: var(--card-border-hover);
+  background: var(--card-hover-bg);
+}
+
+.activitydashboard-sidebar-content {
+  padding: 2rem;
+}
+
+.activitydashboard-sidebar-book-title {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
+}
+
+.activitydashboard-sidebar-book-author {
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+/* Progress Section Premium Design */
+.activitydashboard-sidebar-progress {
+  margin-bottom: 2rem;
+}
+
+.activitydashboard-sidebar-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.activitydashboard-sidebar-meta-card,
+.activitydashboard-sidebar-category-card {
+  background: rgba(0,0,0,0.03);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--card-border);
+  transition: all 0.3s ease;
+}
+.activitydashboard-sidebar-meta-card:hover,
+.activitydashboard-sidebar-category-card:hover {
+  background: rgba(0,0,0,0.06);
+  transform: translateY(-2px);
+}
+[data-theme="dark"] .activitydashboard-sidebar-meta-card,
+[data-theme="dark"] .activitydashboard-sidebar-category-card {
+  background: rgba(255,255,255,0.03);
+}
+[data-theme="dark"] .activitydashboard-sidebar-meta-card:hover,
+[data-theme="dark"] .activitydashboard-sidebar-category-card:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.activitydashboard-sidebar-meta-label,
+.activitydashboard-sidebar-category-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.activitydashboard-sidebar-meta-value,
+.activitydashboard-sidebar-category-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* Empty States */
+.activitydashboard-history-empty {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 2px dashed var(--empty-border);
+  border-radius: 1.5rem;
+  padding: 4rem;
+  text-align: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.activitydashboard-history-empty:hover {
+  border-color: var(--card-border-hover);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02);
+}
+
+.activitydashboard-history-empty-icon {
+  font-size: 4.5rem;
+  margin-bottom: 1.5rem;
+  display: block;
+  animation: float 4s ease-in-out infinite;
+}
+
+.activitydashboard-history-empty-title {
+  color: var(--text-primary);
+  font-weight: 800;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.activitydashboard-history-empty-subtitle {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Utilities */
+.activitydashboard-alert {
+  margin-bottom: 2rem;
+  background: var(--card-bg);
+  border: 1px solid #fca5a5;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.activitydashboard-alert::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 6px;
+  background: #ef4444;
+}
+
+.activitydashboard-alert-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  z-index: 10;
+  position: relative;
+}
+
+.activitydashboard-alert-icon { font-size: 1.875rem; }
+.activitydashboard-alert-title { font-weight: 700; color: #7f1d1d; font-size: 1.25rem; letter-spacing: -0.025em; }
+.activitydashboard-alert-message { color: #b91c1c; font-weight: 500; margin-top: 0.25rem; }
+
+/* Loader */
+.activitydashboard-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg-gradient);
+}
+.activitydashboard-loading-content { display: flex; flex-direction: column; align-items: center; }
+.activitydashboard-loading-spinner {
+  width: 4rem; height: 4rem;
+  border: 4px solid var(--card-border);
+  border-top-color: #4f46e5;
+  border-radius: 9999px;
+  margin-bottom: 1.5rem;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.activitydashboard-loading-title { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; letter-spacing: -0.025em; }
+.activitydashboard-loading-subtitle { color: var(--text-secondary); font-weight: 500; }
