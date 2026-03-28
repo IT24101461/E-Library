@@ -13,7 +13,7 @@ const Header = () => {
     if (raw) setUser(JSON.parse(raw));
   }, []);
 
-  const isActive = (path) => (location.pathname === path ? 'active' : '');
+  const isActive = (path) => location.pathname === path ? styles.navLinkActive : '';
 
   return (
     <header className={styles.header}>
@@ -30,21 +30,33 @@ const Header = () => {
           </div>
         </div>
 
+        {/* Desktop Nav */}
         <nav className={styles.navDesktop}>
-          <Link to="/dashboard" className={`${styles.navLink} ${isActive('/dashboard') ? styles.navLinkActive : ''}`}>
-            🏠 Dashboard
-          </Link>
-          <Link to="/books" className={`${styles.navLink} ${isActive('/books') ? styles.navLinkActive : ''}`}>📖 Books</Link>
-          <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={`${styles.navLink}`}>
-            🤖 AI Recs
-          </Link>
+          <Link to="/dashboard" className={`${styles.navLink} ${isActive('/dashboard')}`}>🏠 Dashboard</Link>
+          <Link to="/books" className={`${styles.navLink} ${isActive('/books')}`}>📖 Books</Link>
+          <Link to="/bookshelf" className={`${styles.navLink} ${isActive('/bookshelf')}`}>🗂 Bookshelf</Link>
+          <Link to="/book-list" className={`${styles.navLink} ${isActive('/book-list')}`}>📋 Book List</Link>
+          <Link to="/history" className={`${styles.navLink} ${isActive('/history')}`}>🕓 History</Link>
+          <Link to="/ranker" className={`${styles.navLink} ${isActive('/ranker')}`}>🏆 Ranker</Link>
+          <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={styles.navLink}>🤖 AI Recs</Link>
+
+          {/* Admin-only links */}
+          {user && user.role === 'ADMIN' && (
+            <>
+              <Link to="/upload" className={`${styles.navLink} ${isActive('/upload')}`}>⬆️ Upload</Link>
+              <Link to="/admin" className={`${styles.navLink} ${isActive('/admin')}`}>⚙️ Admin</Link>
+              <Link to="/add-book" className={`${styles.navLink} ${isActive('/add-book')}`}>➕ Add Book</Link>
+            </>
+          )}
         </nav>
 
+        {/* User Menu */}
         <div className={styles.userMenu}>
           {user ? (
             <>
               <button onClick={() => navigate('/dashboard')} className={styles.userButton}>{user.fullName}</button>
-              {/* Dev-only helper: promote current session user to ADMIN (client-side only) */}
+
+              {/* Dev-only: promote to admin */}
               {process.env.NODE_ENV === 'development' && user.role !== 'ADMIN' && (
                 <button
                   onClick={() => {
@@ -55,11 +67,8 @@ const Header = () => {
                       u.role = 'ADMIN';
                       localStorage.setItem('authUser', JSON.stringify(u));
                       setUser(u);
-                      // small visual confirmation
-                      // eslint-disable-next-line no-alert
                       alert('Local session promoted to ADMIN (development only)');
                     } catch (e) {
-                      // eslint-disable-next-line no-console
                       console.error('Failed to promote to admin', e);
                     }
                   }}
@@ -69,7 +78,13 @@ const Header = () => {
                   Promote to Admin
                 </button>
               )}
-              <button onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }} className={styles.userButtonPrimary}>Log Out</button>
+
+              <button
+                onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }}
+                className={styles.userButtonPrimary}
+              >
+                Log Out
+              </button>
             </>
           ) : (
             <>
@@ -84,13 +99,32 @@ const Header = () => {
         </button>
       </div>
 
+      {/* Mobile Nav */}
       {mobileMenuOpen && (
         <nav className={styles.mobileNav}>
           <Link to="/dashboard" className={styles.mobileNavLink}>🏠 Dashboard</Link>
           <Link to="/books" className={styles.mobileNavLink}>📖 Books</Link>
+          <Link to="/bookshelf" className={styles.mobileNavLink}>🗂 Bookshelf</Link>
+          <Link to="/book-list" className={styles.mobileNavLink}>📋 Book List</Link>
+          <Link to="/history" className={styles.mobileNavLink}>🕓 History</Link>
+          <Link to="/ranker" className={styles.mobileNavLink}>🏆 Ranker</Link>
           <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={styles.mobileNavLink}>🤖 AI Recs</Link>
+
+          {user && user.role === 'ADMIN' && (
+            <>
+              <Link to="/upload" className={styles.mobileNavLink}>⬆️ Upload</Link>
+              <Link to="/admin" className={styles.mobileNavLink}>⚙️ Admin</Link>
+              <Link to="/add-book" className={styles.mobileNavLink}>➕ Add Book</Link>
+            </>
+          )}
+
           {user ? (
-            <button onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }} className={styles.mobileNavLink}>Log Out</button>
+            <button
+              onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }}
+              className={styles.mobileNavLink}
+            >
+              Log Out
+            </button>
           ) : (
             <>
               <Link to="/login" className={styles.mobileNavLink}>Sign in</Link>

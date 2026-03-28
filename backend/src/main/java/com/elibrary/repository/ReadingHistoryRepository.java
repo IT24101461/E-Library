@@ -1,7 +1,7 @@
-package com.elibrary.backend.repository;
+package com.elibrary.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.elibrary.backend.entity.ReadingHistory;
+import com.elibrary.model.ReadingHistory;
 import java.util.List;
 
 public interface ReadingHistoryRepository extends JpaRepository<ReadingHistory, Long> {

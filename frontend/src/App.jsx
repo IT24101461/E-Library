@@ -1,61 +1,52 @@
-// App.jsx — Entry point for e-Library React App
-// Feature 4: Bookshelf (existing)
-// Feature 5: Book Ranker + Chatbot (AI/ML)
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import { useState } from "react";
-import Bookshelf from './Bookshelf';
-import BookRankerApp from './BookRankerApp';
+// Your team's existing pages
+import StartPage from "./pages/StartPage";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import BooksPage from "./pages/BooksPage";
+import Bookshelf from "./pages/Bookshelf";
+import BookRankerApp from "./pages/BookRankerApp";
+import ActivityDashboard from "./pages/ActivityDashboard";
+import Reading from "./pages/Reading";
+import AddBook from "./pages/AddBook";
+
+// Teammate's new pages
+import BookList from "./pages/BookList";
+import UploadBook from "./pages/UploadBook";
+import Reader from "./pages/Reader";
+import AdminDashboard from "./pages/AdminDashboard";
+import EditBook from "./pages/EditBook";
+import History from "./pages/History";
+
+// Your main Header
+import Header from "./components/Header";
 
 function App() {
-  const [activePage, setActivePage] = useState("bookshelf");
-
   return (
-    <div className="App">
-      {/* Navigation */}
-      <nav style={{
-        display: "flex",
-        gap: "12px",
-        padding: "12px 24px",
-        background: "#0f172a",
-        borderBottom: "1px solid #1e3a5f",
-      }}>
-        <button
-          onClick={() => setActivePage("bookshelf")}
-          style={{
-            padding: "8px 20px",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            fontWeight: 600,
-            fontSize: "13px",
-            background: activePage === "bookshelf" ? "#1d4ed8" : "#1e293b",
-            color: activePage === "bookshelf" ? "#fff" : "#94a3b8",
-          }}
-        >
-          📖 Bookshelf
-        </button>
+    <BrowserRouter>
+      <Header />
+      <Routes>
+        {/* Your team's routes */}
+        <Route path="/" element={<StartPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/books" element={<BooksPage />} />
+        <Route path="/bookshelf" element={<Bookshelf />} />
+        <Route path="/ranker" element={<BookRankerApp />} />
+        <Route path="/dashboard" element={<ActivityDashboard />} />
+        <Route path="/reading" element={<Reading />} />
+        <Route path="/add-book" element={<AddBook />} />
 
-        <button
-          onClick={() => setActivePage("ranker")}
-          style={{
-            padding: "8px 20px",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            fontWeight: 600,
-            fontSize: "13px",
-            background: activePage === "ranker" ? "#1d4ed8" : "#1e293b",
-            color: activePage === "ranker" ? "#fff" : "#94a3b8",
-          }}
-        >
-          🏆 Book Ranker & Chat
-        </button>
-      </nav>
-
-      {/* Pages */}
-      {activePage === "bookshelf" && <Bookshelf onNavigate={setActivePage} />}
-      {activePage === "ranker" && <BookRankerApp />}
-    </div>
+        {/* Teammate's routes */}
+        <Route path="/book-list" element={<BookList />} />
+        <Route path="/upload" element={<UploadBook />} />
+        <Route path="/read/:id" element={<Reader />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/edit/:id" element={<EditBook />} />
+        <Route path="/history" element={<History />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

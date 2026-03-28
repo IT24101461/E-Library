@@ -292,6 +292,15 @@ const ActivityDashboard = () => {
                 <button className={styles['activitydashboard-hero-cta-primary']} onClick={() => navigate('/books')}>Browse Books</button>
                 <button className={styles['activitydashboard-hero-cta-secondary']} onClick={() => navigate('/bookshelf')}>Your Library</button>
                 <button className={styles['activitydashboard-hero-cta-tertiary']} onClick={() => navigate('/history')}>View History</button>
+                {authUser && authUser.role === 'ADMIN' && (
+                  <button
+                    className={styles['activitydashboard-hero-cta-tertiary']}
+                    style={{ backgroundColor: 'rgba(234,179,8,0.15)', color: '#854d0e', border: '1px solid rgba(234,179,8,0.4)' }}
+                    onClick={() => navigate('/admin')}
+                  >
+                    🛠️ Admin Dashboard
+                  </button>
+                )}
               </div>
             </div>
 
