@@ -161,7 +161,7 @@ const ActivityDashboard = () => {
             const currentPageFromHistory = hp.currentPage ?? hp.page ?? hp.current ?? 0;
             const totalPagesFromHistory = hp.totalPages ?? bookMeta.totalPages ?? bookMeta.pages ?? bookMeta.pageSize ?? hp.pages ?? 0;
             
-            const currentPage = prog?.currentPage ?? currentPageFromHistory ?? 0;
+            const currentPage = Math.min(prog?.currentPage ?? currentPageFromHistory ?? 0, prog?.totalPages ?? totalPagesFromHistory ?? 0);
             const totalPages = prog?.totalPages ?? totalPagesFromHistory ?? 0;
             
             console.log(`[Dashboard] Final values for bookId=${bookId}: currentPage=${currentPage}, totalPages=${totalPages}`);
@@ -499,7 +499,7 @@ const ActivityDashboard = () => {
                     <div className={styles['activitydashboard-sidebar-meta']}>
                       <div className={styles['activitydashboard-sidebar-meta-card']}>
                         <p className={styles['activitydashboard-sidebar-meta-label']}>Pages Left</p>
-                        <p className={styles['activitydashboard-sidebar-meta-value']}>{currentBook.totalPages - (currentBook.currentPage || 0)}</p>
+                        <p className={styles['activitydashboard-sidebar-meta-value']}>{Math.max(0, currentBook.totalPages - (currentBook.currentPage || 0))}</p>
                       </div>
                       <div className={styles['activitydashboard-sidebar-category-card']}>
                         <p className={styles['activitydashboard-sidebar-category-label']}>Category</p>

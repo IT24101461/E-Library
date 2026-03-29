@@ -12,7 +12,7 @@ import {
 import styles from './Reading.module.css';
 
 // Set up PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 const Reading = () => {
   const { bookId } = useParams();
@@ -143,6 +143,17 @@ const Reading = () => {
       setPdfDoc(pdf);
       setTotalPages(pdf.numPages);
       setCurrentPage((prev) => (prev && prev > 1 ? prev : 1));
+      // Immediately persist correct totalPages so dashboard never shows stale data
+      try {
+        await ActivityService.updateProgress({
+          userId,
+          bookId,
+          currentPage: 1,
+          totalPages: pdf.numPages,
+        });
+      } catch (e) {
+        console.warn("[Reading] Could not sync totalPages on load:", e);
+      }
     } catch (err) {
       setError('Could not load PDF. Trying fallback text content...');
     }
@@ -217,6 +228,8 @@ const Reading = () => {
 
   const handleAutoSave = async () => {
     if (savingInProgressRef.current || !book || currentPage === lastSavedPage) return;
+    // Don't save until totalPages is known — avoids storing bogus 1-page totals
+    if (!totalPages || totalPages <= 1) return;
     savingInProgressRef.current = true;
     setSaving(true);
     try {
@@ -275,7 +288,8 @@ const Reading = () => {
       }
 
       if (currentBook.pdfUrl) {
-        await loadPDF(currentBook.pdfUrl);
+        const pdfEndpoint = `${process.env.REACT_APP_API_BASE_URL}/api/books/${bookId}/file`;
+        await loadPDF(pdfEndpoint);
       } else if (currentBook.content) {
         setFullContent(currentBook.content);
       } else {
