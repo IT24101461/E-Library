@@ -10,7 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+<<<<<<< HEAD
 import java.util.Map;
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 
 @RestController
 @RequestMapping("/reader")
@@ -41,6 +44,7 @@ public class ReaderController {
     }
 
     @PostMapping("/bookmarks")
+<<<<<<< HEAD
     public ResponseEntity<?> addBookmark(@RequestBody Map<String, Object> request) {
         try {
             Long userId = Long.parseLong(request.get("userId").toString());
@@ -70,6 +74,14 @@ public class ReaderController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "Failed to update bookmark: " + e.getMessage()));
+=======
+    public ResponseEntity<Bookmark> addBookmark(@RequestBody Bookmark bookmark) {
+        try {
+            Bookmark saved = bookmarkRepository.save(bookmark);
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
         }
     }
 
@@ -101,6 +113,7 @@ public class ReaderController {
     }
 
     @PostMapping("/highlights")
+<<<<<<< HEAD
     public ResponseEntity<?> addHighlight(@RequestBody Map<String, Object> request) {
         try {
             Long userId = Long.parseLong(request.get("userId").toString());
@@ -134,6 +147,14 @@ public class ReaderController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "Failed to update highlight: " + e.getMessage()));
+=======
+    public ResponseEntity<Highlight> addHighlight(@RequestBody Highlight highlight) {
+        try {
+            Highlight saved = highlightRepository.save(highlight);
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
         }
     }
 

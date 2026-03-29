@@ -4,7 +4,10 @@ import faiss
 import pandas as pd
 from sentence_transformers import SentenceTransformer, CrossEncoder
 import numpy as np
+<<<<<<< HEAD
 import language_tool_python
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 
 app = Flask(__name__)
 CORS(app)
@@ -18,6 +21,7 @@ cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 index = faiss.read_index("books.index")
 df = pd.read_pickle("books_metadata.pkl")
 
+<<<<<<< HEAD
 # --- LOAD GRAMMAR TOOL ---
 print("Loading Grammar Checker...")
 try:
@@ -28,6 +32,8 @@ except Exception as e:
     print("Continuing without grammar checker...")
     grammar_tool = None
 
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 
 @app.route('/chat', methods=['POST'])
 def advanced_bot():
@@ -64,6 +70,7 @@ def advanced_bot():
     return jsonify({"reply": reply, "books": results})
 
 
+<<<<<<< HEAD
 # --- SPELLING & GRAMMAR API ENDPOINT ---
 @app.route('/api/check-grammar', methods=['POST'])
 def check_grammar():
@@ -109,6 +116,8 @@ def check_grammar():
         return jsonify({"error": str(e)}), 500
 
 
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 # Add your HTML code here (same as before)
 
 if __name__ == '__main__':

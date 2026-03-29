@@ -10,6 +10,10 @@ const RecommendationEngine = ({ currentBookId }) => {
   useEffect(() => {
     if (!currentBookId) return;
     // We dynamically pass the currentBookId so it updates based on what the user is reading!
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
     const fetchForId = async (id) => {
       try {
         const res = await fetch(`http://localhost:5000/api/recommend/${id}`);
@@ -43,6 +47,25 @@ const RecommendationEngine = ({ currentBookId }) => {
         }
       }
     })();
+<<<<<<< HEAD
+=======
+=======
+    fetch(`http://localhost:8080/recommend/${currentBookId}`)
+      .then((response) => {
+        if (!response.ok) throw new Error('Failed to fetch AI data');
+        return response.json();
+      })
+      .then((data) => {
+        setRecommendations(data.recommendations || []);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching AI recommendations:', error);
+        setError(error.message);
+        setLoading(false);
+      });
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
   }, [currentBookId]);
 
   // 3. Simple loading and error screens

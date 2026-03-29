@@ -1,21 +1,55 @@
 package com.elibrary.model;
 
 import jakarta.persistence.*;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "books")
 public class Book {
+<<<<<<< HEAD
+=======
+=======
+import lombok.Data;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "books")
+public class Book {
+
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+    // ── Shared ──
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
     private String author;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+    @Column(name = "publication_year")
+    private Integer publicationYear;
+
+    // ── Teammate's fields ──
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -31,6 +65,10 @@ public class Book {
     @Column(name = "pdf_url", columnDefinition = "LONGTEXT")
     private String pdfUrl;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
     @Column(name = "isbn")
     private String isbn;
 
@@ -38,6 +76,12 @@ public class Book {
     private Integer publicationYear;
 
     @Column(name = "category")
+<<<<<<< HEAD
+=======
+=======
+    private String isbn;
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
     private String category;
 
     @Column(name = "created_at")
@@ -49,6 +93,10 @@ public class Book {
     @Column(name = "is_available")
     private Boolean isAvailable = true;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
     // Constructors
     public Book() {
     }
@@ -188,3 +236,26 @@ public class Book {
         this.isAvailable = isAvailable;
     }
 }
+<<<<<<< HEAD
+=======
+=======
+    // ── Your fields ──
+    private String genre;
+    private String emoji;
+    private double rating;
+    private String status;
+    private int progress;
+
+    @Column(name = "list_name")
+    private String listName;
+
+    @Column(name = "cover_image")
+    private String coverImage;
+
+    private String keywords;
+
+    @Column(name = "is_personal")
+    private Boolean isPersonal = false;
+}
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
