@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Professional header styles */
+.header {
+  @apply sticky top-0 z-50 bg-gradient-to-r from-slate-800 via-indigo-800 to-purple-700 shadow-lg;
+}
+
+.headerContainer {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between;
+}
+
+.logo {
+  @apply flex items-center space-x-3 hover:opacity-90 transition;
+}
+
+.logoBadge {
+  @apply bg-white rounded-lg p-2 shadow-md flex items-center justify-center;
+}
+
+.logoImage {
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+
+.logoLink {
+  @apply inline-flex items-center;
+}
+
+.logoTitle {
+  @apply text-2xl font-extrabold text-white leading-tight;
+}
+
+.logoSubtitle {
+  @apply text-sm text-indigo-200;
+}
+
+.navDesktop {
+  @apply hidden md:flex items-center space-x-1;
+}
+
+.navLink {
+  @apply px-4 py-2 text-sm font-medium rounded-md text-indigo-100 hover:text-white hover:bg-white hover:bg-opacity-5 transition;
+}
+
+.navLinkActive {
+  @apply text-white border-b-2 border-white;
+}
+
+.userMenu {
+  @apply hidden md:flex items-center space-x-3;
+}
+
+.userButton {
+  @apply px-3 py-2 rounded-md bg-white bg-opacity-10 text-white hover:bg-opacity-20 transition;
+}
+
+.userButtonPrimary {
+  @apply px-3 py-2 rounded-md bg-white text-indigo-800 font-semibold hover:opacity-95 transition;
+}
+
+.mobileToggle {
+  @apply md:hidden text-white text-2xl;
+}
+
+.mobileNav {
+  @apply md:hidden mt-3 space-y-2 pb-4;
+}
+
+.mobileNavLink {
+  @apply block px-4 py-2 text-white rounded-lg hover:bg-white hover:bg-opacity-10 transition;
+}

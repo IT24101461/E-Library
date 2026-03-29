@@ -1,0 +1,49 @@
+# E-Library Project .gitignore
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-error.log*
+frontend/.DS_Store
+frontend/.idea/
+frontend/.vscode/
+
+# Backend
+backend/target/
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/*.iml
+backend/.idea/
+backend/.vscode/
+backend/logs/
+backend/*.log
+
+# Database
+database/*.bak
+database/*.sql.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+.env
+
+# General
+node_modules/
+.env
+.env.local
+*.log
+dist/
+build/
