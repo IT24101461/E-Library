@@ -1,5 +1,7 @@
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 # Logs
 logs
 *.log
@@ -25,6 +27,7 @@ dist-ssr
 *.sln
 *.sw?
 >>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 # E-Library Project .gitignore
 
 # Frontend

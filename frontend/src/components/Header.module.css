@@ -2,73 +2,277 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Professional header styles */
+/* ============================================================
+   HEADER — Dark Theme matching Bookshelf style
+   ============================================================ */
+
 .header {
-  @apply sticky top-0 z-50 bg-gradient-to-r from-slate-800 via-indigo-800 to-purple-700 shadow-lg;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(15, 15, 15, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  animation: fadeIn 0.5s ease both;
+}
+
+/* Cyan shimmer scan line on bottom border */
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -60%;
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #00e5ff, transparent);
+  animation: shimmerScan 5s ease-in-out infinite;
+  opacity: 0.5;
+}
+
+@keyframes shimmerScan {
+  0%   { left: -60%; }
+  100% { left: 140%; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 .headerContainer {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
+/* ── LOGO ── */
 .logo {
-  @apply flex items-center space-x-3 hover:opacity-90 transition;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideInLeft 0.5s ease both;
+}
+
+.logo:hover {
+  opacity: 0.85;
+  transition: opacity 0.2s;
 }
 
 .logoBadge {
-  @apply bg-white rounded-lg p-2 shadow-md flex items-center justify-center;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  border-radius: 10px;
+  padding: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.15);
 }
 
 .logoImage {
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   display: block;
+  filter: brightness(0) invert(1);
 }
 
 .logoLink {
-  @apply inline-flex items-center;
+  display: inline-flex;
+  align-items: center;
 }
 
 .logoTitle {
-  @apply text-2xl font-extrabold text-white leading-tight;
+  font-family: 'Syne', 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #f0f0f0;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.logoTitle span {
+  color: #00e5ff;
+  text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
 }
 
 .logoSubtitle {
-  @apply text-sm text-indigo-200;
+  font-size: 11px;
+  color: #8a8a9a;
+  letter-spacing: 0.03em;
 }
 
+/* ── NAV ── */
 .navDesktop {
-  @apply hidden md:flex items-center space-x-1;
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (min-width: 768px) {
+  .navDesktop { display: flex; }
 }
 
 .navLink {
-  @apply px-4 py-2 text-sm font-medium rounded-md text-indigo-100 hover:text-white hover:bg-white hover:bg-opacity-5 transition;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #8a8a9a;
+  border-radius: 8px;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  position: relative;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  background: #00e5ff;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.navLink:hover {
+  color: #f0f0f0;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.navLink:hover::after {
+  transform: scaleX(1);
 }
 
 .navLinkActive {
-  @apply text-white border-b-2 border-white;
+  color: #00e5ff !important;
+  background: rgba(0, 229, 255, 0.06) !important;
 }
 
+.navLinkActive::after {
+  transform: scaleX(1) !important;
+}
+
+/* ── USER MENU ── */
 .userMenu {
-  @apply hidden md:flex items-center space-x-3;
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .userMenu { display: flex; }
 }
 
 .userButton {
-  @apply px-3 py-2 rounded-md bg-white bg-opacity-10 text-white hover:bg-opacity-20 transition;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #8a8a9a;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.userButton:hover {
+  color: #f0f0f0;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.userButtonSecondary {
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffc947;
+  background: rgba(255, 201, 71, 0.08);
+  border: 1px solid rgba(255, 201, 71, 0.25);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.userButtonSecondary:hover {
+  background: rgba(255, 201, 71, 0.15);
+  border-color: rgba(255, 201, 71, 0.4);
+  box-shadow: 0 0 12px rgba(255, 201, 71, 0.2);
 }
 
 .userButtonPrimary {
-  @apply px-3 py-2 rounded-md bg-white text-indigo-800 font-semibold hover:opacity-95 transition;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #000;
+  background: #00e5ff;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
+.userButtonPrimary:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.5);
+}
+
+/* ── MOBILE TOGGLE ── */
 .mobileToggle {
-  @apply md:hidden text-white text-2xl;
+  display: block;
+  color: #f0f0f0;
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
 }
 
+@media (min-width: 768px) {
+  .mobileToggle { display: none; }
+}
+
+/* ── MOBILE NAV ── */
 .mobileNav {
-  @apply md:hidden mt-3 space-y-2 pb-4;
+  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(15, 15, 15, 0.95);
 }
 
 .mobileNavLink {
-  @apply block px-4 py-2 text-white rounded-lg hover:bg-white hover:bg-opacity-10 transition;
+  display: block;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #8a8a9a;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mobileNavLink:hover {
+  color: #00e5ff;
+  background: rgba(0, 229, 255, 0.06);
 }

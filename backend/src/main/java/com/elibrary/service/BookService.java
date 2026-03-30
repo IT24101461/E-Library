@@ -55,7 +55,8 @@ public class BookService {
         }
     }
 
-    // Bookshelf methods
+    // ── Bookshelf methods ──
+
     public List<Book> getBooksByList(String listName) {
         return bookRepository.findByListNameAndIsPersonal(listName, true);
     }

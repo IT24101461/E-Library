@@ -40,6 +40,10 @@ public class BookController {
             .toAbsolutePath()
             .toString() + File.separator;
 
+    // ─────────────────────────────────────────
+    // BOOK ENDPOINTS — /api/books/...
+    // ─────────────────────────────────────────
+
     // GET - Retrieve all books
     @GetMapping("/books")
     public ResponseEntity<List<Book>> getAllBooks() {

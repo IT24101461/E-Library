@@ -15,26 +15,6 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    if (!email || !fullName || password.length < 6) {
-      setError('Please fill all fields. Password should be at least 6 characters.');
-      return;
-    }
-    try {
-      setLoading(true);
-      const res = await axios.post(`${API}/api/auth/register`, { email, fullName, password, role });
-      // Auto-login (server returns user info)
-      localStorage.setItem('authUser', JSON.stringify(res.data));
-      navigate('/');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Client-side validation helpers
   const validateEmail = (em) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
@@ -62,6 +42,7 @@ const Register = () => {
     setConfirmOpen(false);
     try {
       setLoading(true);
+      // Use /api/auth/register — consistent with all other API endpoints in this project
       const res = await axios.post(`${API}/api/auth/register`, { fullName, email, password, role });
       localStorage.setItem('authUser', JSON.stringify(res.data));
       setSuccessMsg('Account created successfully — redirecting...');
@@ -91,12 +72,12 @@ const Register = () => {
           <form onSubmit={prepareSubmit} className="space-y-4">
             <div>
               <label className={styles['form-label']}>Full name</label>
-              <input className={styles['form-input']} placeholder="Jane Doe" value={fullName} onChange={e=>setFullName(e.target.value)} />
+              <input className={styles['form-input']} placeholder="Jane Doe" value={fullName} onChange={e => setFullName(e.target.value)} />
             </div>
 
             <div>
               <label className={styles['form-label']}>Role</label>
-              <select className={styles['form-input']} value={role} onChange={e=>setRole(e.target.value)}>
+              <select className={styles['form-input']} value={role} onChange={e => setRole(e.target.value)}>
                 <option value="USER">User</option>
                 <option value="ADMIN">Admin</option>
               </select>
@@ -104,12 +85,12 @@ const Register = () => {
 
             <div>
               <label className={styles['form-label']}>Email</label>
-              <input className={styles['form-input']} placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)} />
+              <input className={styles['form-input']} placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
             </div>
 
             <div>
               <label className={styles['form-label']}>Password</label>
-              <input type="password" className={styles['form-input']} placeholder="Choose a strong password" value={password} onChange={e=>setPassword(e.target.value)} />
+              <input type="password" className={styles['form-input']} placeholder="Choose a strong password" value={password} onChange={e => setPassword(e.target.value)} />
               <div className="mt-2">
                 <span className={styles['small-muted']}>Password must be at least 8 characters and include letters and numbers.</span>
               </div>
@@ -117,7 +98,7 @@ const Register = () => {
 
             <div>
               <label className={styles['form-label']}>Confirm Password</label>
-              <input type="password" className={styles['form-input']} placeholder="Confirm your password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} />
+              <input type="password" className={styles['form-input']} placeholder="Confirm your password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
             </div>
 
             <div>

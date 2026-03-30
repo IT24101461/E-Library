@@ -64,7 +64,6 @@ function AppRoutes() {
     <div className="min-h-screen bg-transparent">
       {showHeader && <Header />}
       <Routes>
-        {/* Main routes */}
         <Route path="/"                element={<StartPage />} />
         <Route path="/start"           element={<StartPage />} />
         <Route path="/dashboard"       element={<ActivityDashboard />} />

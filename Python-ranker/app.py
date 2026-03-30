@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 import pandas as pd
 from flask import Flask, jsonify
 from flask_cors import CORS
@@ -6,6 +9,10 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import os
 import math
+<<<<<<< HEAD
+import language_tool_python
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 
 app = Flask(__name__)
 CORS(app)
@@ -42,6 +49,15 @@ if 'description' not in df_csv.columns:
 else:
     df_csv['description'] = df_csv['description'].fillna("")
 
+<<<<<<< HEAD
+# --- LOAD GRAMMAR TOOL ---
+print("Loading Grammar Checker...")
+# This creates a local grammar checker for US English
+grammar_tool = language_tool_python.LanguageTool('en-US') 
+print("Grammar Checker Loaded!")
+
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 print("Model and Database Loaded! API is active and listening.")
 
 @app.route('/api/recommend/<int:book_id>', methods=['GET'])
@@ -169,12 +185,55 @@ def recommend_books_text():
 def api_index():
     return jsonify({"status": "recommender", "message": "running (FAISS fast mode)"})
 
+<<<<<<< HEAD
+# --- SPELLING & GRAMMAR API ENDPOINT ---
+@app.route('/api/check-grammar', methods=['POST'])
+def check_grammar():
+    try:
+        # 1. Get the text the user typed in the React form
+        from flask import request
+        data = request.json
+        user_text = data.get('text', '')
+
+        if not user_text:
+            return jsonify({"status": "error", "message": "No text provided"}), 400
+
+        # 2. Run the grammar and spell check
+        matches = grammar_tool.check(user_text)
+
+        # 3. Format the mistakes nicely for React
+        mistakes = []
+        for match in matches:
+            error_len = getattr(match, 'errorLength', getattr(match, 'error_length', 0))
+            mistakes.append({
+                "mistake": user_text[match.offset : match.offset + error_len],
+                "message": match.message,
+                "suggestions": match.replacements[:3],
+                "offset": match.offset,
+                "length": error_len
+            })
+
+        return jsonify({
+            "status": "success",
+            "original_text": user_text,
+            "mistakes_found": len(mistakes),
+            "details": mistakes
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 @app.route('/api/health', methods=['GET'])
 def health():
     return jsonify({"status": "ok"})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', '5001'))
+<<<<<<< HEAD
+    app.run(host='127.0.0.1', port=port, debug=True)
+=======
     app.run(host='127.0.0.1', port=port, debug=True)
 =======
 from flask import Flask, jsonify
@@ -250,3 +309,4 @@ if __name__ == '__main__':
     # Running on port 5000
     app.run(port=5000, debug=True)
 >>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520

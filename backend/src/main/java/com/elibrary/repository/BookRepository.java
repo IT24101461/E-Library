@@ -14,6 +14,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Book findByIdAndIsDeletedFalse(Long id);
     List<Book> findByCategoryAndIsDeletedFalse(String category);
 
+    // Bookshelf queries
     List<Book> findByListNameAndIsPersonal(String listName, Boolean isPersonal);
     List<Book> findByIsPersonal(Boolean isPersonal);
     boolean existsByTitleAndListName(String title, String listName);

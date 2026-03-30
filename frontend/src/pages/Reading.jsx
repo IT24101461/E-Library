@@ -4,10 +4,10 @@ import { ActivityService } from '../services/ActivityService';
 import { ReaderService } from '../services/ReaderService';
 import * as pdfjsLib from 'pdfjs-dist';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, Maximize, Minimize, ZoomOut, ZoomIn, Download, 
-  ChevronLeft, ChevronRight, Clock, Award, Bookmark as BookmarkIcon, 
-  Trash2, Plus, Type, Palette, Contrast, Layout
+import {
+  ArrowLeft, Maximize, Minimize, ZoomOut, ZoomIn, Download,
+  ChevronLeft, ChevronRight, Clock, Award, Bookmark as BookmarkIcon,
+  Trash2, Plus, Type, Palette, Contrast, Layout, Menu, X, Highlighter
 } from 'lucide-react';
 import styles from './Reading.module.css';
 
@@ -19,6 +19,7 @@ const Reading = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const canvasRef = useRef(null);
+  const textLayerRef = useRef(null);
   const [book, setBook] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -33,16 +34,17 @@ const Reading = () => {
   const [elapsed, setElapsed] = useState(0);
   const [pagesReadDuringSession, setPagesReadDuringSession] = useState(0);
   const [authUser, setAuthUser] = useState(null);
-  
+
   // Reader Settings State
   const [focusMode, setFocusMode] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [brightness, setBrightness] = useState(100);
   const [theme, setTheme] = useState('dark'); // 'dark', 'sepia', 'light'
   const [highContrast, setHighContrast] = useState(false);
-  
-  const [direction, setDirection] = useState(1); 
-  
+
+  const [direction, setDirection] = useState(1);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   // Bookmarks and Highlights State
   const [bookmarks, setBookmarks] = useState([]);
   const [highlights, setHighlights] = useState([]);
@@ -58,7 +60,9 @@ const Reading = () => {
       }
     }
   }, []);
-  
+
+  // IMPORTANT: userId must be recalculated whenever authUser changes
+  // This ensures new users are correctly identified
   const userId = authUser?.id || 1;
   const saveTimeoutRef = useRef(null);
   const sessionTimerRef = useRef(null);
@@ -77,7 +81,7 @@ const Reading = () => {
     }
     fetchData();
     fetchReaderData(); // Fetch marks
-    
+
     try {
       const sessRaw = sessionStorage.getItem('readingSession');
       if (sessRaw) {
@@ -91,7 +95,7 @@ const Reading = () => {
           sessionTimerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
         }
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [bookId, userId]);
 
   const fetchReaderData = async () => {
@@ -114,6 +118,7 @@ const Reading = () => {
     }
   }, [pdfDoc, currentPage, fullContent, zoom]);
 
+  // Auto-save effect
   useEffect(() => {
     if (currentPage !== lastSavedPage && book && currentPage > 0) {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
@@ -175,12 +180,57 @@ const Reading = () => {
       canvas.width = Math.floor(viewport.width);
       canvas.height = Math.floor(viewport.height);
 
-      await page.render({ canvasContext: context, viewport }).promise;
-      try { canvas.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+      // Force exactly matching container dimensions to prevent CSS squishing which misaligns text
+      if (container) {
+        container.style.width = `${viewport.width}px`;
+        container.style.height = `${viewport.height}px`;
+        container.style.maxWidth = '100%';
+        container.style.minHeight = 'auto';
+      }
 
+      await page.render({ canvasContext: context, viewport }).promise;
+      try { canvas.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { }
+
+      // Extract and render text layer
       const textContent = await page.getTextContent();
       const text = textContent.items.map(item => item.str).join(' ');
       setPageContent(text);
+
+      // Create selectable text layer
+      if (textLayerRef.current) {
+        textLayerRef.current.innerHTML = '';
+        textLayerRef.current.style.position = 'absolute';
+        textLayerRef.current.style.top = '0px';
+        textLayerRef.current.style.left = '0px';
+        textLayerRef.current.style.width = viewport.width + 'px';
+        textLayerRef.current.style.height = viewport.height + 'px';
+        textLayerRef.current.style.zIndex = '10';
+        textLayerRef.current.style.pointerEvents = 'auto';
+        textLayerRef.current.style.userSelect = 'text';
+        textLayerRef.current.style.transform = `scale(1)`;
+        textLayerRef.current.style.transformOrigin = 'top left';
+
+        textContent.items.forEach((item) => {
+          const span = document.createElement('span');
+          const x = item.transform[4];
+          const y = viewport.height - item.transform[5];
+
+          span.style.position = 'absolute';
+          span.style.left = x + 'px';
+          span.style.top = (y - item.height) + 'px';
+          span.style.fontSize = item.height + 'px';
+          span.style.fontFamily = 'inherit';
+          span.style.color = 'transparent';
+          span.style.backgroundColor = 'transparent';
+          span.style.whiteSpace = 'pre';
+          span.style.cursor = 'text';
+          span.style.userSelect = 'text';
+          span.style.WebkitUserSelect = 'text';
+          span.style.lineHeight = item.height + 'px';
+          span.textContent = item.str;
+          textLayerRef.current.appendChild(span);
+        });
+      }
     } catch (err) {
       setPageContent('Error rendering page content');
     }
@@ -241,6 +291,7 @@ const Reading = () => {
       setLastSavedPage(currentPage);
       lastSentPageRef.current = currentPage;
     } catch (err) {
+      // Allow retry on next page change
     } finally {
       savingInProgressRef.current = false;
       setSaving(false);
@@ -256,17 +307,19 @@ const Reading = () => {
     try {
       const newCurrent = Math.min(Number(currentPage || 1) + Number(pagesReadDuringSession || 0), totalPages || Number.MAX_SAFE_INTEGER);
       await ActivityService.updateProgress({ userId, bookId, currentPage: newCurrent, totalPages });
-      
+
       // Log explicitly for velocity tracking
       const minutes = Math.max(1, Math.floor(elapsed / 60));
       await ActivityService.logActivity(userId, 'SESSION', bookId, {
         currentPage: pagesReadDuringSession, // Used as 'pagesRead' by backend for SESSION logs
         timeSpentMinutes: minutes
       });
-      
-      try { sessionStorage.removeItem('readingSession'); } catch (e) {}
+
+      try { sessionStorage.removeItem('readingSession'); } catch (e) { }
       window.dispatchEvent(new CustomEvent('progressUpdated', { detail: { bookId, currentPage: newCurrent } }));
-    } catch (err) {} finally {
+    } catch (err) {
+      console.error('Failed to stop session and save progress', err);
+    } finally {
       setPagesReadDuringSession(0);
     }
   };
@@ -278,13 +331,13 @@ const Reading = () => {
       const response = await ActivityService.getBook(bookId);
       const currentBook = response.data;
       setBook(currentBook);
-      
+
       try {
-          const statsResponse = await ActivityService.getStats(userId);
-          setStats(statsResponse.data);
+        const statsResponse = await ActivityService.getStats(userId);
+        setStats(statsResponse.data);
       } catch (err) {
-          console.warn("Could not fetch user stats", err);
-          setStats({ readingVelocity: 0 });
+        console.warn("Could not fetch user stats", err);
+        setStats({ readingVelocity: 0 });
       }
 
       if (currentBook.pdfUrl) {
@@ -305,10 +358,10 @@ const Reading = () => {
   // --- Bookmark and Highlight Actions ---
   const handleAddBookmark = async () => {
     try {
-      const res = await ReaderService.addBookmark({ 
-        userId: Number(userId), 
-        bookId: Number(bookId), 
-        pageNumber: Number(currentPage) 
+      const res = await ReaderService.addBookmark({
+        userId: Number(userId),
+        bookId: Number(bookId),
+        pageNumber: Number(currentPage)
       });
       if (res.data) {
         setBookmarks([...bookmarks, res.data]);
@@ -328,22 +381,41 @@ const Reading = () => {
     }
   };
 
+  const handleDeleteHighlight = async (id) => {
+    try {
+      await ReaderService.deleteHighlight(id);
+      setHighlights(highlights.filter(h => h.id !== id));
+    } catch (err) {
+      console.error('Failed to delete highlight', err);
+    }
+  };
+
   const handleAddHighlight = async () => {
     try {
-      // Simulate selecting some text or just highlight the page
-      const res = await ReaderService.addHighlight({ 
-        userId: Number(userId), 
-        bookId: Number(bookId), 
-        pageNumber: Number(currentPage), 
-        content: `Highlighted Page ${currentPage}`, 
-        color: 'yellow' 
+      // Get selected text from the page
+      const selectedText = window.getSelection().toString().trim();
+
+      if (!selectedText) {
+        alert('Please select text first before highlighting!');
+        return;
+      }
+
+      const res = await ReaderService.addHighlight({
+        userId: Number(userId),
+        bookId: Number(bookId),
+        pageNumber: Number(currentPage),
+        content: selectedText,
+        color: 'yellow'
       });
+
       if (res.data) {
-         setHighlights([...highlights, res.data]);
+        setHighlights([...highlights, res.data]);
+        alert('Text highlighted successfully!');
+        window.getSelection().removeAllRanges(); // Clear selection
       }
     } catch (err) {
       console.error('Failed to add highlight', err);
-      alert('Failed to save highlight. Did you restart the Spring Boot backend?');
+      alert('Failed to save highlight. Check browser console for details.');
     }
   };
 
@@ -358,17 +430,63 @@ const Reading = () => {
         <div className={styles['reading-error']}>{error}</div>
       ) : (
         <div className={styles['reading-main-layout']}>
+
+          {/* Left Sidebar (Highlights) */}
+          <div className={styles['reading-sidebar-left']}>
+            <div className={styles['sidebar-panel']} style={{ flex: 1, justifyContent: 'flex-start' }}>
+              <div className={styles['bookmarks-header']}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Highlighter size={16} color="var(--text-muted)" />
+                    <span className={styles['sidebar-setting-title']}>My Highlights</span>
+                  </div>
+                  <span className={styles['sidebar-setting-subtitle']}>Saved text snippets</span>
+                </div>
+              </div>
+
+              <div className={styles['bookmark-list']} style={{ marginTop: 12 }}>
+                {highlights.length === 0 ? (
+                  <div className={styles['empty-state']}>No highlights yet. Select text in the book and click 'Highlight'.</div>
+                ) : (
+                  highlights.map(hl => (
+                    <div key={hl.id} className={styles['bookmark-item']} onClick={() => handleGoToPage(hl.pageNumber)} style={{ alignItems: 'flex-start' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                        <span className={styles['bookmark-page']} style={{ fontStyle: 'italic', marginBottom: 6, fontSize: '0.85rem', lineHeight: 1.4, wordBreak: 'break-word' }}>
+                          "{hl.content.length > 80 ? hl.content.substring(0, 80) + '...' : hl.content}"
+                        </span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span className={styles['bookmark-date']}>Page {hl.pageNumber} • {new Date(hl.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <button className={styles['bookmark-delete']} style={{ alignSelf: 'center', marginLeft: 8 }} onClick={(e) => { e.stopPropagation(); handleDeleteHighlight(hl.id); }} title="Remove highlight">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Main Content Area */}
           <div className={styles['reading-content-wrapper']}>
-            
+
             {/* Header */}
             <div className={styles['reading-header']}>
               <button onClick={() => navigate(-1)} className={styles['reading-back-button']}>
                 <ArrowLeft size={16} /> Back
               </button>
-              <button 
-                onClick={() => setFocusMode(!focusMode)} 
-                className={styles['reading-back-button']} 
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className={styles['reading-back-button']}
+                style={{ marginLeft: 12 }}
+                title="Open Settings & Bookmarks"
+              >
+                <Menu size={16} /> Menu
+              </button>
+              <button
+                onClick={() => setFocusMode(!focusMode)}
+                className={styles['reading-back-button']}
                 style={{ marginLeft: 12 }}
               >
                 {focusMode ? <><Minimize size={16} /> Exit Focus</> : <><Maximize size={16} /> Focus Mode</>}
@@ -426,26 +544,28 @@ const Reading = () => {
                 {saving && <span className={styles['reading-saving']}>Saving...</span>}
                 {isTiming && (
                   <div className="flex items-center gap-3">
-                    <div className="text-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px', color:'var(--text-main)' }}>
+                    <div className="text-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-main)' }}>
                       <Clock size={14} /> {Math.floor(elapsed / 60)}m {elapsed % 60}s
                     </div>
-                    <div className="text-sm" style={{color:'var(--text-main)'}}>Pages: {pagesReadDuringSession}</div>
+                    <div className="text-sm" style={{ color: 'var(--text-main)' }}>Pages: {pagesReadDuringSession}</div>
                     <button onClick={stopSession} className="px-2 py-1 bg-yellow-400 text-black text-xs font-bold rounded">Stop Session</button>
                   </div>
                 )}
               </div>
             </div>
 
-
-
             {/* Reading Content */}
             <div className={styles['reading-content-area']}>
               {pdfDoc ? (
                 <div className={styles['reading-pdf-container']}>
-                  <canvas 
-                    ref={canvasRef} 
-                    className={styles['reading-pdf-canvas']} 
+                  <canvas
+                    ref={canvasRef}
+                    className={styles['reading-pdf-canvas']}
                     style={{ filter: `brightness(${brightness}%) ${highContrast ? 'contrast(120%) saturate(150%)' : ''}` }}
+                  />
+                  <div
+                    ref={textLayerRef}
+                    className={styles['reading-text-layer']}
                   />
                 </div>
               ) : (
@@ -520,8 +640,8 @@ const Reading = () => {
                     />
                   </div>
                 </div>
-                
-                <div style={{display:'flex', gap:'8px'}}>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={handleNextPage} disabled={currentPage >= totalPages} className={styles['reading-btn-next']}>
                     Next <ChevronRight size={16} />
                   </button>
@@ -532,15 +652,28 @@ const Reading = () => {
               </div>
             </div>
           </div>
-          
+
+          {/* Sidebar Overlay */}
+          <div
+            className={`${styles['sidebar-overlay']} ${isSidebarOpen ? styles['open'] : ''}`}
+            onClick={() => setIsSidebarOpen(false)}
+          ></div>
+
           {/* Right Sidebar (Settings & Bookmarks) */}
-          <div className={styles['reading-sidebar']}>
-            
-            {/* Focus Mode Toggle (Always visible) */}
+          <div className={`${styles['reading-sidebar']} ${isSidebarOpen ? styles['open'] : ''}`}>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>Menu</h3>
+              <button onClick={() => setIsSidebarOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Focus Mode Toggle */}
             <div className={styles['sidebar-panel']} style={{ padding: '12px 20px' }}>
               <div className={styles['sidebar-setting-row']}>
                 <div className={styles['sidebar-setting-header']}>
-                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {focusMode ? <Minimize size={16} color="var(--accent-color)" /> : <Maximize size={16} color="var(--text-muted)" />}
                     <span className={styles['sidebar-setting-title']}>Focus Mode</span>
                   </div>
@@ -558,17 +691,17 @@ const Reading = () => {
             <div className={styles['sidebar-panel']}>
               <div className={styles['sidebar-setting-row']}>
                 <div className={styles['sidebar-setting-header']}>
-                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <ZoomIn size={16} color="var(--text-muted)" />
                     <span className={styles['sidebar-setting-title']}>Zoom Level</span>
                   </div>
                   <span className={styles['sidebar-setting-value']}>{Math.round(zoom * 100)}%</span>
                 </div>
                 <span className={styles['sidebar-setting-subtitle']}>Adjust page magnification</span>
-                <input 
-                  type="range" min="0.5" max="3.0" step="0.1" value={zoom} 
-                  onChange={(e) => setZoom(Number(e.target.value))} 
-                  className={styles['custom-slider']} style={{marginTop: 8}}
+                <input
+                  type="range" min="0.5" max="3.0" step="0.1" value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className={styles['custom-slider']} style={{ marginTop: 8 }}
                 />
               </div>
             </div>
@@ -577,17 +710,17 @@ const Reading = () => {
             <div className={styles['sidebar-panel']}>
               <div className={styles['sidebar-setting-row']}>
                 <div className={styles['sidebar-setting-header']}>
-                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Layout size={16} color="var(--text-muted)" />
                     <span className={styles['sidebar-setting-title']}>Page Brightness</span>
                   </div>
                   <span className={styles['sidebar-setting-value']}>{brightness}%</span>
                 </div>
                 <span className={styles['sidebar-setting-subtitle']}>Adjust reading comfort</span>
-                <input 
-                  type="range" min="50" max="150" step="1" value={brightness} 
-                  onChange={(e) => setBrightness(Number(e.target.value))} 
-                  className={styles['custom-slider']} style={{marginTop: 8}}
+                <input
+                  type="range" min="50" max="150" step="1" value={brightness}
+                  onChange={(e) => setBrightness(Number(e.target.value))}
+                  className={styles['custom-slider']} style={{ marginTop: 8 }}
                 />
               </div>
             </div>
@@ -596,12 +729,12 @@ const Reading = () => {
             <div className={styles['sidebar-panel']}>
               <div className={styles['sidebar-setting-row']}>
                 <div className={styles['sidebar-setting-header']}>
-                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Palette size={16} color="var(--text-muted)" />
                     <span className={styles['sidebar-setting-title']}>Theme</span>
                   </div>
                 </div>
-                <span className={styles['sidebar-setting-subtitle']} style={{marginBottom: 8}}>Dark / Sepia / Light</span>
+                <span className={styles['sidebar-setting-subtitle']} style={{ marginBottom: 8 }}>Dark / Sepia / Light</span>
                 <div className={styles['theme-options']}>
                   <button className={`${styles['theme-btn']} ${theme === 'dark' ? styles['active'] : ''}`} onClick={() => setTheme('dark')}>Dark</button>
                   <button className={`${styles['theme-btn']} ${theme === 'sepia' ? styles['active'] : ''}`} onClick={() => setTheme('sepia')}>Sepia</button>
@@ -613,10 +746,10 @@ const Reading = () => {
             {/* High Contrast */}
             <div className={styles['sidebar-panel']}>
               <div className={styles['sidebar-setting-row']}>
-                <div className={styles['sidebar-setting-header']} style={{marginBottom: 4}}>
-                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                <div className={styles['sidebar-setting-header']} style={{ marginBottom: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Contrast size={16} color="var(--text-muted)" />
-                    <div style={{display:'flex', flexDirection:'column'}}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span className={styles['sidebar-setting-title']}>High Contrast</span>
                       <span className={styles['sidebar-setting-subtitle']}>Better readability</span>
                     </div>
@@ -632,28 +765,28 @@ const Reading = () => {
             </div>
 
             {/* Bookmarks */}
-            <div className={styles['sidebar-panel']} style={{flex: 1, justifyContent:'flex-start'}}>
+            <div className={styles['sidebar-panel']} style={{ flex: 1, justifyContent: 'flex-start' }}>
               <div className={styles['bookmarks-header']}>
-                <div style={{display:'flex', flexDirection:'column'}}>
-                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <BookmarkIcon size={16} color="var(--text-muted)" />
                     <span className={styles['sidebar-setting-title']}>Bookmarks</span>
                   </div>
                   <span className={styles['sidebar-setting-subtitle']}>Create / Open / Delete</span>
-                  <span className={styles['sidebar-setting-subtitle']} style={{marginTop:4, color:'var(--accent-color)'}}>Current Page: {currentPage}</span>
+                  <span className={styles['sidebar-setting-subtitle']} style={{ marginTop: 4, color: 'var(--accent-color)' }}>Current Page: {currentPage}</span>
                 </div>
                 <button className={styles['btn-add']} onClick={handleAddBookmark}>
                   <Plus size={14} /> Add
                 </button>
               </div>
-              
-              <div className={styles['bookmark-list']} style={{marginTop: 12}}>
+
+              <div className={styles['bookmark-list']} style={{ marginTop: 12 }}>
                 {bookmarks.length === 0 ? (
                   <div className={styles['empty-state']}>No bookmarks yet.</div>
                 ) : (
                   bookmarks.map(bm => (
                     <div key={bm.id} className={styles['bookmark-item']} onClick={() => handleGoToPage(bm.pageNumber)}>
-                      <div style={{display:'flex', flexDirection:'column'}}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <span className={styles['bookmark-page']}>Page {bm.pageNumber}</span>
                         <span className={styles['bookmark-date']}>{new Date(bm.createdAt).toLocaleDateString()}</span>
                       </div>

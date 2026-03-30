@@ -21,31 +21,13 @@ const Login = () => {
     if (pwd) setPassword(pwd);
   }, [searchParams]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    if (!email || !password) {
-      setError('Please enter both email and password');
-      return;
-    }
-    try {
-      setLoading(true);
-      const res = await axios.post(`${API}/api/auth/login`, { email, password });
-      localStorage.setItem('authUser', JSON.stringify(res.data));
-      navigate('/');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const [successMsg, setSuccessMsg] = useState(null);
 
   const doLogin = async () => {
     try {
       setLoading(true);
-        const res = await axios.post(`${API}/api/auth/login`, { email, password });
+      // Use /api/auth/login — consistent with all other API endpoints in this project
+      const res = await axios.post(`${API}/api/auth/login`, { email, password });
       localStorage.setItem('authUser', JSON.stringify(res.data));
       setSuccessMsg('Signed in successfully — redirecting...');
       setTimeout(() => navigate('/'), 900);
@@ -56,7 +38,6 @@ const Login = () => {
     }
   };
 
-  // keep handleSubmit for compatibility with form.
   const handleConfirmedSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -89,7 +70,7 @@ const Login = () => {
             className={styles['login-input']}
             placeholder="you@example.com"
             value={email}
-            onChange={e=>setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             autoComplete="email"
           />
 
@@ -99,7 +80,7 @@ const Login = () => {
             className={styles['login-input']}
             placeholder="Your password"
             value={password}
-            onChange={e=>setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             autoComplete="current-password"
           />
 
@@ -113,8 +94,8 @@ const Login = () => {
 
         <div className={styles['login-footer']}>
           Don't have an account? <Link to="/register" className={styles['login-link']}>Create one</Link>
-          <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #ddd', fontSize: '0.85rem'}}>
-            <Link to="/admin-login" style={{color: '#667eea', textDecoration: 'none', fontWeight: '600'}}>
+          <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #ddd', fontSize: '0.85rem' }}>
+            <Link to="/admin-login" style={{ color: '#667eea', textDecoration: 'none', fontWeight: '600' }}>
               🔐 Admin Access
             </Link>
           </div>

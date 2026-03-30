@@ -85,6 +85,9 @@ CREATE TABLE reading_progress (
 );
 
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 -- Bookmarks Table
 CREATE TABLE bookmarks (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -115,8 +118,25 @@ CREATE TABLE highlights (
   INDEX idx_created_at (created_at)
 );
 
+<<<<<<< HEAD
+-- Feedbacks Table
+CREATE TABLE feedbacks (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT,
+  type VARCHAR(50) NOT NULL COMMENT 'bug, feature, review',
+  rating INT DEFAULT NULL,
+  message TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'PENDING' COMMENT 'PENDING, REVIEWED, SOLVED',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  INDEX idx_user_id (user_id),
+  INDEX idx_created_at (created_at)
+);
+
+=======
 =======
 >>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
 -- ============================================
 -- Sample Data (Optional - for testing)
 -- ============================================

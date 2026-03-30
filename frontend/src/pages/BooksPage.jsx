@@ -50,7 +50,6 @@ const BooksPage = () => {
       alert('No PDF available for this book.');
       return;
     }
-    // Open in new tab
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -165,7 +164,7 @@ const BooksPage = () => {
 
                       <div className={styles['book-card-actions']}>
                         <button
-                          onClick={() => openPdfUrl(book.pdfUrl || book.pdfUrl)}
+                          onClick={() => openPdfUrl(book.pdfUrl)}
                           className={styles['book-btn-preview']}
                           style={{marginRight: 'auto'}}
                         >

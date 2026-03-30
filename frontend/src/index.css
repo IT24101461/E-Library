@@ -313,15 +313,10 @@ code {
     @apply inline-block px-3 py-1 rounded-full text-sm font-semibold;
   }
 
-  .badge-primary  { @apply badge bg-indigo-100 text-indigo-700; }
-  .badge-success  { @apply badge bg-green-100 text-green-700; }
-  .badge-warning  { @apply badge bg-yellow-100 text-yellow-700; }
-  .badge-danger   { @apply badge bg-red-100 text-red-700; }
-
-  .divider        { @apply my-6 border-t border-gray-200; }
-  .grid-auto      { @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6; }
-  .flex-center    { @apply flex items-center justify-center; }
-  .flex-between   { @apply flex items-center justify-between; }
+  .divider { @apply my-6 border-t border-gray-200; }
+  .grid-auto { @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6; }
+  .flex-center { @apply flex items-center justify-center; }
+  .flex-between { @apply flex items-center justify-between; }
 }
 
 /* ── RESPONSIVE TYPOGRAPHY ── */

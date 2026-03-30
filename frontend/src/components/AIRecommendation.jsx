@@ -3,7 +3,11 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const AIRecommendation = ({ book }) => {
+<<<<<<< HEAD
+  const RANKER_BASE = process.env.REACT_APP_RANKER_URL || 'http://127.0.0.1:5000';
+=======
   const RANKER_BASE = process.env.REACT_APP_RANKER_URL || 'http://127.0.0.1:5001';
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
   const navigate = useNavigate();
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);

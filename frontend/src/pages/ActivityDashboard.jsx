@@ -144,7 +144,7 @@ const ActivityDashboard = () => {
       // enrich history items with persisted progress (currentPage / totalPages)
       const rawHistory = historyRes.data || [];
       console.log('[Dashboard] Raw history:', rawHistory);
-      
+
       const enhanced = await Promise.all(
         rawHistory.map(async (h) => {
           const bookId = h.bookId || h.book?.id || h.id;
@@ -152,18 +152,18 @@ const ActivityDashboard = () => {
             console.log(`[Dashboard] Fetching progress for bookId=${bookId}`);
             const response = await ActivityService.getProgress(uid, bookId);
             console.log(`[Dashboard] Raw API response for bookId=${bookId}:`, response);
-            
+
             const prog = response?.data || response;
             console.log(`[Dashboard] Progress data object:`, prog);
-            
+
             const hp = h || {};
             const bookMeta = hp.book || {};
             const currentPageFromHistory = hp.currentPage ?? hp.page ?? hp.current ?? 0;
             const totalPagesFromHistory = hp.totalPages ?? bookMeta.totalPages ?? bookMeta.pages ?? bookMeta.pageSize ?? hp.pages ?? 0;
-            
+
             const currentPage = Math.min(prog?.currentPage ?? currentPageFromHistory ?? 0, prog?.totalPages ?? totalPagesFromHistory ?? 0);
             const totalPages = prog?.totalPages ?? totalPagesFromHistory ?? 0;
-            
+
             console.log(`[Dashboard] Final values for bookId=${bookId}: currentPage=${currentPage}, totalPages=${totalPages}`);
             return { ...h, currentPage, totalPages };
           } catch (e) {
@@ -193,7 +193,7 @@ const ActivityDashboard = () => {
       await ActivityService.deleteActivity(activityId);
       const updatedHistory = history.filter(item => item.id !== activityId);
       setHistory(updatedHistory);
-      
+
       if (currentBook && currentBook.id === activityId) {
         if (updatedHistory.length > 0) {
           setCurrentBook(updatedHistory[0]);
@@ -266,7 +266,7 @@ const ActivityDashboard = () => {
     <main className={styles['activitydashboard-main']} data-theme={theme}>
       <CustomCursor />
       <div className={styles['activitydashboard-container']}>
-        
+
         {/* Error Message */}
         {error && (
           <div className={styles['activitydashboard-alert']}>
@@ -290,23 +290,23 @@ const ActivityDashboard = () => {
 
         {/* Hero / Welcome Section */}
         <div className={styles['activitydashboard-hero']}>
-          {/* Theme Selector */}
+          {/* Theme Selector mimicking Reading.jsx */}
           <div className="absolute top-6 right-6 z-20">
             <div className={styles['theme-options']}>
-              <button 
-                className={theme === 'light' ? styles['theme-btn-active'] : ''} 
+              <button
+                className={theme === 'light' ? styles['theme-btn-active'] : ''}
                 onClick={() => setTheme('light')}
               >
                 Light
               </button>
-              <button 
-                className={theme === 'dark' ? styles['theme-btn-active'] : ''} 
+              <button
+                className={theme === 'dark' ? styles['theme-btn-active'] : ''}
                 onClick={() => setTheme('dark')}
               >
                 Dark
               </button>
-              <button 
-                className={theme === 'sepia' ? styles['theme-btn-active'] : ''} 
+              <button
+                className={theme === 'sepia' ? styles['theme-btn-active'] : ''}
                 onClick={() => setTheme('sepia')}
               >
                 Sepia
@@ -360,8 +360,8 @@ const ActivityDashboard = () => {
               {history && history.length > 0 ? (
                 <div className={styles['hero-books-showcase']}>
                   {history.slice(0, 3).map((item, index) => (
-                    <div 
-                      key={item.id} 
+                    <div
+                      key={item.id}
                       className={`${styles['hero-book-card']} ${styles[`hero-book-pos-${index}`]}`}
                       style={{ zIndex: 3 - index }}
                       onClick={() => navigate(`/reading/${item.bookId || item.id}?page=${item.currentPage || 1}`)}
@@ -406,7 +406,7 @@ const ActivityDashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Left Column - Reading History */}
           <div className={styles['activitydashboard-history-main']}>
             <div className="mb-8">
@@ -469,8 +469,8 @@ const ActivityDashboard = () => {
                   {/* Book Cover */}
                   <div className="h-64 w-full bg-gray-100 flex items-center justify-center relative overflow-hidden group">
                     {currentBook.coverUrl ? (
-                      <img 
-                        src={currentBook.coverUrl} 
+                      <img
+                        src={currentBook.coverUrl}
                         alt={currentBook.title}
                         className="w-full h-full object-cover"
                         onError={(e) => {

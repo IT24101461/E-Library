@@ -13,14 +13,12 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ── Core fields (shared) ──
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
     private String author;
-
-    @Column(name = "publication_year")
-    private Integer publicationYear;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -40,6 +38,10 @@ public class Book {
     @Column(name = "isbn")
     private String isbn;
 
+    @Column(name = "publication_year")
+    private Integer publicationYear;
+
+    @Column(name = "category")
     private String category;
 
     @Column(name = "created_at")
@@ -51,7 +53,7 @@ public class Book {
     @Column(name = "is_available")
     private Boolean isAvailable = true;
 
-    // Bookshelf fields
+    // ── Bookshelf fields ──
     private String genre;
     private String emoji;
     private double rating;
