@@ -16,9 +16,25 @@ const API_BASE     = "http://localhost:8080/api/bookshelf";
 const HISTORY_BASE = "http://localhost:8080/api/search-history";
 
 const GENRE_OPTIONS = [
-  "Fiction","Non-Fiction","Fantasy","Sci-Fi",
-  "Mystery","Thriller","Romance","Horror",
-  "Biography","History","Self-Help","Children",
+  "Fiction",
+  "Non-Fiction",
+  "Fantasy",
+  "Sci-Fi",
+  "Mystery",
+  "Thriller",
+  "Romance",
+  "Horror",
+  "Biography",
+  "History",
+  "Self-Help",
+  "Children",
+  "Business",
+  "Technology",
+  "Health",
+  "Sports",
+  "Travel",
+  "Cooking",
+  "Religion"
 ];
 
 const SORT_OPTIONS = [
@@ -28,7 +44,7 @@ const SORT_OPTIONS = [
 ];
 
 const DEFAULT_FILTERS = {
-  q: "", author: "", yearMin: "", yearMax: "", genres: [], sort: "title",
+  q: "", author: "", yearMin: "", yearMax: "", genres: [], sort: "title", searchType: "",
 };
 
 // ── Debounce hook ─────────────────────────────────────────────
@@ -178,6 +194,8 @@ function SkeletonCard({ index }) {
 // ── Book Card (dark theme) ────────────────────────────────────
 function BookCard({ book, index }) {
   const [imgError, setImgError] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState(null);
+  const cardRef = useRef(null);
   const colors = [
     "linear-gradient(160deg,#1a3a5c,#0a1628)",
     "linear-gradient(160deg,#2d1b4e,#1a0a2e)",
@@ -188,8 +206,26 @@ function BookCard({ book, index }) {
   ];
   const bg = colors[index % colors.length];
 
+  const handleMouseEnter = () => {
+    if (!book.hoverSummary || !cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setTooltipPos({
+      top: rect.top + window.scrollY - 10,
+      left: rect.left + rect.width / 2,
+    });
+  };
+
+  const handleMouseLeave = () => setTooltipPos(null);
+
   return (
-    <div className="book-card" style={{ animationDelay: `${index * 0.06}s` }}>
+    <>
+      <div
+        ref={cardRef}
+        className="book-card"
+        style={{ animationDelay: `${index * 0.06}s`, position: "relative" }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
       <div className="book-cover">
         {book.coverImage && !imgError ? (
           <img
@@ -231,6 +267,56 @@ function BookCard({ book, index }) {
         </div>
       </div>
     </div>
+
+    {/* ── Tooltip rendered via portal so it's never clipped ── */}
+    {tooltipPos && book.hoverSummary && createPortal(
+      <div style={{
+        position: "absolute",
+        top: tooltipPos.top,
+        left: tooltipPos.left,
+        transform: "translate(-50%, -100%)",
+        width: 240,
+        background: "rgba(8,14,26,0.97)",
+        border: "1px solid rgba(0,229,255,0.22)",
+        borderRadius: 12,
+        padding: "12px 14px",
+        boxShadow: "0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,229,255,0.06)",
+        backdropFilter: "blur(16px)",
+        zIndex: 999999,
+        pointerEvents: "none",
+        animation: "fadeSlideDown 0.15s ease",
+      }}>
+        {book.rating > 0 && (
+          <div style={{ display:"flex", alignItems:"center", gap:5, marginBottom:7 }}>
+            <span style={{ color:"#f59e0b", fontSize:11, letterSpacing:1 }}>
+              {"★".repeat(Math.round(book.rating))}{"☆".repeat(5 - Math.round(book.rating))}
+            </span>
+            <span style={{ color:"#8896b0", fontSize:11 }}>{book.rating}</span>
+          </div>
+        )}
+        <div style={{
+          fontSize: 13, fontWeight: 600, color: "#e8f0ff",
+          marginBottom: 3, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.35,
+        }}>
+          {book.title}
+        </div>
+        <div style={{
+          fontSize: 11, color: "#00e5ff", marginBottom: 8,
+          fontFamily: "'DM Sans', sans-serif", opacity: 0.85,
+        }}>
+          {book.author}
+        </div>
+        <div style={{ borderTop:"1px solid rgba(255,255,255,0.07)", marginBottom:8 }} />
+        <div style={{
+          fontSize: 12, color: "#9aaac8", lineHeight: 1.6,
+          fontFamily: "'DM Sans', sans-serif",
+        }}>
+          {book.hoverSummary}
+        </div>
+      </div>,
+      document.body
+    )}
+    </>
   );
 }
 
@@ -507,7 +593,7 @@ export default function AdvancedSearch() {
 
   // Toast state
   const [toast, setToast]                 = useState(null);
-
+  const [searchType, setSearchType] = useState("general");
   const debouncedQ      = useDebounce(filters.q);
   const debouncedAuthor = useDebounce(filters.author);
 
@@ -596,6 +682,8 @@ export default function AdvancedSearch() {
       if (f.yearMax !== "") params.append("yearMax", f.yearMax);
       f.genres.forEach(g => params.append("genre", g));
       params.append("sort", f.sort);
+      params.append("searchType", searchType);
+
       const { data } = await axios.get(`${API_BASE}/search?${params.toString()}`);
       setBooks(data);
       setSearched(true);
@@ -610,9 +698,9 @@ export default function AdvancedSearch() {
   useEffect(() => {
     fetchBooks(filters, debouncedQ, debouncedAuthor);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchBooks, debouncedQ, debouncedAuthor, filters.yearMin, filters.yearMax, filters.genres, filters.sort]);
+  }, [fetchBooks, debouncedQ, debouncedAuthor, filters.yearMin, filters.yearMax, filters.genres, filters.sort, filters.searchType]);
 
-  const setField = field => e => setFilters(prev => ({ ...prev, [field]: e.target.value }));
+  const setField = field => e => setFilters(prev => ({ ...prev, [field]: e.target.value, searchType: "" }));
 
   const toggleGenre = genre =>
     setFilters(prev => ({
@@ -628,7 +716,8 @@ export default function AdvancedSearch() {
 
   // ── Voice search ──────────────────────────────────────────
   const handleVoiceResult = useCallback((transcript) => {
-    setFilters(prev => ({ ...prev, q: transcript }));
+    setSearchType("voice");
+    setFilters(prev => ({ ...prev, q: transcript, searchType: "VOICE" }));
     setToast(`Heard: "${transcript}"`);
     speakFeedback(transcript);
   }, []);
@@ -760,7 +849,10 @@ export default function AdvancedSearch() {
                 type="text"
                 placeholder="Search by title, author, or keywords…"
                 value={filters.q}
-                onChange={setField("q")}
+                onChange={(e) => {
+                  setSearchType("general");
+                  setField("q")(e);
+                }}
                 onFocus={() => setShowHistory(true)}
                 autoComplete="off"
               />

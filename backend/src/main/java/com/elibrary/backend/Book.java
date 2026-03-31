@@ -30,4 +30,8 @@ public class Book {
 
     @Column(name = "cover_image", length = 500)
     private String coverImage; // URL to cover image (nullable → frontend shows placeholder)
+
+    // ── Hover Summary (Feature) ────────────────────────────────
+    @Column(name = "hover_summary", columnDefinition = "TEXT")
+    private String hoverSummary; // Short summary shown on hover in Advanced Search
 }

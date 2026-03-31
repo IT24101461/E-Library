@@ -65,6 +65,7 @@ public class BookController {
             @RequestParam(required = false) String q,
             @RequestParam(required = false) List<String> genre,
             @RequestParam(required = false) String author,
+            @RequestParam(required = false, defaultValue = "general") String searchType,
             @RequestParam(required = false) Integer yearMin,
             @RequestParam(required = false) Integer yearMax,
             @RequestParam(required = false, defaultValue = "title") String sort,
@@ -72,9 +73,10 @@ public class BookController {
 
         try {
             List<Book> results = bookService.advancedSearch(q, author, yearMin, yearMax, genre, sort);
+            System.out.println("DEBUG searchType received: " + searchType);
             searchHistoryService.recordSearch(
                     q, author, yearMin, yearMax, genre, sort,
-                    results.size(), "ADVANCED", request
+                    results.size(), searchType, request
             );
             return ResponseEntity.ok(results);
         } catch (IllegalArgumentException e) {
