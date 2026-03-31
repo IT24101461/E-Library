@@ -3,7 +3,6 @@ package com.elibrary.controller;
 import com.elibrary.model.Book;
 import com.elibrary.service.BookService;
 import com.elibrary.repository.UserRepository;
-import com.elibrary.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -12,12 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.io.File;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api")
@@ -33,7 +31,7 @@ public class BookController {
     @Autowired
     private UserRepository userRepository;
 
-    // PDF directory — resolved as absolute normalized path to avoid Windows /../ string issues
+    // PDF directory — resolved as absolute normalized path
     private static final String PDF_DIR = Paths.get(System.getProperty("user.dir"))
             .resolve("../pdf")
             .normalize()
@@ -78,7 +76,6 @@ public class BookController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
-            // Try pdfUrl field first
             String pdfUrl = book.getPdfUrl();
             File pdfFile = null;
 
@@ -86,7 +83,6 @@ public class BookController {
             log.info("[PDF] Book id=" + id + " pdfUrl=" + pdfUrl);
 
             if (pdfUrl != null && !pdfUrl.isBlank()) {
-                // If it's just a filename, look in pdf dir
                 if (!pdfUrl.startsWith("http")) {
                     String filename = Paths.get(pdfUrl).getFileName().toString();
                     pdfFile = new File(PDF_DIR + filename);

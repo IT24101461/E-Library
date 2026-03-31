@@ -44,6 +44,9 @@ const AdminDashboard = () => {
     isbn: '',
   });
 
+  // Feedbacks
+  const [feedbacks, setFeedbacks] = useState([]);
+
   // Active Tab
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -92,11 +95,24 @@ const AdminDashboard = () => {
     }
   };
 
+  // Fetch Feedbacks
+  const fetchFeedbacks = async () => {
+    try {
+      const res = await axios.get(`${API}/api/v1/feedback`);
+      if (!mountedRef.current) return;
+      setFeedbacks(Array.isArray(res.data) ? res.data : []);
+    } catch (e) {
+      console.error('Failed to fetch feedbacks', e);
+      setStatusMessage('Failed to fetch feedbacks');
+    }
+  };
+
   useEffect(() => {
     mountedRef.current = true;
     fetchStats();
     fetchUsers();
     fetchBooks();
+    fetchFeedbacks();
     return () => { mountedRef.current = false; };
     // eslint-disable-next-line
   }, []);
@@ -178,7 +194,6 @@ const AdminDashboard = () => {
       return;
     }
     try {
-      // Use query param approach (your version) — keeps auth consistent with other endpoints
       const res = await axios.post(`${API}/api/books?userId=${user.id}`, bookFormData);
       setBooks([...books, res.data]);
       setBookFormData({ title: '', author: '', description: '', isbn: '' });
@@ -193,7 +208,7 @@ const AdminDashboard = () => {
   const handleDeleteBook = async (bookId) => {
     if (window.confirm('Are you sure you want to delete this book?')) {
       try {
-        // Use the admin endpoint (teammate's version) — more appropriate for admin actions
+        // Using the admin endpoint (IT24103499's contribution) — more appropriate for admin actions
         await axios.delete(`${API}/api/admin/books/${bookId}?userId=${user.id}`);
         setBooks(books.filter(b => b.id !== bookId));
         setStatusMessage('Book deleted successfully');
@@ -201,6 +216,18 @@ const AdminDashboard = () => {
         console.error(e);
         setStatusMessage('Failed to delete book: ' + (e.response?.data?.error || e.message));
       }
+    }
+  };
+
+  // FEEDBACK CRUD OPERATIONS
+  const handleUpdateFeedbackStatus = async (id, status) => {
+    try {
+      await axios.put(`${API}/api/v1/feedback/${id}/status`, { status });
+      setFeedbacks(feedbacks.map(f => f.id === id ? { ...f, status } : f));
+      setStatusMessage(`Feedback marked as ${status}`);
+    } catch (e) {
+      console.error(e);
+      setStatusMessage('Failed to update feedback status');
     }
   };
 
@@ -243,6 +270,12 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab('books')}
           >
             <span className={styles.navIcon}>📚</span> Books
+          </button>
+          <button
+            className={`${styles.navItem} ${activeTab === 'feedback' ? styles.activeNav : ''}`}
+            onClick={() => setActiveTab('feedback')}
+          >
+            <span className={styles.navIcon}>💬</span> Feedback
           </button>
         </nav>
 
@@ -301,6 +334,7 @@ const AdminDashboard = () => {
               <h1 className={styles.pageTitle}>
                 {activeTab === 'users' && 'User Management'}
                 {activeTab === 'books' && 'Book Management'}
+                {activeTab === 'feedback' && 'User Feedback'}
               </h1>
               <p className={styles.pageSubtitle}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -617,6 +651,58 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Feedback Tab */}
+          {activeTab === 'feedback' && (
+            <div className={`${styles.usersSection} ${styles.fadeIn}`}>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>User Feedback & Requests</h2>
+              </div>
+
+              <div className={styles.usersGrid}>
+                {feedbacks.map(f => (
+                  <div key={f.id} className={styles.userCard}>
+                    <div className={styles.userCardHeader}>
+                      <div className={styles.cellAvatarLarge}>
+                        {f.type === 'bug' ? '🐛' : f.type === 'feature' ? '💡' : '⭐'}
+                      </div>
+                      <div className={styles.userCardInfo}>
+                        <h4 className={styles.userCardName} style={{textTransform: 'capitalize'}}>{f.type}</h4>
+                        <p className={styles.userCardEmail}>{new Date(f.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className={styles.userCardBody} style={{marginBottom: '10px'}}>
+                      <p style={{fontSize: '0.9rem', color: '#4b5563', maxHeight: '100px', overflowY: 'auto'}}>{f.message}</p>
+                      {f.rating && <p style={{color: '#f59e0b', marginTop: '5px', fontWeight: 'bold'}}>Rating: {f.rating}/5 ★</p>}
+                    </div>
+                    <div className={styles.userCardActions} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                      <span style={{
+                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid transparent',
+                        backgroundColor: f.status === 'PENDING' ? '#fee2e2' : f.status === 'REVIEWED' ? '#fef3c7' : '#dcfce3',
+                        color: f.status === 'PENDING' ? '#991b1b' : f.status === 'REVIEWED' ? '#92400e' : '#166534',
+                        borderColor: f.status === 'PENDING' ? '#fca5a5' : f.status === 'REVIEWED' ? '#fcd34d' : '#86efac'
+                      }}>{f.status || 'PENDING'}</span>
+                      <div style={{display: 'flex', gap: '5px'}}>
+                        {(f.status === 'PENDING' || !f.status) && (
+                          <button onClick={() => handleUpdateFeedbackStatus(f.id, 'REVIEWED')} className={styles.cardActionBtn} style={{background: '#fef3c7', color: '#92400e', border: 'none'}}>
+                            Review
+                          </button>
+                        )}
+                        {f.status !== 'SOLVED' && (
+                          <button onClick={() => handleUpdateFeedbackStatus(f.id, 'SOLVED')} className={styles.cardActionBtn} style={{background: '#dcfce3', color: '#166534', border: 'none'}}>
+                            Solve
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {feedbacks.length === 0 && (
+                  <p style={{gridColumn: '1 / -1', textAlign: 'center', padding: '20px', color: '#6b7280'}}>No feedback submitted yet.</p>
+                )}
               </div>
             </div>
           )}

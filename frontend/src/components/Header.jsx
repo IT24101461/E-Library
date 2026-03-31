@@ -39,6 +39,7 @@ const Header = () => {
           <Link to="/history" className={`${styles.navLink} ${isActive('/history')}`}>🕓 History</Link>
           <Link to="/ranker" className={`${styles.navLink} ${isActive('/ranker')}`}>🏆 Ranker</Link>
           <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={styles.navLink}>🤖 AI Recs</Link>
+          <Link to="/feedback" className={`${styles.navLink} ${isActive('/feedback')}`}>💬 Feedback</Link>
 
           {/* Admin-only links */}
           {user && user.role === 'ADMIN' && (
@@ -109,6 +110,7 @@ const Header = () => {
           <Link to="/history" className={styles.mobileNavLink}>🕓 History</Link>
           <Link to="/ranker" className={styles.mobileNavLink}>🏆 Ranker</Link>
           <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={styles.mobileNavLink}>🤖 AI Recs</Link>
+          <Link to="/feedback" className={styles.mobileNavLink}>💬 Feedback</Link>
 
           {user && user.role === 'ADMIN' && (
             <>

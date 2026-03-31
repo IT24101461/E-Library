@@ -105,7 +105,7 @@ const ActivityDashboard = () => {
     fetchData();
   }, [authUser]);
 
-  // Listen for progress updates coming from the reader and refresh affected history item
+  // Listen for progress updates coming from the reader and refresh
   useEffect(() => {
     const onProgressUpdated = async (e) => {
       try {
@@ -118,7 +118,6 @@ const ActivityDashboard = () => {
         console.warn('Failed to handle progressUpdated event', err);
       }
     };
-
     window.addEventListener('progressUpdated', onProgressUpdated);
     return () => window.removeEventListener('progressUpdated', onProgressUpdated);
   }, [authUser]);
@@ -141,7 +140,7 @@ const ActivityDashboard = () => {
         console.warn('Could not fetch reader items', e);
       }
 
-      // enrich history items with persisted progress (currentPage / totalPages)
+      // Enrich history items with persisted progress
       const rawHistory = historyRes.data || [];
       console.log('[Dashboard] Raw history:', rawHistory);
 
@@ -149,22 +148,14 @@ const ActivityDashboard = () => {
         rawHistory.map(async (h) => {
           const bookId = h.bookId || h.book?.id || h.id;
           try {
-            console.log(`[Dashboard] Fetching progress for bookId=${bookId}`);
             const response = await ActivityService.getProgress(uid, bookId);
-            console.log(`[Dashboard] Raw API response for bookId=${bookId}:`, response);
-
             const prog = response?.data || response;
-            console.log(`[Dashboard] Progress data object:`, prog);
-
             const hp = h || {};
             const bookMeta = hp.book || {};
             const currentPageFromHistory = hp.currentPage ?? hp.page ?? hp.current ?? 0;
             const totalPagesFromHistory = hp.totalPages ?? bookMeta.totalPages ?? bookMeta.pages ?? bookMeta.pageSize ?? hp.pages ?? 0;
-
             const currentPage = Math.min(prog?.currentPage ?? currentPageFromHistory ?? 0, prog?.totalPages ?? totalPagesFromHistory ?? 0);
             const totalPages = prog?.totalPages ?? totalPagesFromHistory ?? 0;
-
-            console.log(`[Dashboard] Final values for bookId=${bookId}: currentPage=${currentPage}, totalPages=${totalPages}`);
             return { ...h, currentPage, totalPages };
           } catch (e) {
             console.warn(`[Dashboard] Error fetching progress for bookId=${bookId}:`, e);
@@ -175,9 +166,7 @@ const ActivityDashboard = () => {
 
       console.log('[Dashboard] Enhanced history:', enhanced);
       setHistory(enhanced);
-      if (enhanced.length > 0) {
-        setCurrentBook(enhanced[0]);
-      }
+      if (enhanced.length > 0) setCurrentBook(enhanced[0]);
     } catch (err) {
       console.error('Error fetching data:', err);
       setError('Unable to load data. Please ensure the backend is running.');
@@ -193,13 +182,8 @@ const ActivityDashboard = () => {
       await ActivityService.deleteActivity(activityId);
       const updatedHistory = history.filter(item => item.id !== activityId);
       setHistory(updatedHistory);
-
       if (currentBook && currentBook.id === activityId) {
-        if (updatedHistory.length > 0) {
-          setCurrentBook(updatedHistory[0]);
-        } else {
-          setCurrentBook(null);
-        }
+        setCurrentBook(updatedHistory.length > 0 ? updatedHistory[0] : null);
       }
     } catch (err) {
       console.error('Failed to delete activity:', err);
@@ -208,11 +192,7 @@ const ActivityDashboard = () => {
 
   const handleBorrowBook = async (bookId) => {
     try {
-      await ActivityService.createActivity({
-        bookId,
-        userId: authUser ? authUser.id : 1,
-        action: 'BORROW',
-      });
+      await ActivityService.createActivity({ bookId, userId: authUser ? authUser.id : 1, action: 'BORROW' });
       fetchData();
     } catch (err) {
       console.error('Failed to borrow book:', err);
@@ -229,7 +209,7 @@ const ActivityDashboard = () => {
 
       await ActivityService.updateProgress({ userId: uid, bookId, currentPage: newCurrent, totalPages });
 
-      // Log the session explicitly so the backend can permanently calculate Reading Velocity
+      // Log the session so the backend can calculate Reading Velocity
       await ActivityService.logActivity(uid, 'SESSION', bookId, {
         currentPage: pagesRead || 0,
         timeSpentMinutes: Math.max(1, Math.floor((durationSeconds || 60) / 60))
@@ -241,10 +221,8 @@ const ActivityDashboard = () => {
         return { ...h, currentPage: newCurrent, totalPages };
       });
       setHistory(updatedHistory);
-
       setStats((s) => ({ ...(s || {}), readingVelocity: Math.round(velocity) }));
-
-      console.log(`[Dashboard] Session complete for book ${bookId}: pages=${pagesRead}, duration=${durationSeconds}s, velocity=${velocity.toFixed(2)} p/h`);
+      console.log(`[Dashboard] Session complete for book ${bookId}: pages=${pagesRead}, duration=${durationSeconds}s`);
     } catch (err) {
       console.error('Failed to process session completion:', err);
     }
@@ -276,10 +254,7 @@ const ActivityDashboard = () => {
                 <p className={styles['activitydashboard-alert-title']}>Connection Issue</p>
                 <p className={styles['activitydashboard-alert-message']}>{error}</p>
                 <div className="mt-2">
-                  <button
-                    className="px-3 py-1 bg-red-600 text-white rounded"
-                    onClick={() => fetchData()}
-                  >
+                  <button className="px-3 py-1 bg-red-600 text-white rounded" onClick={() => fetchData()}>
                     Retry
                   </button>
                 </div>
@@ -290,34 +265,25 @@ const ActivityDashboard = () => {
 
         {/* Hero / Welcome Section */}
         <div className={styles['activitydashboard-hero']}>
-          {/* Theme Selector mimicking Reading.jsx */}
+          {/* Theme Selector */}
           <div className="absolute top-6 right-6 z-20">
             <div className={styles['theme-options']}>
-              <button
-                className={theme === 'light' ? styles['theme-btn-active'] : ''}
-                onClick={() => setTheme('light')}
-              >
-                Light
-              </button>
-              <button
-                className={theme === 'dark' ? styles['theme-btn-active'] : ''}
-                onClick={() => setTheme('dark')}
-              >
-                Dark
-              </button>
-              <button
-                className={theme === 'sepia' ? styles['theme-btn-active'] : ''}
-                onClick={() => setTheme('sepia')}
-              >
-                Sepia
-              </button>
+              {['light', 'dark', 'sepia'].map(t => (
+                <button
+                  key={t}
+                  className={theme === t ? styles['theme-btn-active'] : ''}
+                  onClick={() => setTheme(t)}
+                >
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className={styles['activitydashboard-hero-inner']}>
             <div className={styles['activitydashboard-hero-content']}>
               <h1 className={styles['activitydashboard-hero-title']}>
-                Welcome Back, {authUser?.username || 'Reader'}!
+                Welcome Back, {authUser?.fullName || authUser?.username || 'Reader'}!
               </h1>
               {authUser && authUser.role === 'ADMIN' && (
                 <div className="mb-4 inline-block text-xs bg-white bg-opacity-20 text-indigo-50 px-3 py-1.5 rounded-full border border-white border-opacity-30 backdrop-blur-md">
@@ -332,13 +298,16 @@ const ActivityDashboard = () => {
                 <button className={styles['activitydashboard-hero-cta-primary']} onClick={() => navigate('/books')}>
                   <span className="text-xl">📚</span> Browse Library
                 </button>
-                <button className={styles['activitydashboard-hero-cta-secondary']} onClick={() => {
-                  if (currentBook) {
-                    navigate(`/reading/${currentBook.bookId || currentBook.id}?page=${currentBook.currentPage || 1}`)
-                  } else {
-                    navigate('/books')
-                  }
-                }}>
+                <button
+                  className={styles['activitydashboard-hero-cta-secondary']}
+                  onClick={() => {
+                    if (currentBook) {
+                      navigate(`/reading/${currentBook.bookId || currentBook.id}?page=${currentBook.currentPage || 1}`);
+                    } else {
+                      navigate('/books');
+                    }
+                  }}
+                >
                   <span className="text-xl">✨</span> Continue Reading
                 </button>
                 <button className={styles['activitydashboard-hero-cta-tertiary']} onClick={() => navigate('/history')}>
@@ -380,7 +349,7 @@ const ActivityDashboard = () => {
               ) : (
                 <div className={styles['activitydashboard-hero-illus-card']}>
                   <div className="text-center py-4">
-                    <span className="text-6xl mb-6 block animate-bounce" style={{animationDuration: '3s'}}>🚀</span>
+                    <span className="text-6xl mb-6 block animate-bounce" style={{ animationDuration: '3s' }}>🚀</span>
                     <p className="font-extrabold text-white text-2xl tracking-tight">Your Journey Awaits</p>
                     <p className="text-indigo-200 mt-2">Discover thousands of books</p>
                   </div>
@@ -400,7 +369,7 @@ const ActivityDashboard = () => {
           </div>
         )}
 
-        {/* Full-width AI Recommendations */}
+        {/* Full-width AI Recommendations (RecommendationEngine) */}
         <div className="mb-8">
           <RecommendationEngine currentBookId={currentBook?.bookId || currentBook?.id || 1508} />
         </div>
@@ -413,8 +382,7 @@ const ActivityDashboard = () => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <span>📖</span>
-                    Reading History
+                    <span>📖</span> Reading History
                   </h2>
                   <p className="text-gray-600 text-sm mt-1">{history.length} books in your library</p>
                 </div>
@@ -432,7 +400,7 @@ const ActivityDashboard = () => {
                 )}
               </div>
 
-              {/* History Cards */}
+              {/* History Cards — each gets an inline AIRecommendation */}
               <div className="space-y-4">
                 {history.length > 0 ? (
                   history.map((book, idx) => (
@@ -460,13 +428,11 @@ const ActivityDashboard = () => {
           <div className={styles['activitydashboard-sidebar']}>
             <div className={styles['activitydashboard-sidebar-sticky']}>
               <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 mb-6">
-                <span>✨</span>
-                Continue Reading
+                <span>✨</span> Continue Reading
               </h2>
 
               {currentBook ? (
                 <div className={styles['activitydashboard-sidebar-card']}>
-                  {/* Book Cover */}
                   <div className="h-64 w-full bg-gray-100 flex items-center justify-center relative overflow-hidden group">
                     {currentBook.coverUrl ? (
                       <img
@@ -479,23 +445,17 @@ const ActivityDashboard = () => {
                         }}
                       />
                     ) : null}
-                    <span style={{display: currentBook.coverUrl ? 'none' : 'flex'}} className="text-6xl">📕</span>
+                    <span style={{ display: currentBook.coverUrl ? 'none' : 'flex' }} className="text-6xl">📕</span>
                   </div>
 
-                  {/* Content */}
                   <div className={styles['activitydashboard-sidebar-content']}>
                     <h3 className={styles['activitydashboard-sidebar-book-title']}>{currentBook.title}</h3>
                     <p className={styles['activitydashboard-sidebar-book-author']}>{currentBook.author}</p>
 
-                    {/* Progress Section */}
                     <div className={styles['activitydashboard-sidebar-progress']}>
-                      <ProgressBar
-                        current={currentBook.currentPage || 0}
-                        total={currentBook.totalPages || 300}
-                      />
+                      <ProgressBar current={currentBook.currentPage || 0} total={currentBook.totalPages || 300} />
                     </div>
 
-                    {/* Stats */}
                     <div className={styles['activitydashboard-sidebar-meta']}>
                       <div className={styles['activitydashboard-sidebar-meta-card']}>
                         <p className={styles['activitydashboard-sidebar-meta-label']}>Pages Left</p>
@@ -507,14 +467,12 @@ const ActivityDashboard = () => {
                       </div>
                     </div>
 
-                    {/* Buttons */}
                     <div className="space-y-2">
                       <button
                         onClick={() => navigate(`/reading/${currentBook.bookId || currentBook.id}?page=${currentBook.currentPage || 1}`)}
                         className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center gap-2"
                       >
-                        <span className="text-lg">📖</span>
-                        Continue Reading
+                        <span className="text-lg">📖</span> Continue Reading
                       </button>
                       <button className="w-full bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
                         View Details
@@ -530,11 +488,10 @@ const ActivityDashboard = () => {
                 </div>
               )}
 
-              {/* Quick Stats Box */}
+              {/* Today's Goal */}
               <div className="mt-8 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
                 <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <span>🎯</span>
-                  Today's Goal
+                  <span>🎯</span> Today's Goal
                 </h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">

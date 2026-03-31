@@ -36,6 +36,7 @@ public class ActivityService {
         log.setAction(action);
         log.setCurrentPage(currentPage);
         log.setTimeSpentMinutes(timeSpentMinutes);
+        // Mark high interest if time spent > 5 minutes
         log.setHighInterest(timeSpentMinutes != null && timeSpentMinutes > 5);
         log.setTimestamp(LocalDateTime.now());
         return activityLogRepository.save(log);
@@ -58,7 +59,14 @@ public class ActivityService {
     // Get stats for dashboard
     public ActivityStatsDTO getUserStats(Long userId) {
         List<ActivityLog> activities = getUserHistory(userId);
-
+        
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
         // Calculate reading velocity (pages per hour) using explicit SESSION logs
         List<ActivityLog> sessionActivities = activities.stream()
                 .filter(a -> "SESSION".equals(a.getAction()))
@@ -68,6 +76,19 @@ public class ActivityService {
                 .mapToInt(a -> a.getCurrentPage() != null ? a.getCurrentPage() : 0)
                 .sum();
         int totalMinutes = sessionActivities.stream()
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+        // Calculate reading velocity (pages per hour)
+        int totalPages = activities.stream()
+                .mapToInt(a -> a.getCurrentPage() != null ? a.getCurrentPage() : 0)
+                .sum();
+        int totalMinutes = activities.stream()
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
                 .mapToInt(a -> a.getTimeSpentMinutes() != null ? a.getTimeSpentMinutes() : 0)
                 .sum();
         double readingVelocity = totalMinutes > 0 ? (totalPages / (double) totalMinutes) * 60 : 0;

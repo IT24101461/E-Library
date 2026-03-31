@@ -1,7 +1,19 @@
 server:
   port: 8080
   servlet:
+<<<<<<< HEAD
+    context-path: /api
+=======
+<<<<<<< HEAD
+    context-path: /api
+=======
+<<<<<<< HEAD
+    context-path: /api
+=======
     context-path: /
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
 spring:
   application:
@@ -10,12 +22,24 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/elibrary_db
     username: root
-    password: NewPassword123
+    password: "Bharana@2004"
     driver-class-name: com.mysql.cj.jdbc.Driver
     
   jpa:
     hibernate:
+<<<<<<< HEAD
       ddl-auto: update
+=======
+<<<<<<< HEAD
+      ddl-auto: update
+=======
+<<<<<<< HEAD
+      ddl-auto: update
+=======
+      ddl-auto: validate
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
     show-sql: false
     properties:
       hibernate:
@@ -24,7 +48,7 @@ spring:
         
   security:
     jwt:
-      secret: ${JWT_SECRET:your-secret-key-change-this-in-production}
+      secret: your-secret-key-change-this-in-production
       expiration: 86400000  # 24 hours in milliseconds
 
 logging:

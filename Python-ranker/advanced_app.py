@@ -5,9 +5,13 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer, CrossEncoder
 import numpy as np
 <<<<<<< HEAD
+from spellchecker import SpellChecker
+=======
+<<<<<<< HEAD
 import language_tool_python
 =======
 >>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
 app = Flask(__name__)
 CORS(app)
@@ -23,6 +27,13 @@ df = pd.read_pickle("books_metadata.pkl")
 
 <<<<<<< HEAD
 # --- LOAD GRAMMAR TOOL ---
+print("Loading Grammar Checker (PySpellChecker)...")
+spell = SpellChecker()
+print("Grammar Checker Loaded!")
+
+=======
+<<<<<<< HEAD
+# --- LOAD GRAMMAR TOOL ---
 print("Loading Grammar Checker...")
 try:
     grammar_tool = language_tool_python.LanguageTool('en-US')
@@ -34,6 +45,7 @@ except Exception as e:
 
 =======
 >>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
 @app.route('/chat', methods=['POST'])
 def advanced_bot():
@@ -71,6 +83,9 @@ def advanced_bot():
 
 
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 # --- SPELLING & GRAMMAR API ENDPOINT ---
 @app.route('/api/check-grammar', methods=['POST'])
 def check_grammar():
@@ -82,6 +97,24 @@ def check_grammar():
         if not user_text:
             return jsonify({"status": "error", "message": "No text provided"}), 400
 
+<<<<<<< HEAD
+        # 2. Use PySpellChecker for accurate spell checking
+        misspelled = spell.unknown(user_text.split())
+        mistakes = []
+        
+        # Check for spelling errors
+        for word in misspelled:
+            corrections = spell.correction(word)
+            start_idx = user_text.find(word)
+            if start_idx != -1:
+                mistakes.append({
+                    "mistake": word,
+                    "message": f"Spelling: '{word}' is misspelled",
+                    "suggestions": [corrections] if corrections else [],
+                    "offset": start_idx,
+                    "length": len(word)
+                })
+=======
         if grammar_tool is None:
             return jsonify({
                 "status": "unavailable",
@@ -104,6 +137,7 @@ def check_grammar():
                 "offset": match.offset,                 # Where it starts
                 "length": match.errorLength             # How long
             })
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
         return jsonify({
             "status": "success",
@@ -116,8 +150,11 @@ def check_grammar():
         return jsonify({"error": str(e)}), 500
 
 
+<<<<<<< HEAD
+=======
 =======
 >>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 # Add your HTML code here (same as before)
 
 if __name__ == '__main__':

@@ -20,7 +20,7 @@ import java.util.Map;
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    private static final String ADMIN_ACCESS_CODE = "ADMIN123"; // Admin code for creating admin accounts
+    private static final String ADMIN_ACCESS_CODE = "ADMIN123";
 
     @Autowired
     private UserRepository userRepository;
@@ -57,7 +57,6 @@ public class AuthController {
             long userCount = userRepository.count();
             if (requestedRole != null) {
                 if ("ADMIN".equalsIgnoreCase(requestedRole)) {
-                    // Verify admin code for ADMIN registration
                     String adminCode = body.get("adminCode");
                     if (adminCode == null || !adminCode.trim().equals(ADMIN_ACCESS_CODE)) {
                         logger.warn("Admin code validation failed. Provided: {}, Expected: {}", adminCode, ADMIN_ACCESS_CODE);

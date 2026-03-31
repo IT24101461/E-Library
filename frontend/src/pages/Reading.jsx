@@ -20,6 +20,7 @@ const Reading = () => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   const textLayerRef = useRef(null);
+
   const [book, setBook] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -62,7 +63,6 @@ const Reading = () => {
   }, []);
 
   // IMPORTANT: userId must be recalculated whenever authUser changes
-  // This ensures new users are correctly identified
   const userId = authUser?.id || 1;
   const saveTimeoutRef = useRef(null);
   const sessionTimerRef = useRef(null);
@@ -80,7 +80,7 @@ const Reading = () => {
       if (!isNaN(p) && p > 0) setCurrentPage(p);
     }
     fetchData();
-    fetchReaderData(); // Fetch marks
+    fetchReaderData();
 
     try {
       const sessRaw = sessionStorage.getItem('readingSession');
@@ -95,7 +95,7 @@ const Reading = () => {
           sessionTimerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
         }
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [bookId, userId]);
 
   const fetchReaderData = async () => {
@@ -131,7 +131,7 @@ const Reading = () => {
     return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
   }, [currentPage, book]);
 
-  // Apply body classes for global theme/contrast over text
+  // Apply body classes for global theme/contrast
   useEffect(() => {
     if (highContrast) {
       document.body.classList.add('high-contrast');
@@ -143,8 +143,7 @@ const Reading = () => {
 
   const loadPDF = async (pdfUrl) => {
     try {
-      let source = pdfUrl;
-      const pdf = await pdfjsLib.getDocument(source).promise;
+      const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
       setPdfDoc(pdf);
       setTotalPages(pdf.numPages);
       setCurrentPage((prev) => (prev && prev > 1 ? prev : 1));
@@ -189,7 +188,7 @@ const Reading = () => {
       }
 
       await page.render({ canvasContext: context, viewport }).promise;
-      try { canvas.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { }
+      try { canvas.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
 
       // Extract and render text layer
       const textContent = await page.getTextContent();
@@ -311,11 +310,11 @@ const Reading = () => {
       // Log explicitly for velocity tracking
       const minutes = Math.max(1, Math.floor(elapsed / 60));
       await ActivityService.logActivity(userId, 'SESSION', bookId, {
-        currentPage: pagesReadDuringSession, // Used as 'pagesRead' by backend for SESSION logs
+        currentPage: pagesReadDuringSession,
         timeSpentMinutes: minutes
       });
 
-      try { sessionStorage.removeItem('readingSession'); } catch (e) { }
+      try { sessionStorage.removeItem('readingSession'); } catch (e) {}
       window.dispatchEvent(new CustomEvent('progressUpdated', { detail: { bookId, currentPage: newCurrent } }));
     } catch (err) {
       console.error('Failed to stop session and save progress', err);
@@ -392,14 +391,11 @@ const Reading = () => {
 
   const handleAddHighlight = async () => {
     try {
-      // Get selected text from the page
       const selectedText = window.getSelection().toString().trim();
-
       if (!selectedText) {
         alert('Please select text first before highlighting!');
         return;
       }
-
       const res = await ReaderService.addHighlight({
         userId: Number(userId),
         bookId: Number(bookId),
@@ -407,11 +403,10 @@ const Reading = () => {
         content: selectedText,
         color: 'yellow'
       });
-
       if (res.data) {
         setHighlights([...highlights, res.data]);
         alert('Text highlighted successfully!');
-        window.getSelection().removeAllRanges(); // Clear selection
+        window.getSelection().removeAllRanges();
       }
     } catch (err) {
       console.error('Failed to add highlight', err);

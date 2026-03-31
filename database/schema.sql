@@ -87,7 +87,10 @@ CREATE TABLE reading_progress (
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 >>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 -- Bookmarks Table
 CREATE TABLE bookmarks (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -119,6 +122,9 @@ CREATE TABLE highlights (
 );
 
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 -- Feedbacks Table
 CREATE TABLE feedbacks (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -133,10 +139,13 @@ CREATE TABLE feedbacks (
   INDEX idx_created_at (created_at)
 );
 
+<<<<<<< HEAD
+=======
 =======
 =======
 >>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
 >>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 -- ============================================
 -- Sample Data (Optional - for testing)
 -- ============================================

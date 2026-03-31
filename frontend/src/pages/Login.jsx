@@ -11,6 +11,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState(null);
   const navigate = useNavigate();
 
   // Pre-fill credentials from registration
@@ -20,8 +21,6 @@ const Login = () => {
     if (userEmail) setEmail(userEmail);
     if (pwd) setPassword(pwd);
   }, [searchParams]);
-
-  const [successMsg, setSuccessMsg] = useState(null);
 
   const doLogin = async () => {
     try {
@@ -94,8 +93,8 @@ const Login = () => {
 
         <div className={styles['login-footer']}>
           Don't have an account? <Link to="/register" className={styles['login-link']}>Create one</Link>
-          <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #ddd', fontSize: '0.85rem' }}>
-            <Link to="/admin-login" style={{ color: '#667eea', textDecoration: 'none', fontWeight: '600' }}>
+          <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #ddd', fontSize: '0.85rem'}}>
+            <Link to="/admin-login" style={{color: '#667eea', textDecoration: 'none', fontWeight: '600'}}>
               🔐 Admin Access
             </Link>
           </div>

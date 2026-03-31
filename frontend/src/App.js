@@ -8,20 +8,18 @@ import AddBook from './pages/AddBook';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import StartPage from './pages/StartPage';
+import FeedbackPage from './pages/FeedbackPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import AdminRegister from './pages/AdminRegister';
 import AdminRoute from './components/AdminRoute';
 import Bookshelf from './pages/Bookshelf';
 import BookRankerApp from './pages/BookRankerApp';
-
-// Teammate's pages
 import BookList from './pages/BookList';
 import UploadBook from './pages/UploadBook';
 import Reader from './pages/Reader';
 import EditBook from './pages/EditBook';
 import History from './pages/History';
-
 import './App.css';
 
 // Passes onNavigate to Bookshelf so "Explore Book Ranker" button works
@@ -38,7 +36,7 @@ function BookRankerWithNav() {
 
 function AppRoutes() {
   const location = useLocation();
-  const hideHeaderPaths = ['/', '/start'];
+  const hideHeaderPaths = ['/', '/start', '/admin-dashboard', '/admin-login', '/admin-register'];
   const showHeader = !hideHeaderPaths.includes(location.pathname);
 
   // Scroll to hash fragment on navigation (handles links like /dashboard#recommendations)
@@ -55,6 +53,7 @@ function AppRoutes() {
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     };
 
+    // Try immediate scroll; if element not mounted yet, retry shortly
     scrollToElement();
     const retry = setTimeout(scrollToElement, 200);
     return () => clearTimeout(retry);
@@ -71,6 +70,7 @@ function AppRoutes() {
         <Route path="/books"           element={<BooksPage />} />
         <Route path="/books/add"       element={<AddBook />} />
         <Route path="/add-book"        element={<AddBook />} />
+        <Route path="/feedback"        element={<FeedbackPage />} />
         <Route path="/login"           element={<Login />} />
         <Route path="/register"        element={<Register />} />
         <Route path="/reading/:bookId" element={<Reading />} />
