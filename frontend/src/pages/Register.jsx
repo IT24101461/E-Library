@@ -25,7 +25,19 @@ const Register = () => {
     }
     try {
       setLoading(true);
+<<<<<<< HEAD
       const res = await axios.post(`${API}/api/auth/register`, { email, fullName, password, role });
+=======
+<<<<<<< HEAD
+      const res = await axios.post(`${API}/api/auth/register`, { email, fullName, password, role });
+=======
+<<<<<<< HEAD
+      const res = await axios.post(`${API}/api/auth/register`, { email, fullName, password, role });
+=======
+      const res = await axios.post(`${API}/auth/register`, { email, fullName, password, role });
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
       // Auto-login (server returns user info)
       localStorage.setItem('authUser', JSON.stringify(res.data));
       navigate('/');
@@ -63,7 +75,19 @@ const Register = () => {
     setConfirmOpen(false);
     try {
       setLoading(true);
+<<<<<<< HEAD
       const res = await axios.post(`${API}/api/auth/register`, { fullName, email, password, role });
+=======
+<<<<<<< HEAD
+      const res = await axios.post(`${API}/api/auth/register`, { fullName, email, password, role });
+=======
+<<<<<<< HEAD
+      const res = await axios.post(`${API}/api/auth/register`, { fullName, email, password, role });
+=======
+      const res = await axios.post(`${API}/auth/register`, { fullName, email, password, role });
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
       localStorage.setItem('authUser', JSON.stringify(res.data));
       setSuccessMsg('Account created successfully — redirecting...');
       setTimeout(() => {

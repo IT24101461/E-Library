@@ -1,29 +1,158 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
+=======
+<<<<<<< HEAD
+import React, { useState, useEffect } from 'react';
+=======
+<<<<<<< HEAD
+import React, { useState, useEffect } from 'react';
+=======
+import React, { useState, useEffect, useRef } from 'react';
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 import { useNavigate } from 'react-router-dom';
 import StatsCard from '../components/StatsCard';
 import HistoryCard from '../components/HistoryCard';
 import ProgressBar from '../components/ProgressBar';
 import ThemeToggle from '../components/ThemeToggle';
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 import AIRecommendation from '../components/AIRecommendation';
 import { ActivityService } from '../services/ActivityService';
 import { ReaderService } from '../services/ReaderService';
 import styles from './ActivityDashboard.module.css';
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+import RecommendationEngine from '../components/RecommendationEngine';
+import { ActivityService } from '../services/ActivityService';
+import styles from './ActivityDashboard.module.css';
+
+// ── Custom cursor (ported from Bookshelf) ────────────────────────────────────
+function CustomCursor() {
+  const ringRef = useRef(null);
+  const dotRef  = useRef(null);
+  const pos     = useRef({ x: 0, y: 0 });
+  const ring    = useRef({ x: 0, y: 0 });
+  const rafId   = useRef(null);
+
+  useEffect(() => {
+    const onMove = (e) => {
+      pos.current = { x: e.clientX, y: e.clientY };
+      if (dotRef.current) {
+        dotRef.current.style.left = `${e.clientX}px`;
+        dotRef.current.style.top  = `${e.clientY}px`;
+      }
+      const trail = document.createElement('div');
+      trail.className = styles['cursor-trail'];
+      trail.style.left = `${e.clientX}px`;
+      trail.style.top  = `${e.clientY}px`;
+      document.body.appendChild(trail);
+      setTimeout(() => trail.remove(), 700);
+    };
+    const onEnter = () => {
+      ringRef.current?.classList.add(styles['hovering']);
+      dotRef.current?.classList.add(styles['hovering']);
+    };
+    const onLeave = () => {
+      ringRef.current?.classList.remove(styles['hovering']);
+      dotRef.current?.classList.remove(styles['hovering']);
+    };
+    const onDown = () => ringRef.current?.classList.add(styles['clicking']);
+    const onUp   = () => ringRef.current?.classList.remove(styles['clicking']);
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('mouseup',   onUp);
+    document.querySelectorAll('button, a').forEach(el => {
+      el.addEventListener('mouseenter', onEnter);
+      el.addEventListener('mouseleave', onLeave);
+    });
+
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const animate = () => {
+      ring.current.x = lerp(ring.current.x, pos.current.x, 0.12);
+      ring.current.y = lerp(ring.current.y, pos.current.y, 0.12);
+      if (ringRef.current) {
+        ringRef.current.style.left = `${ring.current.x}px`;
+        ringRef.current.style.top  = `${ring.current.y}px`;
+      }
+      rafId.current = requestAnimationFrame(animate);
+    };
+    rafId.current = requestAnimationFrame(animate);
+
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('mouseup',   onUp);
+      cancelAnimationFrame(rafId.current);
+    };
+  }, []);
+
+  return (
+    <>
+      <div className={styles['cursor-ring']} ref={ringRef} />
+      <div className={styles['cursor-dot']}  ref={dotRef}  />
+    </>
+  );
+}
+// ────────────────────────────────────────────────────────────────────────────
+
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 const ActivityDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
+<<<<<<< HEAD
   const [totalBookmarks, setTotalBookmarks] = useState(0);
   const [totalHighlights, setTotalHighlights] = useState(0);
+=======
+<<<<<<< HEAD
+  const [totalBookmarks, setTotalBookmarks] = useState(0);
+  const [totalHighlights, setTotalHighlights] = useState(0);
+=======
+<<<<<<< HEAD
+  const [totalBookmarks, setTotalBookmarks] = useState(0);
+  const [totalHighlights, setTotalHighlights] = useState(0);
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
   const [currentBook, setCurrentBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [authUser, setAuthUser] = useState(null);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
   const [theme, setTheme] = useState(localStorage.getItem('appTheme') || 'light');
 
   useEffect(() => {
     localStorage.setItem('appTheme', theme);
   }, [theme]);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
   useEffect(() => {
     const raw = localStorage.getItem('authUser');
@@ -70,6 +199,13 @@ const ActivityDashboard = () => {
       const historyRes = await ActivityService.getHistory(uid);
       setStats(statsRes.data);
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
       try {
         const bRes = await ReaderService.getBookmarks(uid);
         const hRes = await ReaderService.getHighlights(uid);
@@ -79,6 +215,14 @@ const ActivityDashboard = () => {
         console.warn('Could not fetch reader items', e);
       }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
       // enrich history items with persisted progress (currentPage / totalPages)
       const rawHistory = historyRes.data || [];
       console.log('[Dashboard] Raw history:', rawHistory);
@@ -173,12 +317,27 @@ const ActivityDashboard = () => {
       // Send update to backend
       await ActivityService.updateProgress({ userId: uid, bookId, currentPage: newCurrent, totalPages });
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
       // Log the session explicitly so the backend can permanently calculate Reading Velocity
       await ActivityService.logActivity(uid, 'SESSION', bookId, {
         currentPage: pagesRead || 0,
         timeSpentMinutes: Math.max(1, Math.floor((durationSeconds || 60) / 60))
       });
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
       // Update local history state
       const updatedHistory = history.map((h) => {
         const idMatch = (h.bookId || h.id) === (bookId || 0);
@@ -198,7 +357,19 @@ const ActivityDashboard = () => {
 
   if (loading) {
     return (
+<<<<<<< HEAD
       <div className={styles['activitydashboard-loading']} data-theme={theme}>
+=======
+<<<<<<< HEAD
+      <div className={styles['activitydashboard-loading']} data-theme={theme}>
+=======
+<<<<<<< HEAD
+      <div className={styles['activitydashboard-loading']} data-theme={theme}>
+=======
+      <div className={styles['activitydashboard-loading']}>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
         <div className={styles['activitydashboard-loading-content']}>
           <div className={styles['activitydashboard-loading-spinner']}></div>
           <p className={styles['activitydashboard-loading-title']}>Loading your library...</p>
@@ -209,7 +380,20 @@ const ActivityDashboard = () => {
   }
 
   return (
+<<<<<<< HEAD
     <main className={styles['activitydashboard-main']} data-theme={theme}>
+=======
+<<<<<<< HEAD
+    <main className={styles['activitydashboard-main']} data-theme={theme}>
+=======
+<<<<<<< HEAD
+    <main className={styles['activitydashboard-main']} data-theme={theme}>
+=======
+    <main className={styles['activitydashboard-main']}>
+      <CustomCursor />
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
       <div className={styles['activitydashboard-container']}>
         
         {/* Error Message */}
@@ -220,6 +404,13 @@ const ActivityDashboard = () => {
               <div>
                 <p className={styles['activitydashboard-alert-title']}>Connection Issue</p>
                 <p className={styles['activitydashboard-alert-message']}>{error}</p>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
                 <div className="mt-2">
                   <button
                     className="px-3 py-1 bg-red-600 text-white rounded"
@@ -228,6 +419,14 @@ const ActivityDashboard = () => {
                     Retry
                   </button>
                 </div>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
               </div>
             </div>
           </div>
@@ -235,6 +434,13 @@ const ActivityDashboard = () => {
 
         {/* Hero / Welcome Section */}
         <div className={styles['activitydashboard-hero']}>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
           {/* Theme Selector mimicking Reading.jsx */}
           <div className="absolute top-6 right-6 z-20">
             <div className={styles['theme-options']}>
@@ -286,10 +492,42 @@ const ActivityDashboard = () => {
                 }}>
                   <span className="text-xl">✨</span> Continue Reading
                 </button>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+          <div className={styles['activitydashboard-hero-inner']}>
+            <div className={styles['activitydashboard-hero-content']}>
+                <h1 className={styles['activitydashboard-hero-title']}>Welcome Back, Reader!</h1>
+                {authUser && authUser.role === 'ADMIN' && (
+                  <div className="mt-3 inline-block text-sm bg-yellow-50 text-yellow-800 px-3 py-2 rounded shadow-sm">
+                    Admin mode: <strong className="ml-1">Elevated privileges enabled</strong>
+                  </div>
+                )}
+              <p className={styles['activitydashboard-hero-sub']}>Track your reading journey, set daily goals, and continue where you left off — all in one beautiful place.</p>
+
+              <div className={styles['activitydashboard-hero-ctas']}>
+                <div className="mb-3 ml-auto">
+                  <ThemeToggle />
+                </div>
+                <button className={styles['activitydashboard-hero-cta-primary']} onClick={() => navigate('/books')}>Browse Books</button>
+                <button className={styles['activitydashboard-hero-cta-secondary']} onClick={() => navigate('/bookshelf')}>Your Library</button>
+                <button className={styles['activitydashboard-hero-cta-tertiary']} onClick={() => navigate('/history')}>View History</button>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
               </div>
             </div>
 
             <div className={styles['activitydashboard-hero-illustration']}>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
               {history && history.length > 0 ? (
                 <div className={styles['hero-books-showcase']}>
                   {history.slice(0, 3).map((item, index) => (
@@ -319,6 +557,26 @@ const ActivityDashboard = () => {
                   </div>
                 </div>
               )}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+              <div className={styles['activitydashboard-hero-illus-card']}>
+                <svg width="280" height="180" viewBox="0 0 280 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0" y="0" width="280" height="180" rx="16" fill="white" fillOpacity="0.06" />
+                  <g transform="translate(20,20)">
+                    <rect x="0" y="0" width="80" height="110" rx="8" fill="white" fillOpacity="0.12" />
+                    <rect x="100" y="10" width="120" height="16" rx="6" fill="white" fillOpacity="0.12" />
+                    <rect x="100" y="36" width="80" height="12" rx="6" fill="white" fillOpacity="0.08" />
+                    <rect x="100" y="56" width="100" height="12" rx="6" fill="white" fillOpacity="0.08" />
+                    <rect x="100" y="80" width="60" height="12" rx="6" fill="white" fillOpacity="0.08" />
+                  </g>
+                </svg>
+              </div>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
             </div>
           </div>
         </div>
@@ -353,7 +611,22 @@ const ActivityDashboard = () => {
           </div>
         )}
 
+<<<<<<< HEAD
         {/* Main Content Grid */}
+=======
+<<<<<<< HEAD
+        {/* Main Content Grid */}
+=======
+<<<<<<< HEAD
+        {/* Main Content Grid */}
+=======
+        {/* Main Content Grid (with full-width AI recommendations above) */}
+        <div className="mb-8">
+          <RecommendationEngine currentBookId={currentBook?.bookId || currentBook?.id || 1508} />
+        </div>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
@@ -392,7 +665,18 @@ const ActivityDashboard = () => {
                         onDelete={handleDeleteActivity}
                         onSessionComplete={handleSessionComplete}
                       />
+<<<<<<< HEAD
                       <AIRecommendation book={book} />
+=======
+<<<<<<< HEAD
+                      <AIRecommendation book={book} />
+=======
+<<<<<<< HEAD
+                      <AIRecommendation book={book} />
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
                     </div>
                   ))
                 ) : (
@@ -507,4 +791,16 @@ const ActivityDashboard = () => {
   );
 };
 
+<<<<<<< HEAD
 export default ActivityDashboard;
+=======
+<<<<<<< HEAD
+export default ActivityDashboard;
+=======
+<<<<<<< HEAD
+export default ActivityDashboard;
+=======
+export default ActivityDashboard;
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5

@@ -4,7 +4,14 @@ import faiss
 import pandas as pd
 from sentence_transformers import SentenceTransformer, CrossEncoder
 import numpy as np
+<<<<<<< HEAD
 from spellchecker import SpellChecker
+=======
+<<<<<<< HEAD
+import language_tool_python
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
 app = Flask(__name__)
 CORS(app)
@@ -18,11 +25,27 @@ cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 index = faiss.read_index("books.index")
 df = pd.read_pickle("books_metadata.pkl")
 
+<<<<<<< HEAD
 # --- LOAD GRAMMAR TOOL ---
 print("Loading Grammar Checker (PySpellChecker)...")
 spell = SpellChecker()
 print("Grammar Checker Loaded!")
 
+=======
+<<<<<<< HEAD
+# --- LOAD GRAMMAR TOOL ---
+print("Loading Grammar Checker...")
+try:
+    grammar_tool = language_tool_python.LanguageTool('en-US')
+    print("Grammar Checker Loaded!")
+except Exception as e:
+    print(f"Grammar Checker failed to load: {e}")
+    print("Continuing without grammar checker...")
+    grammar_tool = None
+
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
 @app.route('/chat', methods=['POST'])
 def advanced_bot():
@@ -59,6 +82,10 @@ def advanced_bot():
     return jsonify({"reply": reply, "books": results})
 
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 # --- SPELLING & GRAMMAR API ENDPOINT ---
 @app.route('/api/check-grammar', methods=['POST'])
 def check_grammar():
@@ -70,6 +97,7 @@ def check_grammar():
         if not user_text:
             return jsonify({"status": "error", "message": "No text provided"}), 400
 
+<<<<<<< HEAD
         # 2. Use PySpellChecker for accurate spell checking
         misspelled = spell.unknown(user_text.split())
         mistakes = []
@@ -86,6 +114,30 @@ def check_grammar():
                     "offset": start_idx,
                     "length": len(word)
                 })
+=======
+        if grammar_tool is None:
+            return jsonify({
+                "status": "unavailable",
+                "message": "Grammar checker is not available",
+                "original_text": user_text,
+                "mistakes_found": 0,
+                "details": []
+            }), 200
+
+        # 2. Run the grammar and spell check
+        matches = grammar_tool.check(user_text)
+
+        # 3. Format the mistakes nicely for React
+        mistakes = []
+        for match in matches:
+            mistakes.append({
+                "mistake": match.matchedText,           # The misspelled word
+                "message": match.message,               # Why it's wrong
+                "suggestions": match.replacements[:3],  # Top 3 fixes
+                "offset": match.offset,                 # Where it starts
+                "length": match.errorLength             # How long
+            })
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
         return jsonify({
             "status": "success",
@@ -98,6 +150,11 @@ def check_grammar():
         return jsonify({"error": str(e)}), 500
 
 
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 # Add your HTML code here (same as before)
 
 if __name__ == '__main__':

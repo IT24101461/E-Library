@@ -44,9 +44,12 @@ const AdminDashboard = () => {
     isbn: '',
   });
 
+<<<<<<< HEAD
   // Feedbacks
   const [feedbacks, setFeedbacks] = useState([]);
 
+=======
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
   // Active Tab
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -95,6 +98,7 @@ const AdminDashboard = () => {
     }
   };
 
+<<<<<<< HEAD
   // Fetch Feedbacks
   const fetchFeedbacks = async () => {
     try {
@@ -107,12 +111,17 @@ const AdminDashboard = () => {
     }
   };
 
+=======
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
   useEffect(() => {
     mountedRef.current = true;
     fetchStats();
     fetchUsers();
     fetchBooks();
+<<<<<<< HEAD
     fetchFeedbacks();
+=======
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
     return () => { mountedRef.current = false; };
     // eslint-disable-next-line
   }, []);
@@ -196,30 +205,64 @@ const AdminDashboard = () => {
       return;
     }
     try {
+<<<<<<< HEAD
       const res = await axios.post(`${API}/api/books?userId=${user.id}`, bookFormData);
+=======
+<<<<<<< HEAD
+      const res = await axios.post(`${API}/api/books?userId=${user.id}`, bookFormData);
+=======
+      const res = await axios.post(`${API}/api/books`, {
+        ...bookFormData,
+        userId: user.id,
+      });
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
       setBooks([...books, res.data]);
       setBookFormData({ title: '', author: '', description: '', isbn: '' });
       setShowBookForm(false);
       setStatusMessage('Book created successfully');
     } catch (e) {
+<<<<<<< HEAD
       console.error(e);
       setStatusMessage('Failed to create book: ' + (e.response?.data?.error || e.message));
+=======
+<<<<<<< HEAD
+      console.error(e);
+      setStatusMessage('Failed to create book: ' + (e.response?.data?.error || e.message));
+=======
+      setStatusMessage('Failed to create book');
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
     }
   };
 
   const handleDeleteBook = async (bookId) => {
     if (window.confirm('Are you sure you want to delete this book?')) {
       try {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
         await axios.delete(`${API}/api/books/${bookId}`);
         setBooks(books.filter(b => b.id !== bookId));
         setStatusMessage('Book deleted successfully');
       } catch (e) {
         console.error(e);
+<<<<<<< HEAD
+=======
+=======
+        await axios.delete(`${API}/api/admin/books/${bookId}?userId=${user.id}`);
+        setBooks(books.filter(b => b.id !== bookId));
+        setStatusMessage('Book deleted successfully');
+      } catch (e) {
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
         setStatusMessage('Failed to delete book: ' + (e.response?.data?.error || e.message));
       }
     }
   };
 
+<<<<<<< HEAD
   // FEEDBACK CRUD OPERATIONS
   const handleUpdateFeedbackStatus = async (id, status) => {
     try {
@@ -232,6 +275,8 @@ const AdminDashboard = () => {
     }
   };
 
+=======
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
   // Logout
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -243,6 +288,10 @@ const AdminDashboard = () => {
 
   return (
     <div className={styles.adminDashboard}>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
       {/* Sidebar Navigation */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
@@ -272,12 +321,15 @@ const AdminDashboard = () => {
           >
             <span className={styles.navIcon}>📚</span> Books
           </button>
+<<<<<<< HEAD
           <button 
             className={`${styles.navItem} ${activeTab === 'feedback' ? styles.activeNav : ''}`}
             onClick={() => setActiveTab('feedback')}
           >
             <span className={styles.navIcon}>💬</span> Feedback
           </button>
+=======
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -336,7 +388,10 @@ const AdminDashboard = () => {
               <h1 className={styles.pageTitle}>
                 {activeTab === 'users' && 'User Management'}
                 {activeTab === 'books' && 'Book Management'}
+<<<<<<< HEAD
                 {activeTab === 'feedback' && 'User Feedback'}
+=======
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
               </h1>
               <p className={styles.pageSubtitle}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -559,10 +614,174 @@ const AdminDashboard = () => {
                           value={u.role}
                           onChange={e => handleChangeUserRole(u.id, e.target.value)}
                           className={`${styles.roleBadge} ${u.role === 'ADMIN' ? styles.roleAdmin : styles.roleUser}`}
+<<<<<<< HEAD
+=======
+=======
+      {/* Header */}
+      <div className={styles.adminHeader}>
+        <div className={styles.headerContent}>
+          <div className={styles.headerLeft}>
+            <h1 className={styles.adminTitle}>⚙️ Admin Control Panel</h1>
+            <p className={styles.adminSubtitle}>Manage Users, Books & System</p>
+          </div>
+          <div className={styles.headerRight}>
+            <span className={styles.adminUser}>👤 {user?.fullName}</span>
+            <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Status Message */}
+      {statusMessage && (
+        <div className={styles.statusMessage}>
+          {statusMessage}
+          <button onClick={() => setStatusMessage('')} className={styles.closeStatus}>✕</button>
+        </div>
+      )}
+
+      {/* Tabs Navigation */}
+      <div className={styles.tabsNav}>
+        <button 
+          className={`${styles.tabBtn} ${activeTab === 'dashboard' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('dashboard')}
+        >
+          📊 Dashboard
+        </button>
+        <button 
+          className={`${styles.tabBtn} ${activeTab === 'users' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('users')}
+        >
+          👥 Users
+        </button>
+        <button 
+          className={`${styles.tabBtn} ${activeTab === 'books' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('books')}
+        >
+          📚 Books
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className={styles.adminContent}>
+
+        {/* Dashboard Tab */}
+        {activeTab === 'dashboard' && (
+          <div className={styles.dashboardSection}>
+            <h2 className={styles.sectionTitle}>System Overview</h2>
+            
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon}>📚</div>
+                <div className={styles.statLabel}>Total Books</div>
+                <div className={styles.statValue}>{loading ? '...' : stats.totalBooks}</div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon}>👥</div>
+                <div className={styles.statLabel}>Total Users</div>
+                <div className={styles.statValue}>{loading ? '...' : stats.totalUsers}</div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon}>📈</div>
+                <div className={styles.statLabel}>System Activity</div>
+                <div className={styles.statValue}>{loading ? '...' : stats.totalActivity}</div>
+              </div>
+            </div>
+
+            <div className={styles.quickActions}>
+              <h3>Quick Actions</h3>
+              <div className={styles.actionButtons}>
+                <button onClick={() => setActiveTab('users')} className={styles.actionBtn}>
+                  Manage Users
+                </button>
+                <button onClick={() => setActiveTab('books')} className={styles.actionBtn}>
+                  Manage Books
+                </button>
+                <button onClick={() => { setShowUserForm(true); setActiveTab('users'); }} className={styles.actionBtn}>
+                  Add User
+                </button>
+                <button onClick={() => { setShowBookForm(true); setActiveTab('books'); }} className={styles.actionBtn}>
+                  Add Book
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Users Tab */}
+        {activeTab === 'users' && (
+          <div className={styles.usersSection}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>User Management</h2>
+              <button 
+                onClick={() => setShowUserForm(true)}
+                className={styles.addBtn}
+              >
+                + Add New User
+              </button>
+            </div>
+
+            {showUserForm && (
+              <div className={styles.formCard}>
+                <h3>Create New User</h3>
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={userFormData.fullName}
+                  onChange={e => setUserFormData({...userFormData, fullName: e.target.value})}
+                  className={styles.formInput}
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={userFormData.email}
+                  onChange={e => setUserFormData({...userFormData, email: e.target.value})}
+                  className={styles.formInput}
+                />
+                <select
+                  value={userFormData.role}
+                  onChange={e => setUserFormData({...userFormData, role: e.target.value})}
+                  className={styles.formInput}
+                >
+                  <option value="USER">User</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+                <div className={styles.formButtons}>
+                  <button onClick={handleCreateUser} className={styles.saveBtn}>Save</button>
+                  <button onClick={() => setShowUserForm(false)} className={styles.cancelBtn}>Cancel</button>
+                </div>
+              </div>
+            )}
+
+            <div className={styles.table}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map(u => (
+                    <tr key={u.id}>
+                      <td>{u.fullName}</td>
+                      <td>{u.email}</td>
+                      <td>
+                        <select 
+                          value={u.role}
+                          onChange={e => handleChangeUserRole(u.id, e.target.value)}
+                          className={styles.roleSelect}
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
                         >
                           <option value="USER">User</option>
                           <option value="ADMIN">Admin</option>
                         </select>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
                       </div>
                     </div>
                     <div className={styles.userCardActions}>
@@ -656,6 +875,7 @@ const AdminDashboard = () => {
               </div>
             </div>
           )}
+<<<<<<< HEAD
 
           {/* Feedback Tab */}
           {activeTab === 'feedback' && (
@@ -710,10 +930,105 @@ const AdminDashboard = () => {
           )}
         </div>
       </main>
+=======
+        </div>
+      </main>
+=======
+                      </td>
+                      <td>
+                        <button onClick={() => handleResetPasswordClick(u.id)} className={styles.resetBtn} title="Reset Password">
+                          🔐
+                        </button>
+                        <button onClick={() => handleDeleteUser(u.id)} className={styles.deleteBtn}>Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Books Tab */}
+        {activeTab === 'books' && (
+          <div className={styles.booksSection}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>Book Management</h2>
+              <button 
+                onClick={() => setShowBookForm(true)}
+                className={styles.addBtn}
+              >
+                + Add New Book
+              </button>
+            </div>
+
+            {showBookForm && (
+              <div className={styles.formCard}>
+                <h3>Add New Book</h3>
+                <input
+                  type="text"
+                  placeholder="Title"
+                  value={bookFormData.title}
+                  onChange={e => setBookFormData({...bookFormData, title: e.target.value})}
+                  className={styles.formInput}
+                />
+                <input
+                  type="text"
+                  placeholder="Author"
+                  value={bookFormData.author}
+                  onChange={e => setBookFormData({...bookFormData, author: e.target.value})}
+                  className={styles.formInput}
+                />
+                <input
+                  type="text"
+                  placeholder="ISBN"
+                  value={bookFormData.isbn}
+                  onChange={e => setBookFormData({...bookFormData, isbn: e.target.value})}
+                  className={styles.formInput}
+                />
+                <textarea
+                  placeholder="Description"
+                  value={bookFormData.description}
+                  onChange={e => setBookFormData({...bookFormData, description: e.target.value})}
+                  className={styles.formTextarea}
+                />
+                <div className={styles.formButtons}>
+                  <button onClick={handleCreateBook} className={styles.saveBtn}>Save</button>
+                  <button onClick={() => setShowBookForm(false)} className={styles.cancelBtn}>Cancel</button>
+                </div>
+              </div>
+            )}
+
+            <div className={styles.booksGrid}>
+              {books.map(b => (
+                <div key={b.id} className={styles.bookCard}>
+                  <h4>{b.title}</h4>
+                  <p><strong>Author:</strong> {b.author}</p>
+                  <p><strong>ISBN:</strong> {b.isbn || 'N/A'}</p>
+                  <p className={styles.description}>{b.description}</p>
+                  <button 
+                    onClick={() => handleDeleteBook(b.id)}
+                    className={styles.deleteBtn}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
       {/* Password Reset Modal */}
       {showResetPassword && (
         <div className={styles.modalOverlay}>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
           <div className={`${styles.modalContent} ${styles.fadeInUp}`}>
             <div className={styles.modalHeader}>
               <h3 className={styles.modalTitle}>Reset User Password</h3>
@@ -742,13 +1057,45 @@ const AdminDashboard = () => {
                 className={styles.formInput}
               />
             </div>
+<<<<<<< HEAD
+=======
+=======
+          <div className={styles.modalContent}>
+            <h3 className={styles.modalTitle}>Reset User Password</h3>
+            <p className={styles.modalText}>Enter a new password for this user:</p>
+            
+            <input
+              type="password"
+              placeholder="New Password"
+              value={resetPasswordData.newPassword}
+              onChange={e => setResetPasswordData({...resetPasswordData, newPassword: e.target.value})}
+              className={styles.formInput}
+            />
+            
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              value={resetPasswordData.confirmPassword}
+              onChange={e => setResetPasswordData({...resetPasswordData, confirmPassword: e.target.value})}
+              className={styles.formInput}
+            />
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
             
             <div className={styles.modalActions}>
               <button 
                 onClick={handleResetPasswordSubmit}
                 className={styles.btnConfirm}
               >
+<<<<<<< HEAD
                 Confirm Reset
+=======
+<<<<<<< HEAD
+                Confirm Reset
+=======
+                Reset Password
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
               </button>
               <button 
                 onClick={() => setShowResetPassword(false)}

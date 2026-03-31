@@ -19,7 +19,18 @@ import java.util.Map;
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+<<<<<<< HEAD
     private static final String ADMIN_ACCESS_CODE = "ADMIN123"; // Admin code for creating admin accounts
+=======
+<<<<<<< HEAD
+    private static final String ADMIN_ACCESS_CODE = "ADMIN123"; // Admin code for creating admin accounts
+=======
+<<<<<<< HEAD
+    private static final String ADMIN_ACCESS_CODE = "ADMIN123"; // Admin code for creating admin accounts
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 
     @Autowired
     private UserRepository userRepository;
@@ -58,6 +69,13 @@ public class AuthController {
             long userCount = userRepository.count();
             if (requestedRole != null) {
                 if ("ADMIN".equalsIgnoreCase(requestedRole)) {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
                     // Verify admin code for ADMIN registration
                     String adminCode = body.get("adminCode");
                     if (adminCode == null || !adminCode.trim().equals(ADMIN_ACCESS_CODE)) {
@@ -65,6 +83,14 @@ public class AuthController {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Invalid admin code"));
                     }
                     logger.info("Admin code validated successfully for email: {}", email);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
                     user.setRole("ADMIN");
                 } else {
                     user.setRole("USER");
