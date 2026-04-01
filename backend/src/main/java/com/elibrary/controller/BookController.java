@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001",
                          "http://localhost:5173", "http://localhost:5174"})
 public class BookController {
@@ -31,18 +31,12 @@ public class BookController {
     @Autowired
     private UserRepository userRepository;
 
-    // PDF directory — resolved as absolute normalized path
     private static final String PDF_DIR = Paths.get(System.getProperty("user.dir"))
             .resolve("../pdf")
             .normalize()
             .toAbsolutePath()
             .toString() + File.separator;
 
-    // ─────────────────────────────────────────
-    // BOOK ENDPOINTS — /api/books/...
-    // ─────────────────────────────────────────
-
-    // GET - Retrieve all books
     @GetMapping("/books")
     public ResponseEntity<List<Book>> getAllBooks() {
         try {
@@ -53,7 +47,6 @@ public class BookController {
         }
     }
 
-    // GET - Retrieve single book
     @GetMapping("/books/{id}")
     public ResponseEntity<Book> getBook(@PathVariable Long id) {
         try {
@@ -67,7 +60,6 @@ public class BookController {
         }
     }
 
-    // GET - Serve PDF file for a book
     @GetMapping("/books/{id}/file")
     public ResponseEntity<Resource> getBookFile(@PathVariable Long id) {
         try {
@@ -90,7 +82,6 @@ public class BookController {
                 }
             }
 
-            // Fallback: try to find by title in pdf dir
             if (pdfFile == null || !pdfFile.exists()) {
                 File pdfDir = new File(PDF_DIR);
                 if (pdfDir.exists()) {
@@ -124,7 +115,6 @@ public class BookController {
         }
     }
 
-    // GET - Retrieve book content
     @GetMapping("/books/{id}/content")
     public ResponseEntity<String> getBookContent(@PathVariable Long id) {
         try {
@@ -138,7 +128,6 @@ public class BookController {
         }
     }
 
-    // GET - Retrieve books by category
     @GetMapping("/books/category/{category}")
     public ResponseEntity<List<Book>> getBooksByCategory(@PathVariable String category) {
         try {
@@ -149,7 +138,6 @@ public class BookController {
         }
     }
 
-    // POST - Create new book (admin only)
     @PostMapping("/books")
     public ResponseEntity<?> createBook(@RequestParam(required = false) Long userId, @RequestBody Book book) {
         try {
@@ -167,7 +155,6 @@ public class BookController {
         }
     }
 
-    // PUT - Update book
     @PutMapping("/books/{id}")
     public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
         try {
@@ -181,7 +168,6 @@ public class BookController {
         }
     }
 
-    // DELETE - Delete book
     @DeleteMapping("/books/{id}")
     public ResponseEntity<String> deleteBook(@PathVariable Long id) {
         try {
@@ -192,10 +178,6 @@ public class BookController {
                     .body("{\"error\": \"Failed to delete book\"}");
         }
     }
-
-    // ─────────────────────────────────────────
-    // BOOKSHELF ENDPOINTS — /api/bookshelf/...
-    // ─────────────────────────────────────────
 
     @GetMapping("/bookshelf/all")
     public List<Book> getAllBookshelfBooks() {

@@ -3,7 +3,7 @@ import styles from './FeedbackWidget.module.css';
 import FeedbackService from '../services/FeedbackService';
 
 const FeedbackWidget = ({ isOpen, onClose }) => {
-  const [type, setType] = useState('bug'); // 'bug', 'feature', 'review'
+  const [type, setType] = useState('bug');
   const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [message, setMessage] = useState('');
@@ -17,7 +17,6 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
   useEffect(() => {
     const rootTheme = document.documentElement.getAttribute('data-theme') || 'dark';
     setTheme(rootTheme);
-    
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'data-theme') {
@@ -29,7 +28,6 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
     return () => observer.disconnect();
   }, []);
 
-  // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
       setIsSuccess(false);
@@ -43,9 +41,7 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
 
   const handleTypeSelect = (selectedType) => {
     setType(selectedType);
-    if (selectedType !== 'review') {
-      setRating(0);
-    }
+    if (selectedType !== 'review') setRating(0);
   };
 
   const handleCheckGrammar = async () => {
@@ -53,10 +49,8 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
       setErrorMessage('Please enter text to check');
       return;
     }
-
     setIsCheckingGrammar(true);
     try {
-<<<<<<< HEAD
       const params = new URLSearchParams();
       params.append('text', message);
       params.append('language', 'en-US');
@@ -69,33 +63,11 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
 
       const data = await response.json();
       const mistakes = data.matches || [];
-      
       setGrammarIssues(mistakes);
       if (mistakes.length === 0) {
         setErrorMessage('✓ No grammar issues found!');
       } else {
         setErrorMessage(`Found ${mistakes.length} issue(s)`);
-=======
-      const response = await fetch('http://127.0.0.1:5000/api/check-grammar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: message })
-      });
-
-      const data = await response.json();
-      
-      if (data.status === 'success') {
-        setGrammarIssues(data.details || []);
-        if (data.details.length === 0) {
-          setErrorMessage('✓ No grammar issues found!');
-        } else {
-          setErrorMessage(`Found ${data.details.length} issue(s)`);
-        }
-      } else {
-        setErrorMessage('Failed to check grammar');
->>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
       }
     } catch (error) {
       console.error('Grammar check error:', error);
@@ -111,7 +83,6 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
       setErrorMessage('Please enter a message');
       return;
     }
-
     setIsSubmitting(true);
     setErrorMessage('');
     try {
@@ -121,14 +92,12 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
         message
       });
       setIsSuccess(true);
-      setTimeout(() => {
-        onClose();
-      }, 2000);
+      setTimeout(() => { onClose(); }, 2000);
     } catch (error) {
       console.error('Failed to submit feedback', error);
-      const errorMsg = error.response?.data?.message || 
-                       error.response?.data || 
-                       error.message || 
+      const errorMsg = error.response?.data?.message ||
+                       error.response?.data ||
+                       error.message ||
                        'Failed to submit feedback. Please try again.';
       setErrorMessage(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
     } finally {
@@ -142,7 +111,7 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} data-theme={theme} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeBtn} onClick={onClose}>✕</button>
-        
+
         {!isSuccess ? (
           <>
             <div className={styles.header}>
@@ -205,7 +174,6 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
                 maxLength={500}
                 required
               />
-              
               <button
                 type="button"
                 onClick={handleCheckGrammar}
@@ -214,15 +182,11 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
               >
                 {isCheckingGrammar ? 'Checking...' : '✓ CHECK GRAMMAR'}
               </button>
-              
               {errorMessage && (
-                <div className={styles.errorMessage}>
-                  {errorMessage}
-                </div>
+                <div className={styles.errorMessage}>{errorMessage}</div>
               )}
-              
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className={styles.submitBtn}
                 disabled={isSubmitting || !message.trim() || (type === 'review' && rating === 0)}
               >
@@ -231,11 +195,11 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
             </form>
           </>
         ) : (
-           <div className={styles.successMessage}>
-              <div className={styles.checkIcon}>✓</div>
-              <h3 className={styles.title}>Thank You!</h3>
-              <p className={styles.subtitle}>Your feedback has been received.</p>
-           </div>
+          <div className={styles.successMessage}>
+            <div className={styles.checkIcon}>✓</div>
+            <h3 className={styles.title}>Thank You!</h3>
+            <p className={styles.subtitle}>Your feedback has been received.</p>
+          </div>
         )}
       </div>
     </div>

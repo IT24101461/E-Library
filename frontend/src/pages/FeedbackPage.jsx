@@ -5,14 +5,13 @@ import FeedbackService from '../services/FeedbackService';
 
 const FeedbackPage = () => {
   const navigate = useNavigate();
-  const [type, setType] = useState('bug'); // 'bug', 'feature', 'review'
+  const [type, setType] = useState('bug');
   const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [theme, setTheme] = useState('dark');
-
   const [isCheckingGrammar, setIsCheckingGrammar] = useState(false);
   const [grammarMistakes, setGrammarMistakes] = useState([]);
   const [grammarChecked, setGrammarChecked] = useState(false);
@@ -28,9 +27,8 @@ const FeedbackPage = () => {
     setIsCheckingGrammar(true);
     setGrammarChecked(false);
     setGrammarMistakes([]);
-    
+
     try {
-<<<<<<< HEAD
       const params = new URLSearchParams();
       params.append('text', message);
       params.append('language', 'en-US');
@@ -41,7 +39,7 @@ const FeedbackPage = () => {
         body: params
       });
       const data = await response.json();
-      
+
       const mistakes = (data.matches || []).map(m => ({
         offset: m.offset,
         length: m.length,
@@ -52,18 +50,6 @@ const FeedbackPage = () => {
 
       setGrammarMistakes(mistakes);
       setGrammarChecked(true);
-=======
-      const response = await fetch('http://127.0.0.1:5001/api/check-grammar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: message })
-      });
-      const data = await response.json();
-      if (data.status === 'success') {
-        setGrammarMistakes(data.details || []);
-        setGrammarChecked(true);
-      }
->>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
     } catch (err) {
       console.error('Error calling grammar API:', err);
     } finally {
@@ -74,21 +60,19 @@ const FeedbackPage = () => {
   const applyCorrection = (mistake, suggestion) => {
     const newMsg = message.substring(0, mistake.offset) + suggestion + message.substring(mistake.offset + mistake.length);
     setMessage(newMsg);
-    
+
     const offsetDiff = suggestion.length - mistake.length;
     setGrammarMistakes(prev => prev.filter(m => m !== mistake).map(m => {
-        if (m.offset > mistake.offset) {
-            return { ...m, offset: m.offset + offsetDiff };
-        }
-        return m;
+      if (m.offset > mistake.offset) {
+        return { ...m, offset: m.offset + offsetDiff };
+      }
+      return m;
     }));
   };
 
   useEffect(() => {
-    // Sync with existing theme
     const rootTheme = document.documentElement.getAttribute('data-theme') || 'dark';
     setTheme(rootTheme);
-    
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'data-theme') {
@@ -102,15 +86,12 @@ const FeedbackPage = () => {
 
   const handleTypeSelect = (selectedType) => {
     setType(selectedType);
-    if (selectedType !== 'review') {
-      setRating(0);
-    }
+    if (selectedType !== 'review') setRating(0);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!message.trim()) return;
-
     setIsSubmitting(true);
     try {
       await FeedbackService.submitFeedback({
@@ -200,10 +181,10 @@ const FeedbackPage = () => {
                   maxLength={1000}
                   required
                 />
-                
+
                 <div className={styles.grammarControls}>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className={styles.grammarBtn}
                     onClick={handleCheckGrammar}
                     disabled={isCheckingGrammar || !message.trim()}
@@ -224,9 +205,9 @@ const FeedbackPage = () => {
                             {mistake.suggestions && mistake.suggestions.length > 0 && (
                               <div className={styles.suggestionsBox}>
                                 {mistake.suggestions.map((sug, i) => (
-                                  <button 
-                                    key={i} 
-                                    type="button" 
+                                  <button
+                                    key={i}
+                                    type="button"
                                     className={styles.suggestionChip}
                                     onClick={() => applyCorrection(mistake, sug)}
                                   >
@@ -246,8 +227,8 @@ const FeedbackPage = () => {
                   </div>
                 )}
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className={styles.submitBtn}
                   disabled={isSubmitting || !message.trim() || (type === 'review' && rating === 0)}
                 >
@@ -257,14 +238,14 @@ const FeedbackPage = () => {
             </div>
           </>
         ) : (
-           <div className={styles.successMessage}>
-              <div className={styles.checkIcon}>✓</div>
-              <h2 className={styles.title}>You're Awesome!</h2>
-              <p className={styles.subtitle}>Your feedback has been successfully submitted and helps us build a better platform for everyone.</p>
-              <button className={styles.homeBtn} onClick={() => navigate('/dashboard')}>
-                Return to Dashboard
-              </button>
-           </div>
+          <div className={styles.successMessage}>
+            <div className={styles.checkIcon}>✓</div>
+            <h2 className={styles.title}>You're Awesome!</h2>
+            <p className={styles.subtitle}>Your feedback has been successfully submitted and helps us build a better platform for everyone.</p>
+            <button className={styles.homeBtn} onClick={() => navigate('/dashboard')}>
+              Return to Dashboard
+            </button>
+          </div>
         )}
       </div>
     </div>

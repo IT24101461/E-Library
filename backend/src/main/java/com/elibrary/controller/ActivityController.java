@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class ActivityController {
 
@@ -90,61 +90,11 @@ public class ActivityController {
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             e.printStackTrace();
-            // Return safe defaults so the dashboard still loads
             Map<String, Object> defaults = new HashMap<>();
             defaults.put("booksRead", 0);
             defaults.put("readingVelocity", 0);
             defaults.put("currentStreak", 0);
             return ResponseEntity.ok(defaults);
-        }
-    }
-
-    // GET - Reading progress for a specific book
-    @GetMapping("/progress")
-    public ResponseEntity<Map<String, Object>> getProgress(
-            @RequestParam Long userId,
-            @RequestParam Long bookId) {
-        try {
-            ReadingProgress progress = progressService.getProgress(userId, bookId);
-            Map<String, Object> response = new HashMap<>();
-            if (progress != null) {
-                response.put("currentPage", progress.getCurrentPage() != null ? progress.getCurrentPage() : 0);
-                response.put("totalPages", progress.getTotalPages() != null ? progress.getTotalPages() : 0);
-                response.put("userId", userId);
-                response.put("bookId", bookId);
-            } else {
-                response.put("currentPage", 0);
-                response.put("totalPages", 0);
-                response.put("userId", userId);
-                response.put("bookId", bookId);
-            }
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("currentPage", 0);
-            response.put("totalPages", 0);
-            return ResponseEntity.ok(response);
-        }
-    }
-
-    // PUT - Update reading progress
-    @PutMapping("/progress")
-    public ResponseEntity<Map<String, Object>> updateProgress(
-            @RequestParam Long userId,
-            @RequestParam Long bookId,
-            @RequestParam Integer currentPage,
-            @RequestParam(required = false, defaultValue = "0") Integer totalPages) {
-        try {
-            progressService.updateProgress(userId, bookId, currentPage, totalPages);
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Progress updated successfully");
-            response.put("currentPage", currentPage);
-            response.put("totalPages", totalPages);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", "Failed to update progress: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 

@@ -23,8 +23,6 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/**").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
                         .anyRequest().permitAll()
                 );
 
@@ -39,7 +37,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Allow frontend dev servers on 3000 and 3001
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3001"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));

@@ -148,6 +148,7 @@ const ActivityDashboard = () => {
         rawHistory.map(async (h) => {
           const bookId = h.bookId || h.book?.id || h.id;
           try {
+            if (!bookId) return { ...h };
             const response = await ActivityService.getProgress(uid, bookId);
             const prog = response?.data || response;
             const hp = h || {};
