@@ -3,20 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import styles from './StartPage.module.css';
 import { ActivityService } from '../services/ActivityService';
 
+<<<<<<< HEAD
 const RightArrowIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
 );
 
+=======
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 const StartPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(1);
+<<<<<<< HEAD
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     // Reveal text animation after load
     setTimeout(() => setIsLoaded(true), 100);
 
+=======
+
+  useEffect(() => {
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     const raw = localStorage.getItem('authUser');
     if (raw) {
       try {
@@ -29,6 +37,10 @@ const StartPage = () => {
   const handleAction = async (action) => {
     try {
       setLoading(true);
+<<<<<<< HEAD
+=======
+      // create a lightweight activity record so dashboard reflects the action
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
       await ActivityService.createActivity({ action: action, userId: userId });
     } catch (err) {
       console.warn('Failed to record activity', err);
@@ -40,6 +52,7 @@ const StartPage = () => {
 
   return (
     <main className={styles.startpage}>
+<<<<<<< HEAD
       {/* Background Image Wrapper */}
       <div className={styles.bgImageWrap} aria-hidden>
         <img 
@@ -78,6 +91,19 @@ const StartPage = () => {
              <p>Access thousands of curated books and research papers.</p>
           </div>
         </div>
+=======
+      <div className={styles.bgVideoWrap} aria-hidden>
+        <video className={styles.bgVideo} autoPlay muted loop playsInline poster="/pdf/reading-illus.png">
+          <source src="/vedio/Professional_Library_Video_Generation.webm" type="video/webm" />
+        </video>
+        <div className={styles.videoOverlay}></div>
+      </div>
+
+      <div className={styles.centerContainer}>
+        <button className={styles.centerButton} onClick={() => handleAction('START_READING')} disabled={loading}>
+          {loading ? 'Processing...' : 'Start Reading'}
+        </button>
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
       </div>
     </main>
   );

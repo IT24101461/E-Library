@@ -35,9 +35,12 @@ public class Feedback {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+<<<<<<< HEAD
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
+=======
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     public Feedback() {}
 
     @PrePersist
@@ -67,7 +70,10 @@ public class Feedback {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+<<<<<<< HEAD
 
     public Boolean getIsDeleted() { return isDeleted; }
     public void setIsDeleted(Boolean isDeleted) { this.isDeleted = isDeleted; }
+=======
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 }

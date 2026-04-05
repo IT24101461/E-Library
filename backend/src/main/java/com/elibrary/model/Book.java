@@ -1,21 +1,79 @@
 package com.elibrary.model;
 
 import jakarta.persistence.*;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "books")
 public class Book {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+import lombok.Data;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "books")
+public class Book {
+
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+    // ── Shared ──
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
     private String author;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+    @Column(name = "publication_year")
+    private Integer publicationYear;
+
+    // ── Teammate's fields ──
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -31,6 +89,16 @@ public class Book {
     @Column(name = "pdf_url", columnDefinition = "LONGTEXT")
     private String pdfUrl;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     @Column(name = "isbn")
     private String isbn;
 
@@ -38,6 +106,18 @@ public class Book {
     private Integer publicationYear;
 
     @Column(name = "category")
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+    private String isbn;
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     private String category;
 
     @Column(name = "created_at")
@@ -49,6 +129,16 @@ public class Book {
     @Column(name = "is_available")
     private Boolean isAvailable = true;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     // Constructors
     public Book() {
     }
@@ -188,3 +278,32 @@ public class Book {
         this.isAvailable = isAvailable;
     }
 }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+    // ── Your fields ──
+    private String genre;
+    private String emoji;
+    private double rating;
+    private String status;
+    private int progress;
+
+    @Column(name = "list_name")
+    private String listName;
+
+    @Column(name = "cover_image")
+    private String coverImage;
+
+    private String keywords;
+
+    @Column(name = "is_personal")
+    private Boolean isPersonal = false;
+}
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11

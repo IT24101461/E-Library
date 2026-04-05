@@ -11,7 +11,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v1/feedback")
+<<<<<<< HEAD
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+=======
+<<<<<<< HEAD
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+=======
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 public class FeedbackController {
 
     @Autowired

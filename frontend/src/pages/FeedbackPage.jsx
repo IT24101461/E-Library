@@ -30,6 +30,10 @@ const FeedbackPage = () => {
     setGrammarMistakes([]);
     
     try {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
       const params = new URLSearchParams();
       params.append('text', message);
       params.append('language', 'en-US');
@@ -51,6 +55,21 @@ const FeedbackPage = () => {
 
       setGrammarMistakes(mistakes);
       setGrammarChecked(true);
+<<<<<<< HEAD
+=======
+=======
+      const response = await fetch('http://127.0.0.1:5001/api/check-grammar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: message })
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        setGrammarMistakes(data.details || []);
+        setGrammarChecked(true);
+      }
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     } catch (err) {
       console.error('Error calling grammar API:', err);
     } finally {

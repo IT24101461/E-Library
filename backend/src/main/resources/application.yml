@@ -1,7 +1,23 @@
 server:
   port: 8080
   servlet:
+<<<<<<< HEAD
     context-path: /api
+=======
+<<<<<<< HEAD
+    context-path: /api
+=======
+<<<<<<< HEAD
+    context-path: /api
+=======
+<<<<<<< HEAD
+    context-path: /api
+=======
+    context-path: /
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 
 spring:
   application:
@@ -15,7 +31,23 @@ spring:
     
   jpa:
     hibernate:
+<<<<<<< HEAD
       ddl-auto: update
+=======
+<<<<<<< HEAD
+      ddl-auto: update
+=======
+<<<<<<< HEAD
+      ddl-auto: update
+=======
+<<<<<<< HEAD
+      ddl-auto: update
+=======
+      ddl-auto: validate
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     show-sql: false
     properties:
       hibernate:

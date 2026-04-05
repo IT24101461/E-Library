@@ -2,12 +2,15 @@ package com.elibrary.controller;
 
 import com.elibrary.model.User;
 import com.elibrary.repository.UserRepository;
+<<<<<<< HEAD
 import com.elibrary.repository.ActivityLogRepository;
 import com.elibrary.repository.BookmarkRepository;
 import com.elibrary.repository.HighlightRepository;
 import com.elibrary.repository.FeedbackRepository;
 import com.elibrary.repository.ReadingProgressRepository;
 import com.elibrary.repository.SearchHistoryRepository;
+=======
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 import com.elibrary.service.BookService;
 import com.elibrary.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +19,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+<<<<<<< HEAD
 import java.time.LocalDateTime;
+=======
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +37,7 @@ public class AdminController {
     private UserRepository userRepository;
 
     @Autowired
+<<<<<<< HEAD
     private ActivityLogRepository activityLogRepository;
 
     @Autowired
@@ -49,6 +56,8 @@ public class AdminController {
     private SearchHistoryRepository searchHistoryRepository;
 
     @Autowired
+=======
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     private BookService bookService;
 
     @Autowired
@@ -150,6 +159,7 @@ public class AdminController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "User not found or already deleted"));
             }
 
+<<<<<<< HEAD
             // Soft-delete all user-related data (no hard deletes to avoid foreign key issues)
             // Soft-delete bookmarks
             var bookmarks = bookmarkRepository.findByUserIdAndIsDeletedFalse(id);
@@ -194,6 +204,8 @@ public class AdminController {
             }
 
             // Finally soft-delete the user
+=======
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
             User target = targetOpt.get();
             target.setIsDeleted(true);
             userRepository.save(target);
@@ -256,7 +268,11 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Failed to reset password"));
         }
     }
+<<<<<<< HEAD
 
     // ============ END OF ADMIN ENDPOINTS ============
 }
 
+=======
+}
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11

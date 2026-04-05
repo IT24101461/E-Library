@@ -34,6 +34,7 @@ const Header = () => {
           <Link to="/dashboard" className={`${styles.navLink} ${isActive('/dashboard') ? styles.navLinkActive : ''}`}>
             🏠 Dashboard
           </Link>
+<<<<<<< HEAD
           <Link to="/books" className={`${styles.navLink} ${isActive('/books') ? styles.navLinkActive : ''}`}>
             📖 Books
           </Link>
@@ -45,17 +46,96 @@ const Header = () => {
           <Link to="/feedback" className={`${styles.navLink} ${isActive('/feedback') ? styles.navLinkActive : ''}`}>
             💬 Feedback
           </Link>
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+          <Link to="/books" className={`${styles.navLink} ${isActive('/books') ? styles.navLinkActive : ''}`}>
+            📖 Books
+          </Link>
+          <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={`${styles.navLink}`}>
+            🤖 AI Recs
+          </Link>
+<<<<<<< HEAD
+          <Link to="/feedback" className={`${styles.navLink} ${isActive('/feedback') ? styles.navLinkActive : ''}`}>
+            💬 Feedback
+          </Link>
+=======
+<<<<<<< HEAD
+          <Link to="/feedback" className={`${styles.navLink} ${isActive('/feedback') ? styles.navLinkActive : ''}`}>
+            💬 Feedback
+          </Link>
+=======
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
           {user && user.role === 'ADMIN' && (
             <Link to="/admin" className={`${styles.navLink} ${isActive('/admin') ? styles.navLinkActive : ''}`}>
               ⚙️ Admin
             </Link>
           )}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+          <Link to="/books" className={`${styles.navLink} ${isActive('/books') ? styles.navLinkActive : ''}`}>📖 Books</Link>
+          <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={`${styles.navLink}`}>
+            🤖 AI Recs
+          </Link>
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
         </nav>
 
         <div className={styles.userMenu}>
           {user ? (
             <>
               <button onClick={() => navigate('/dashboard')} className={styles.userButton}>{user.fullName}</button>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+              {/* Dev-only helper: promote current session user to ADMIN (client-side only) */}
+              {process.env.NODE_ENV === 'development' && user.role !== 'ADMIN' && (
+                <button
+                  onClick={() => {
+                    try {
+                      const raw = localStorage.getItem('authUser');
+                      if (!raw) return;
+                      const u = JSON.parse(raw);
+                      u.role = 'ADMIN';
+                      localStorage.setItem('authUser', JSON.stringify(u));
+                      setUser(u);
+                      // small visual confirmation
+                      // eslint-disable-next-line no-alert
+                      alert('Local session promoted to ADMIN (development only)');
+                    } catch (e) {
+                      // eslint-disable-next-line no-console
+                      console.error('Failed to promote to admin', e);
+                    }
+                  }}
+                  title="Temporarily promote this session to ADMIN (dev only)"
+                  className={styles.userButtonSecondary}
+                >
+                  Promote to Admin
+                </button>
+              )}
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
               <button onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }} className={styles.userButtonPrimary}>Log Out</button>
             </>
           ) : (
@@ -75,7 +155,11 @@ const Header = () => {
         <nav className={styles.mobileNav}>
           <Link to="/dashboard" className={styles.mobileNavLink}>🏠 Dashboard</Link>
           <Link to="/books" className={styles.mobileNavLink}>📖 Books</Link>
+<<<<<<< HEAD
           {user && <Link to="/bookshelf" className={styles.mobileNavLink}>📌 Bookshelf</Link>}
+=======
+          <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={styles.mobileNavLink}>🤖 AI Recs</Link>
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
           {user ? (
             <button onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }} className={styles.mobileNavLink}>Log Out</button>
           ) : (

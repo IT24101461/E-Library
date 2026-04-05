@@ -84,6 +84,16 @@ CREATE TABLE reading_progress (
   INDEX idx_book_id (book_id)
 );
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 -- Bookmarks Table
 CREATE TABLE bookmarks (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -114,6 +124,13 @@ CREATE TABLE highlights (
   INDEX idx_created_at (created_at)
 );
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 -- Feedbacks Table
 CREATE TABLE feedbacks (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -128,6 +145,7 @@ CREATE TABLE feedbacks (
   INDEX idx_created_at (created_at)
 );
 
+<<<<<<< HEAD
 -- Bookshelf Items Table
 CREATE TABLE bookshelf_items (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -162,6 +180,15 @@ CREATE TABLE search_history (
   INDEX idx_user_timestamp (user_id, timestamp)
 );
 
+=======
+<<<<<<< HEAD
+=======
+=======
+=======
+>>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
+>>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 -- ============================================
 -- Sample Data (Optional - for testing)
 -- ============================================

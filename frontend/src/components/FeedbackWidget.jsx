@@ -56,6 +56,10 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
 
     setIsCheckingGrammar(true);
     try {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
       const params = new URLSearchParams();
       params.append('text', message);
       params.append('language', 'en-US');
@@ -74,6 +78,30 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
         setErrorMessage('✓ No grammar issues found!');
       } else {
         setErrorMessage(`Found ${mistakes.length} issue(s)`);
+<<<<<<< HEAD
+=======
+=======
+      const response = await fetch('http://127.0.0.1:5000/api/check-grammar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: message })
+      });
+
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        setGrammarIssues(data.details || []);
+        if (data.details.length === 0) {
+          setErrorMessage('✓ No grammar issues found!');
+        } else {
+          setErrorMessage(`Found ${data.details.length} issue(s)`);
+        }
+      } else {
+        setErrorMessage('Failed to check grammar');
+>>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
       }
     } catch (error) {
       console.error('Grammar check error:', error);

@@ -15,8 +15,11 @@ const AddBook = () => {
     publicationYear: new Date().getFullYear(),
     coverUrl: '',
     pdfUrl: '',
+<<<<<<< HEAD
     content: '',
     isAvailable: true,
+=======
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -37,10 +40,17 @@ const AddBook = () => {
   }, [authUser, navigate]);
 
   const handleChange = (e) => {
+<<<<<<< HEAD
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : (name === 'totalPages' || name === 'publicationYear' ? parseInt(value) : value),
+=======
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'totalPages' || name === 'publicationYear' ? parseInt(value) : value,
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
     }));
   };
 
@@ -277,6 +287,7 @@ const AddBook = () => {
               </p>
             </div>
 
+<<<<<<< HEAD
             {/* Emoji and Genre */}
             <div className={styles['addbook-row']}>
               <div>
@@ -337,6 +348,8 @@ const AddBook = () => {
               </label>
             </div>
 
+=======
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
             {/* Buttons */}
             <div className={styles['addbook-btn-row']}>
               <button

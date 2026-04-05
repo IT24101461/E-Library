@@ -10,5 +10,8 @@ import java.util.List;
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     List<Bookmark> findByUserIdAndBookId(Long userId, Long bookId);
     List<Bookmark> findByUserId(Long userId);
+<<<<<<< HEAD
     List<Bookmark> findByUserIdAndIsDeletedFalse(Long userId);
+=======
+>>>>>>> 8b633b4794f990139a187f791f79171778bb2c11
 }

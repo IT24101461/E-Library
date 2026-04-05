@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: elibrary-backend
+    
+  datasource:
+    url: jdbc:mysql://localhost:3306/elibrary_db
+    username: root
+    password: "Bharana@2004"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        
+  security:
+    jwt:
+      secret: your-secret-key-change-this-in-production
+      expiration: 86400000  # 24 hours in milliseconds
+
+logging:
+  level:
+    root: INFO
+    com.elibrary: DEBUG
