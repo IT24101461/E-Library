@@ -69,10 +69,9 @@ export const getApiUrl = () => {
     console.log(`[API Config] Using env REACT_APP_API_BASE_URL: ${url}`);
     return url;
   }
-  
-  if (process.env.NODE_ENV === 'production') {
-    console.log('[API Config] Production detected - using relative /api URL');
-    return '/api';
+  if (process.env.REACT_APP_API_URL && !process.env.REACT_APP_API_URL.includes('localhost')) {
+    console.log(`[API Config] Using env REACT_APP_API_URL: ${process.env.REACT_APP_API_URL}`);
+    return process.env.REACT_APP_API_URL;
   }
 
   // Android emulator - use 10.0.2.2 (host machine from emulator's perspective)
