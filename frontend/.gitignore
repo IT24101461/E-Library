@@ -3,12 +3,23 @@ node_modules/
 /.pnp
 .pnp.js
 
+# Build cache (contains large .pack files >10MB)
+node_modules/.cache/
+
 # Testing
 /coverage
 
 # Production
 /build
 /dist
+
+# Android build outputs
+android/app/build/
+android/.gradle/
+
+# APK files
+*.apk
+*.aab
 
 # Misc
 .DS_Store
