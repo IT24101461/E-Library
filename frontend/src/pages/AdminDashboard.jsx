@@ -1,7 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { 
+  LayoutDashboard, Users, BookOpen, MessageSquare, Key, LogOut, 
+  Clock, Calendar, Zap, Database, Activity, ChevronRight, 
+  Trash2, ShieldAlert, Edit, Plus, CheckCircle, Search,
+  ShieldCheck, UserCircle
+} from 'lucide-react';
 import styles from './AdminDashboard.module.css';
+import AdminAccessRequests from '../components/AdminAccessRequests';
 
 const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
@@ -42,7 +49,23 @@ const AdminDashboard = () => {
     author: '',
     description: '',
     isbn: '',
+    totalPages: '',
+    category: 'Fiction',
+    publicationYear: new Date().getFullYear(),
+    pdfUrl: '',
+    coverUrl: '',
+    content: '',
+    isAvailable: true,
   });
+  const [bookSearchTerm, setBookSearchTerm] = useState('');
+
+  const filteredBooks = useMemo(() => {
+    return books.filter(b => 
+      b.title.toLowerCase().includes(bookSearchTerm.toLowerCase()) ||
+      b.author.toLowerCase().includes(bookSearchTerm.toLowerCase()) ||
+      (b.isbn && b.isbn.toLowerCase().includes(bookSearchTerm.toLowerCase()))
+    );
+  }, [books, bookSearchTerm]);
 
   // Feedbacks
   const [feedbacks, setFeedbacks] = useState([]);
@@ -55,13 +78,13 @@ const AdminDashboard = () => {
     try {
       const booksRes = await axios.get(`${API}/api/books`);
       const usersRes = await axios.get(`${API}/api/admin/users?userId=${user.id}`);
-
+      
       if (!mountedRef.current) return;
 
       setStats({
         totalBooks: Array.isArray(booksRes.data) ? booksRes.data.length : 0,
         totalUsers: Array.isArray(usersRes.data) ? usersRes.data.length : 0,
-        totalActivity: 0,
+        totalActivity: 0, // Can be expanded later
       });
     } catch (e) {
       console.error('Failed to fetch stats', e);
@@ -138,6 +161,8 @@ const AdminDashboard = () => {
     }
   };
 
+
+
   const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
@@ -196,7 +221,19 @@ const AdminDashboard = () => {
     try {
       const res = await axios.post(`${API}/api/books?userId=${user.id}`, bookFormData);
       setBooks([...books, res.data]);
-      setBookFormData({ title: '', author: '', description: '', isbn: '' });
+      setBookFormData({ 
+        title: '', 
+        author: '', 
+        description: '', 
+        isbn: '',
+        totalPages: '',
+        category: 'Fiction',
+        publicationYear: new Date().getFullYear(),
+        pdfUrl: '',
+        coverUrl: '',
+        content: '',
+        isAvailable: true,
+      });
       setShowBookForm(false);
       setStatusMessage('Book created successfully');
     } catch (e) {
@@ -208,8 +245,7 @@ const AdminDashboard = () => {
   const handleDeleteBook = async (bookId) => {
     if (window.confirm('Are you sure you want to delete this book?')) {
       try {
-        // Using the admin endpoint (IT24103499's contribution) — more appropriate for admin actions
-        await axios.delete(`${API}/api/admin/books/${bookId}?userId=${user.id}`);
+        await axios.delete(`${API}/api/books/${bookId}`);
         setBooks(books.filter(b => b.id !== bookId));
         setStatusMessage('Book deleted successfully');
       } catch (e) {
@@ -245,84 +281,106 @@ const AdminDashboard = () => {
       {/* Sidebar Navigation */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
-          <div className={styles.logoIcon}>⚡</div>
+          <div className={styles.logoIcon}>
+            <Zap size={24} fill="currentColor" />
+          </div>
           <div className={styles.logoText}>
-            <h2>Admin<span className={styles.highlight}>Pro</span></h2>
-            <p>Control Panel</p>
+            <h2>Admin<span className={styles.highlight}>Core</span></h2>
+            <p>System Command v2.0</p>
           </div>
         </div>
 
         <nav className={styles.sidebarNav}>
-          <button
+          <button 
             className={`${styles.navItem} ${activeTab === 'dashboard' ? styles.activeNav : ''}`}
             onClick={() => setActiveTab('dashboard')}
           >
-            <span className={styles.navIcon}>📊</span> Dashboard
+            <LayoutDashboard className={styles.navIcon} size={20} /> Dashboard
           </button>
-          <button
+          <button 
             className={`${styles.navItem} ${activeTab === 'users' ? styles.activeNav : ''}`}
             onClick={() => setActiveTab('users')}
           >
-            <span className={styles.navIcon}>👥</span> Users
+            <Users className={styles.navIcon} size={20} /> User Matrix
           </button>
-          <button
+          <button 
             className={`${styles.navItem} ${activeTab === 'books' ? styles.activeNav : ''}`}
             onClick={() => setActiveTab('books')}
           >
-            <span className={styles.navIcon}>📚</span> Books
+            <BookOpen className={styles.navIcon} size={20} /> Book Registry
           </button>
-          <button
+          <button 
             className={`${styles.navItem} ${activeTab === 'feedback' ? styles.activeNav : ''}`}
             onClick={() => setActiveTab('feedback')}
           >
-            <span className={styles.navIcon}>💬</span> Feedback
+            <MessageSquare className={styles.navIcon} size={20} /> User Pulse
+          </button>
+          <button 
+            className={`${styles.navItem} ${activeTab === 'access' ? styles.activeNav : ''}`}
+            onClick={() => setActiveTab('access')}
+          >
+            <Key className={styles.navIcon} size={20} /> Access Control
           </button>
         </nav>
 
         <div className={styles.sidebarFooter}>
           <div className={styles.userInfo}>
-            <div className={styles.userAvatar}>👤</div>
+            <div className={styles.userAvatar}>
+              <ShieldAlert size={18} color="var(--admin-accent)" />
+            </div>
             <div className={styles.userDetails}>
               <span className={styles.userName}>{user?.fullName}</span>
-              <span className={styles.userRole}>Administrator</span>
+              <span className={styles.userRole}>Root Administrator</span>
             </div>
           </div>
           <button onClick={handleLogout} className={styles.logoutBtn}>
-            <span className={styles.navIcon}>🚪</span> Logout
+            <LogOut size={16} /> Terminate Session
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className={styles.mainContent}>
-
+        
+        {/* Top Header Section */}
         {/* Dashboard Tab uses the Hero Banner, others use Top Header */}
         {activeTab === 'dashboard' ? (
           <header className={styles.heroBanner}>
             <div className={styles.heroContent}>
-              <h1>Welcome back, <span className={styles.heroHighlight}>{user?.fullName || 'Admin'}</span> 👋</h1>
-              <p>Here's what's happening across your digital library today.</p>
-              <div className={styles.heroWidgets}>
-                <div className={styles.heroWidgetCard}>
-                  <div className={styles.heroWidgetIcon}>🕒</div>
-                  <div>
-                    <span className={styles.widgetLabel}>Local Time</span>
-                    <span className={styles.widgetData}>
-                      {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                <Activity size={14} color="var(--admin-accent)" />
+                <span style={{ 
+                  color: 'var(--admin-accent)', 
+                  fontWeight: 800, 
+                  letterSpacing: '1px', 
+                  fontSize: '0.7rem',
+                  textTransform: 'uppercase',
+                  opacity: 0.8
+                }}>System Status: Optimal // Core v2.0</span>
+              </div>
+              <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
+                Welcome, <span className={styles.heroHighlight}>{user?.fullName || 'Root'}</span>
+              </h1>
+              <p style={{ opacity: 0.7, maxWidth: '600px' }}>Managing the Digital Library ecosystem with real-time sync and security protocols.</p>
+            </div>
+
+            <div className={styles.heroWidgets}>
+              <div className={styles.heroWidgetCard}>
+                <Clock size={18} color="var(--admin-accent)" />
+                <div>
+                  <span className={styles.widgetLabel}>System Time</span>
+                  <span className={styles.widgetData}>{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
                 </div>
-                <div className={styles.heroWidgetCard}>
-                  <div className={styles.heroWidgetIcon}>📅</div>
-                  <div>
-                    <span className={styles.widgetLabel}>Current Date</span>
-                    <span className={styles.widgetData}>
-                      {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
-                  </div>
+              </div>
+              <div className={styles.heroWidgetCard}>
+                <Database size={18} color="var(--admin-accent)" />
+                <div>
+                  <span className={styles.widgetLabel}>Node Status</span>
+                  <span className={styles.widgetData}>Connected</span>
                 </div>
               </div>
             </div>
+            
             <div className={styles.heroShapes}>
               <div className={styles.shape1}></div>
               <div className={styles.shape2}></div>
@@ -335,6 +393,7 @@ const AdminDashboard = () => {
                 {activeTab === 'users' && 'User Management'}
                 {activeTab === 'books' && 'Book Management'}
                 {activeTab === 'feedback' && 'User Feedback'}
+                {activeTab === 'access' && 'Admin Access Requests'}
               </h1>
               <p className={styles.pageSubtitle}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -358,47 +417,29 @@ const AdminDashboard = () => {
               <div className={styles.statsGrid}>
                 <div className={styles.statCard}>
                   <div className={styles.statIconWrapper}>
-                    <div className={styles.statIcon}>📚</div>
+                    <BookOpen className={styles.statIcon} size={24} />
                   </div>
                   <div className={styles.statInfo}>
-                    <div className={styles.statLabel}>Total Books</div>
+                    <div className={styles.statLabel}>Library Index</div>
                     <div className={styles.statValue}>{loading ? '...' : stats.totalBooks}</div>
                   </div>
-                  <div className={styles.sparkline}>
-                    <svg viewBox="0 0 100 30" preserveAspectRatio="none">
-                      <path d="M0 30 L10 25 L20 28 L30 15 L40 20 L50 10 L60 15 L70 5 L80 12 L90 2 L100 10 L100 30 Z" fill="rgba(255,255,255,0.15)"/>
-                      <path d="M0 30 L10 25 L20 28 L30 15 L40 20 L50 10 L60 15 L70 5 L80 12 L90 2 L100 10" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2"/>
-                    </svg>
-                  </div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statIconWrapper}>
-                    <div className={styles.statIcon}>👥</div>
+                    <Users className={styles.statIcon} size={24} />
                   </div>
                   <div className={styles.statInfo}>
-                    <div className={styles.statLabel}>Total Users</div>
+                    <div className={styles.statLabel}>Active Nodes</div>
                     <div className={styles.statValue}>{loading ? '...' : stats.totalUsers}</div>
                   </div>
-                  <div className={styles.sparkline}>
-                    <svg viewBox="0 0 100 30" preserveAspectRatio="none">
-                      <path d="M0 30 L20 25 L40 28 L60 15 L80 12 L100 5 L100 30 Z" fill="rgba(255,255,255,0.15)"/>
-                      <path d="M0 30 L20 25 L40 28 L60 15 L80 12 L100 5" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2"/>
-                    </svg>
-                  </div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statIconWrapper}>
-                    <div className={styles.statIcon}>📈</div>
+                    <Activity className={styles.statIcon} size={24} />
                   </div>
                   <div className={styles.statInfo}>
-                    <div className={styles.statLabel}>System Activity</div>
-                    <div className={styles.statValue}>{loading ? '...' : stats.totalActivity}</div>
-                  </div>
-                  <div className={styles.sparkline}>
-                    <svg viewBox="0 0 100 30" preserveAspectRatio="none">
-                      <path d="M0 30 L10 22 L20 26 L30 10 L40 18 L50 8 L60 12 L70 2 M80 15 L90 5 L100 8 L100 30 Z" fill="rgba(255,255,255,0.15)"/>
-                      <path d="M0 30 L10 22 L20 26 L30 10 L40 18 L50 8 L60 12 L70 2 L80 15 L90 5 L100 8" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2"/>
-                    </svg>
+                    <div className={styles.statLabel}>Pulse Rate</div>
+                    <div className={styles.statValue}>Optimal</div>
                   </div>
                 </div>
               </div>
@@ -410,10 +451,10 @@ const AdminDashboard = () => {
                     <h3>Quick Actions</h3>
                     <div className={styles.actionButtons}>
                       <button onClick={() => setActiveTab('users')} className={styles.actionBtn}>
-                        Manage Users
+                         Manage Users
                       </button>
                       <button onClick={() => setActiveTab('books')} className={styles.actionBtn}>
-                        Manage Books
+                         Manage Books
                       </button>
                       <button onClick={() => { setShowUserForm(true); setActiveTab('users'); }} className={styles.actionBtnSecondary}>
                         + Add New User
@@ -455,36 +496,29 @@ const AdminDashboard = () => {
                 {/* Recent Activity Feed */}
                 <div className={styles.activityFeedCard}>
                   <div className={styles.activityHeader}>
-                    <h3>Recent Activity</h3>
-                    <button className={styles.viewAllBtn}>View All</button>
+                    <h3><Activity size={18} color="var(--admin-accent)" /> Recent System Events</h3>
+                    <button className={styles.viewAllBtn}>Logs</button>
                   </div>
                   <div className={styles.timeline}>
                     <div className={styles.timelineItem}>
-                      <div className={styles.timelineMarker}>👤</div>
+                      <div className={styles.timelineMarker}><Plus size={14} /></div>
                       <div className={styles.timelineContent}>
-                        <p className={styles.timelineText}><strong>Admin</strong> added a new user <em>{users[users.length - 1]?.fullName || 'Jane Doe'}</em></p>
-                        <span className={styles.timelineTime}>Just now</span>
+                        <p className={styles.timelineText}><strong>Node Expansion:</strong> New user registry synchronized.</p>
+                        <span className={styles.timelineTime}>Moment ago</span>
                       </div>
                     </div>
                     <div className={styles.timelineItem}>
-                      <div className={styles.timelineMarker}>📚</div>
+                      <div className={styles.timelineMarker}><CheckCircle size={14} /></div>
                       <div className={styles.timelineContent}>
-                        <p className={styles.timelineText}>New book <strong>{books[books.length - 1]?.title || 'System Design Interview'}</strong> was registered.</p>
+                        <p className={styles.timelineText}><strong>Backup Integrity:</strong> Scheduled snapshot successful.</p>
                         <span className={styles.timelineTime}>2 hours ago</span>
                       </div>
                     </div>
                     <div className={styles.timelineItem}>
-                      <div className={styles.timelineMarker}>🔄</div>
+                      <div className={styles.timelineMarker}><Database size={14} /></div>
                       <div className={styles.timelineContent}>
-                        <p className={styles.timelineText}>System backup completed successfully.</p>
-                        <span className={styles.timelineTime}>Yesterday at 11:00 PM</span>
-                      </div>
-                    </div>
-                    <div className={styles.timelineItem}>
-                      <div className={styles.timelineMarker}>⚠️</div>
-                      <div className={styles.timelineContent}>
-                        <p className={styles.timelineText}>High traffic detected from AI Recommendation Engine.</p>
-                        <span className={styles.timelineTime}>Yesterday at 4:30 PM</span>
+                        <p className={styles.timelineText}><strong>Registry Update:</strong> New volume metadata indexed.</p>
+                        <span className={styles.timelineTime}>System Cycle 4</span>
                       </div>
                     </div>
                   </div>
@@ -498,7 +532,7 @@ const AdminDashboard = () => {
             <div className={`${styles.usersSection} ${styles.fadeIn}`}>
               <div className={styles.sectionHeader}>
                 <h2 className={styles.sectionTitle}>Registered Users</h2>
-                <button
+                <button 
                   onClick={() => setShowUserForm(true)}
                   className={styles.addBtn}
                 >
@@ -533,7 +567,7 @@ const AdminDashboard = () => {
                       <option value="ADMIN">Administrator</option>
                     </select>
                   </div>
-                  <div className={styles.formButtons}>
+              <div className={styles.formButtons}>
                     <button onClick={handleCreateUser} className={styles.saveBtn}>Save User</button>
                     <button onClick={() => setShowUserForm(false)} className={styles.cancelBtn}>Cancel</button>
                   </div>
@@ -542,33 +576,43 @@ const AdminDashboard = () => {
 
               <div className={styles.usersGrid}>
                 {users.map(u => (
-                  <div key={u.id} className={styles.userCard}>
+                  <div key={u.id} className={`${styles.userCard} ${u.role === 'ADMIN' ? styles.adminCardElite : ''}`}>
                     <div className={styles.userCardHeader}>
-                      <div className={styles.cellAvatarLarge}>👤</div>
+                      <div className={`${styles.cellAvatarElite} ${u.role === 'ADMIN' ? styles.avatarAdminElite : styles.avatarUserElite}`}>
+                        {u.role === 'ADMIN' ? <ShieldCheck size={32} /> : <UserCircle size={32} />}
+                        <span className={`${styles.pulseIndicatorElite} ${styles.pulseOnlineElite}`}></span>
+                      </div>
                       <div className={styles.userCardInfo}>
-                        <h4 className={styles.userCardName} title={u.fullName}>{u.fullName}</h4>
-                        <p className={styles.userCardEmail} title={u.email}>{u.email}</p>
+                        <div className={styles.nameRowElite}>
+                          <h4 className={styles.userCardNameElite}>{u.fullName}</h4>
+                          <div className={styles.nodeStatusTag}>
+                            {u.role === 'ADMIN' ? 'MASTER NODE' : 'DATA STREAM'}
+                          </div>
+                        </div>
+                        <p className={styles.userCardEmailElite}>{u.email}</p>
                       </div>
                     </div>
-                    <div className={styles.userCardBody}>
-                      <div className={styles.roleControl}>
-                        <span className={styles.roleLabel}>System Role</span>
-                        <select
-                          value={u.role}
-                          onChange={e => handleChangeUserRole(u.id, e.target.value)}
-                          className={`${styles.roleBadge} ${u.role === 'ADMIN' ? styles.roleAdmin : styles.roleUser}`}
-                        >
-                          <option value="USER">User</option>
-                          <option value="ADMIN">Admin</option>
-                        </select>
+
+                    <div className={styles.nodeMetaMatrix}>
+                      <div className={styles.metaBlock}>
+                        <span className={styles.metaLabel}>NODE SIGNATURE</span>
+                        <span className={styles.metaValue}>#{u.id}</span>
+                      </div>
+                      <div className={styles.metaDividerVertical}></div>
+                      <div className={styles.metaBlock} style={{textAlign: 'right'}}>
+                        <span className={styles.metaLabel}>GATEWAY ROLE</span>
+                        <span className={`${styles.roleBadgeElite} ${u.role === 'ADMIN' ? styles.roleAdminElite : styles.roleUserElite}`}>
+                          {u.role === 'ADMIN' ? 'Matrix Administrator' : 'Sanctuary Node'}
+                        </span>
                       </div>
                     </div>
-                    <div className={styles.userCardActions}>
-                      <button onClick={() => handleResetPasswordClick(u.id)} className={styles.cardActionBtn} title="Reset Password">
-                        🔐 Reset
+
+                    <div className={styles.userCardActionsElite}>
+                      <button onClick={() => handleResetPasswordClick(u.id)} className={styles.tacticalBtn}>
+                        <Key size={14} /> RESET GATEWAY
                       </button>
-                      <button onClick={() => handleDeleteUser(u.id)} className={`${styles.cardActionBtn} ${styles.btnDangerText}`} title="Delete User">
-                        🗑️ Delete
+                      <button onClick={() => handleDeleteUser(u.id)} className={`${styles.tacticalBtn} ${styles.btnPurgeElite}`}>
+                        <Trash2 size={14} /> PURGE
                       </button>
                     </div>
                   </div>
@@ -581,13 +625,27 @@ const AdminDashboard = () => {
           {activeTab === 'books' && (
             <div className={`${styles.booksSection} ${styles.fadeIn}`}>
               <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>Library Catalog</h2>
-                <button
-                  onClick={() => setShowBookForm(true)}
-                  className={styles.addBtn}
-                >
-                  <span className={styles.btnIcon}>+</span> Add New Book
-                </button>
+                <div className={styles.headerLeft}>
+                  <h2 className={styles.sectionTitle}>Library Catalog Registry</h2>
+                  <p className={styles.sectionSubtitle}>{filteredBooks.length} assets currently indexed</p>
+                </div>
+                
+                <div className={styles.searchWrapper}>
+                  <Search size={18} className={styles.searchIcon} />
+                  <input 
+                    type="text" 
+                    placeholder="Search by Title, Author, or ISBN..." 
+                    className={styles.searchInput}
+                    value={bookSearchTerm}
+                    onChange={(e) => setBookSearchTerm(e.target.value)}
+                  />
+                </div>
+
+                <div className={styles.headerActions}>
+                  <button onClick={() => setShowBookForm(!showBookForm)} className={styles.addBtn}>
+                    {showBookForm ? 'Cancel Operation' : '+ Add New Asset'}
+                  </button>
+                </div>
               </div>
 
               {showBookForm && (
@@ -615,13 +673,80 @@ const AdminDashboard = () => {
                       onChange={e => setBookFormData({...bookFormData, isbn: e.target.value})}
                       className={styles.formInput}
                     />
+                    <input
+                      type="number"
+                      placeholder="Total Pages"
+                      value={bookFormData.totalPages}
+                      onChange={e => setBookFormData({...bookFormData, totalPages: e.target.value})}
+                      className={styles.formInput}
+                    />
+                    <select
+                      value={bookFormData.category}
+                      onChange={e => setBookFormData({...bookFormData, category: e.target.value})}
+                      className={styles.formInput}
+                    >
+                      <option>Fiction</option>
+                      <option>Non-Fiction</option>
+                      <option>Mystery</option>
+                      <option>Thriller</option>
+                      <option>Romance</option>
+                      <option>Science Fiction</option>
+                      <option>Fantasy</option>
+                      <option>Biography</option>
+                      <option>History</option>
+                      <option>Self-Help</option>
+                      <option>Other</option>
+                    </select>
+                    <input
+                      type="number"
+                      placeholder="Publication Year"
+                      value={bookFormData.publicationYear}
+                      onChange={e => setBookFormData({...bookFormData, publicationYear: parseInt(e.target.value)})}
+                      className={styles.formInput}
+                    />
                   </div>
+                  
                   <textarea
                     placeholder="Book Description & Synopsis"
                     value={bookFormData.description}
                     onChange={e => setBookFormData({...bookFormData, description: e.target.value})}
                     className={styles.formTextarea}
+                    rows="3"
                   />
+
+                  <input
+                    type="url"
+                    placeholder="Cover URL (e.g., https://covers.example.com/cover.jpg)"
+                    value={bookFormData.coverUrl}
+                    onChange={e => setBookFormData({...bookFormData, coverUrl: e.target.value})}
+                    className={styles.formInput}
+                  />
+
+                  <input
+                    type="url"
+                    placeholder="PDF URL (e.g., http://localhost:8080/files/book.pdf)"
+                    value={bookFormData.pdfUrl}
+                    onChange={e => setBookFormData({...bookFormData, pdfUrl: e.target.value})}
+                    className={styles.formInput}
+                  />
+
+                  <textarea
+                    placeholder="Book Content (paste full text or leave empty if using PDF)"
+                    value={bookFormData.content}
+                    onChange={e => setBookFormData({...bookFormData, content: e.target.value})}
+                    className={styles.formTextarea}
+                    rows="4"
+                  />
+
+                  <label className={styles.formCheckbox}>
+                    <input
+                      type="checkbox"
+                      checked={bookFormData.isAvailable}
+                      onChange={e => setBookFormData({...bookFormData, isAvailable: e.target.checked})}
+                    />
+                    {' '}Book is Available
+                  </label>
+
                   <div className={styles.formButtons}>
                     <button onClick={handleCreateBook} className={styles.saveBtn}>Save Book</button>
                     <button onClick={() => setShowBookForm(false)} className={styles.cancelBtn}>Cancel</button>
@@ -630,23 +755,40 @@ const AdminDashboard = () => {
               )}
 
               <div className={styles.booksGrid}>
-                {books.map(b => (
+                {filteredBooks.map(b => (
                   <div key={b.id} className={styles.bookCard}>
                     <div className={styles.bookCardInner}>
-                      <div className={styles.bookIcon}>📖</div>
+                      <div className={styles.bookIcon}>
+                        {b.coverUrl ? (
+                          <img src={b.coverUrl} alt={b.title} className={styles.bookCoverImg} />
+                        ) : (
+                          <BookOpen size={20} color="var(--admin-accent)" />
+                        )}
+                      </div>
                       <div className={styles.bookDetails}>
-                        <h4 title={b.title}>{b.title}</h4>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <h4 title={b.title}>{b.title}</h4>
+                          <span className={styles.categoryTag}>{b.category || 'General'}</span>
+                        </div>
                         <p className={styles.bookAuthor}>{b.author}</p>
-                        <p className={styles.bookIsbn}>ISBN: {b.isbn || 'N/A'}</p>
+                        
+                        <div className={styles.bookMetaRow}>
+                          <div className={styles.statusGroup}>
+                            <span className={`${styles.statusDot} ${b.isAvailable ? styles.statusOnline : styles.statusOffline}`}></span>
+                            <span>{b.isAvailable ? 'Available' : 'Out of Stock'}</span>
+                          </div>
+                          <div className={styles.metaDivider}></div>
+                          <span>ISBN: {b.isbn || 'N/A'}</span>
+                        </div>
                       </div>
                     </div>
                     <p className={styles.bookDescription}>{b.description}</p>
                     <div className={styles.bookActions}>
-                      <button
+                      <button 
                         onClick={() => handleDeleteBook(b.id)}
                         className={styles.btnDeleteSolid}
                       >
-                        Remove Book
+                        <Trash2 size={14} /> Purge Registry
                       </button>
                     </div>
                   </div>
@@ -680,20 +822,21 @@ const AdminDashboard = () => {
                     </div>
                     <div className={styles.userCardActions} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                       <span style={{
-                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid transparent',
-                        backgroundColor: f.status === 'PENDING' ? '#fee2e2' : f.status === 'REVIEWED' ? '#fef3c7' : '#dcfce3',
-                        color: f.status === 'PENDING' ? '#991b1b' : f.status === 'REVIEWED' ? '#92400e' : '#166534',
-                        borderColor: f.status === 'PENDING' ? '#fca5a5' : f.status === 'REVIEWED' ? '#fcd34d' : '#86efac'
-                      }}>{f.status || 'PENDING'}</span>
-                      <div style={{display: 'flex', gap: '5px'}}>
+                        padding: '6px 12px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800,
+                        backgroundColor: f.status === 'SOLVED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(99, 102, 241, 0.1)',
+                        color: f.status === 'SOLVED' ? 'var(--admin-success)' : 'var(--admin-accent)',
+                        border: `1px solid ${f.status === 'SOLVED' ? 'var(--admin-success)' : 'var(--admin-accent)'}`,
+                        textTransform: 'uppercase', letterSpacing: '1px'
+                      }}>{f.status || 'INGESTING'}</span>
+                      <div style={{display: 'flex', gap: '8px'}}>
                         {(f.status === 'PENDING' || !f.status) && (
-                          <button onClick={() => handleUpdateFeedbackStatus(f.id, 'REVIEWED')} className={styles.cardActionBtn} style={{background: '#fef3c7', color: '#92400e', border: 'none'}}>
-                            Review
+                          <button onClick={() => handleUpdateFeedbackStatus(f.id, 'REVIEWED')} className={styles.cardActionBtn}>
+                            <ChevronRight size={14} /> Review
                           </button>
                         )}
                         {f.status !== 'SOLVED' && (
-                          <button onClick={() => handleUpdateFeedbackStatus(f.id, 'SOLVED')} className={styles.cardActionBtn} style={{background: '#dcfce3', color: '#166534', border: 'none'}}>
-                            Solve
+                          <button onClick={() => handleUpdateFeedbackStatus(f.id, 'SOLVED')} className={`${styles.cardActionBtn} ${styles.btnSuccessText}`}>
+                            <CheckCircle size={14} /> Solve
                           </button>
                         )}
                       </div>
@@ -706,53 +849,58 @@ const AdminDashboard = () => {
               </div>
             </div>
           )}
+
+          {/* Access Requests Tab */}
+          {activeTab === 'access' && (
+            <div className={`${styles.usersSection} ${styles.fadeIn}`}>
+              <AdminAccessRequests user={user} />
+            </div>
+          )}
+
         </div>
       </main>
 
       {/* Password Reset Modal */}
       {showResetPassword && (
-        <div className={styles.modalOverlay}>
-          <div className={`${styles.modalContent} ${styles.fadeInUp}`}>
+        <div className={styles.modalOverlay} style={{ background: 'rgba(2, 6, 23, 0.9)', backdropFilter: 'blur(10px)' }}>
+          <div className={`${styles.modalContent} ${styles.fadeInUp}`} style={{ background: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: '1.5rem', padding: '2.5rem' }}>
             <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>Reset User Password</h3>
+              <h3 className={styles.modalTitle} style={{ color: 'white', fontWeight: 800 }}><Key size={20} color="var(--admin-accent)" /> Security Protocol Reset</h3>
               <button onClick={() => setShowResetPassword(false)} className={styles.closeModalBtn}>✕</button>
             </div>
-            <p className={styles.modalText}>Enter a new, secure password for this account. The user will be able to log in with these credentials immediately.</p>
-
+            <p className={styles.modalText} style={{ color: 'var(--admin-text-muted)' }}>Overwriting credential matrix for selected node. This action is irreversible.</p>
+            
             <div className={styles.formGroup}>
-              <label>New Password</label>
+              <label style={{ color: 'var(--admin-accent)', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase' }}>New Security Key</label>
               <input
                 type="password"
-                placeholder="Enter new password"
+                placeholder="••••••••"
                 value={resetPasswordData.newPassword}
                 onChange={e => setResetPasswordData({...resetPasswordData, newPassword: e.target.value})}
                 className={styles.formInput}
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--admin-border)', color: 'white' }}
               />
             </div>
-
+            
             <div className={styles.formGroup}>
-              <label>Confirm Password</label>
+              <label style={{ color: 'var(--admin-accent)', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase' }}>Verify Key</label>
               <input
                 type="password"
-                placeholder="Confirm new password"
+                placeholder="••••••••"
                 value={resetPasswordData.confirmPassword}
                 onChange={e => setResetPasswordData({...resetPasswordData, confirmPassword: e.target.value})}
                 className={styles.formInput}
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--admin-border)', color: 'white' }}
               />
             </div>
-
-            <div className={styles.modalActions}>
-              <button
+            
+            <div className={styles.modalActions} style={{ marginTop: '2rem' }}>
+              <button 
                 onClick={handleResetPasswordSubmit}
-                className={styles.btnConfirm}
+                className={styles.actionBtn}
+                style={{ width: '100%', justifyContent: 'center' }}
               >
-                Confirm Reset
-              </button>
-              <button
-                onClick={() => setShowResetPassword(false)}
-                className={styles.btnCancel}
-              >
-                Cancel
+                Execute Reset
               </button>
             </div>
           </div>

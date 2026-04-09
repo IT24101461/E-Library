@@ -10,4 +10,5 @@ import java.util.List;
 public interface HighlightRepository extends JpaRepository<Highlight, Long> {
     List<Highlight> findByUserIdAndBookId(Long userId, Long bookId);
     List<Highlight> findByUserId(Long userId);
+    List<Highlight> findByUserIdAndIsDeletedFalse(Long userId);
 }

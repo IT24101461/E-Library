@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -15,11 +16,33 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    if (!email || !fullName || password.length < 6) {
+      setError('Please fill all fields. Password should be at least 6 characters.');
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await axios.post(`${API}/api/auth/register`, { email, fullName, password, role });
+      // Auto-login (server returns user info)
+      localStorage.setItem('authUser', JSON.stringify(res.data));
+      navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Client-side validation helpers
   const validateEmail = (em) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
   };
 
   const passwordStrength = (pw) => {
+    // at least 8 chars, one letter and one number
     return /(?=.{8,})(?=.*[A-Za-z])(?=.*\d)/.test(pw);
   };
 
@@ -44,6 +67,7 @@ const Register = () => {
       localStorage.setItem('authUser', JSON.stringify(res.data));
       setSuccessMsg('Account created successfully — redirecting...');
       setTimeout(() => {
+        // Navigate to login with pre-filled credentials
         navigate(`/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
       }, 1400);
     } catch (err) {
@@ -68,12 +92,12 @@ const Register = () => {
           <form onSubmit={prepareSubmit} className="space-y-4">
             <div>
               <label className={styles['form-label']}>Full name</label>
-              <input className={styles['form-input']} placeholder="Jane Doe" value={fullName} onChange={e => setFullName(e.target.value)} />
+              <input className={styles['form-input']} placeholder="Jane Doe" value={fullName} onChange={e=>setFullName(e.target.value)} />
             </div>
 
             <div>
               <label className={styles['form-label']}>Role</label>
-              <select className={styles['form-input']} value={role} onChange={e => setRole(e.target.value)}>
+              <select className={styles['form-input']} value={role} onChange={e=>setRole(e.target.value)}>
                 <option value="USER">User</option>
                 <option value="ADMIN">Admin</option>
               </select>
@@ -81,12 +105,12 @@ const Register = () => {
 
             <div>
               <label className={styles['form-label']}>Email</label>
-              <input className={styles['form-input']} placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+              <input className={styles['form-input']} placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)} />
             </div>
 
             <div>
               <label className={styles['form-label']}>Password</label>
-              <input type="password" className={styles['form-input']} placeholder="Choose a strong password" value={password} onChange={e => setPassword(e.target.value)} />
+              <input type="password" className={styles['form-input']} placeholder="Choose a strong password" value={password} onChange={e=>setPassword(e.target.value)} />
               <div className="mt-2">
                 <span className={styles['small-muted']}>Password must be at least 8 characters and include letters and numbers.</span>
               </div>
@@ -94,7 +118,7 @@ const Register = () => {
 
             <div>
               <label className={styles['form-label']}>Confirm Password</label>
-              <input type="password" className={styles['form-input']} placeholder="Confirm your password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+              <input type="password" className={styles['form-input']} placeholder="Confirm your password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} />
             </div>
 
             <div>
@@ -111,13 +135,12 @@ const Register = () => {
         </div>
       </div>
 
+      {/* Confirmation modal */}
       {confirmOpen && (
         <div className={styles['modal-backdrop']}>
           <div className={styles['modal-card']}>
             <h3 className="text-lg font-bold mb-2">Confirm account creation</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Create account for <span className="font-medium">{fullName}</span> (<span className="font-medium">{email}</span>)?
-            </p>
+            <p className="text-sm text-gray-600 mb-4">Create account for <span className="font-medium">{fullName}</span> (<span className="font-medium">{email}</span>)?</p>
             <div className="flex justify-end gap-3">
               <button onClick={() => setConfirmOpen(false)} className={styles['btn-secondary']}>Cancel</button>
               <button onClick={confirmCreate} className={styles['btn-primary']}>Create</button>

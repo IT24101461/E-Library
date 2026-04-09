@@ -70,19 +70,53 @@ const HistoryCard = ({ book, onDelete, onSessionComplete }) => {
           {hasTotal ? (
             <div className="mb-4 mt-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-medium text-gray-600">Reading Progress</span>
-                <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">{Math.round(progressPercent)}%</span>
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">📖 Reading Progress</span>
+                <span className="text-sm font-bold text-white bg-gradient-to-r from-indigo-500 to-purple-600 px-3 py-1 rounded-full shadow-md">{Math.round(progressPercent)}%</span>
               </div>
-              <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden shadow-inner">
                 <div 
-                  className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500 shadow-lg"
                   style={{ width: `${progressPercent}%` }}
                 ></div>
               </div>
-              <div className="flex justify-between items-center mt-2">
-                <p className="text-xs text-gray-600">📖 Page {currentPage} of {totalPages}</p>
-                <p className="text-xs font-medium text-gray-700">{Math.max(0, totalPages - currentPage)} pages left</p>
+              <div className="flex justify-between items-center mt-3 text-xs">
+                <p className="text-gray-700 font-semibold">📍 Page <span className="text-indigo-600 font-bold">{currentPage}</span> / {totalPages}</p>
+                <p className="text-indigo-600 font-bold">{Math.max(0, totalPages - currentPage)} 📄 left</p>
               </div>
+              
+              {/* Reading Statistics */}
+              <div className="mt-4 grid grid-cols-3 gap-3 bg-gradient-to-r from-indigo-50 to-purple-50 p-3 rounded-lg border border-indigo-100">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-indigo-600">{Math.max(0, totalPages - currentPage)}</div>
+                  <div className="text-xs text-gray-600 font-medium">Pages Left</div>
+                </div>
+                <div className="text-center border-l border-r border-indigo-200">
+                  <div className="text-lg font-bold text-purple-600">{currentPage > 0 ? Math.round((currentPage / totalPages) * 100) : 0}%</div>
+                  <div className="text-xs text-gray-600 font-medium">Completed</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-pink-600">{Math.round((totalPages - currentPage) / Math.max(1, currentPage)) || 0}</div>
+                  <div className="text-xs text-gray-600 font-medium">Est. Days*</div>
+                </div>
+              </div>
+              
+              {/* Progress Status Badge */}
+              <div className="mt-3 flex gap-2">
+                {progressPercent === 0 && (
+                  <span className="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">🆕 Not Started</span>
+                )}
+                {progressPercent > 0 && progressPercent < 50 && (
+                  <span className="inline-block bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-semibold">🔄 In Progress</span>
+                )}
+                {progressPercent >= 50 && progressPercent < 100 && (
+                  <span className="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-semibold">⚡ Almost Done</span>
+                )}
+                {progressPercent === 100 && (
+                  <span className="inline-block bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">✅ Completed</span>
+                )}
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-2 italic">*Estimated based on current reading rate</p>
             </div>
           ) : (
             <div className="mb-4 mt-4">
@@ -90,17 +124,23 @@ const HistoryCard = ({ book, onDelete, onSessionComplete }) => {
             </div>
           )}
 
-          {/* Last Read Time */}
-          <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t border-gray-100">
-            <span className="flex items-center gap-1">
+          {/* Last Read Time & Statistics */}
+          <div className="flex items-center gap-3 text-xs pt-3 border-t border-gray-100">
+            <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded-full text-blue-700 font-medium">
               <span>⏱️</span>
-              Last read: <span className="font-medium text-gray-700">{getTimeAgo(book.lastRead)}</span>
-            </span>
+              <span>Last read <span className="font-bold">{getTimeAgo(book.lastRead)}</span></span>
+            </div>
             {book.action && (
-              <span className="flex items-center gap-1 text-indigo-600 font-medium">
+              <div className="flex items-center gap-1 px-2 py-1 bg-purple-50 rounded-full text-purple-700 font-medium">
                 <span>📌</span>
-                {book.action}
-              </span>
+                <span>{book.action}</span>
+              </div>
+            )}
+            {hasTotal && progressPercent > 0 && (
+              <div className="flex items-center gap-1 px-2 py-1 bg-green-50 rounded-full text-green-700 font-medium">
+                <span>🔥</span>
+                <span>Active</span>
+              </div>
             )}
           </div>
         </div>

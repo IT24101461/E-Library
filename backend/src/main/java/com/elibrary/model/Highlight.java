@@ -28,6 +28,9 @@ public class Highlight {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
     public Highlight() {}
 
     public Highlight(Long userId, Long bookId, Integer pageNumber, String content, String color) {
@@ -52,4 +55,6 @@ public class Highlight {
     public void setColor(String color) { this.color = color; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public Boolean getIsDeleted() { return isDeleted; }
+    public void setIsDeleted(Boolean isDeleted) { this.isDeleted = isDeleted; }
 }

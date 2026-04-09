@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #!/usr/bin/env python3
 """
 AI-Scholar Recommendation Engine
@@ -180,25 +179,88 @@ def recommend_by_text():
     
     try:
         data = request.json or {}
+        user_query = str(data.get('query', '')).strip()
         title = str(data.get('title', '')).strip()
         description = str(data.get('description', '')).strip()
         seed_id = int(data.get('id', 0))
         
-        print(f"📋 Request: title='{title[:30]}...' | desc='{description[:30]}...' | id={seed_id}")
+        # Extract advanced filters
+        min_rating = float(data.get('min_rating', 0))
+        from_year = int(data.get('from_year')) if data.get('from_year') else 0
+        to_year = int(data.get('to_year')) if data.get('to_year') else 3000
+        author_filter = str(data.get('author', '')).strip().lower()
+
+        print(f"📋 Request: query='{user_query}' | title='{title[:30]}...' | rating>={min_rating} | years={from_year}-{to_year}")
         
         # Validate input
-        query_text = f"{title} {description}".strip()
-        if not query_text or not model or faiss_index is None:
+        query_text = user_query if user_query else f"{title} {description}".strip()
+        if not model or faiss_index is None:
             return jsonify({
                 "status": "error",
-                "message": "Invalid request or model not loaded",
+                "message": "Model or index not loaded",
                 "recommendations": []
-            }), 400
+            }), 500
+            
+        # If no strict query text is provided, do a pure filter search over the dataset
+        if not query_text:
+            results = []
+            # We simply iterate over the dataset and find the first 20 that match the filters
+            for idx in range(len(df_meta)):
+                if len(results) >= 20:
+                    break
+                
+                meta_row = df_meta.iloc[idx]
+                book_id = int(meta_row.get('book_id', 0))
+                
+                if book_id == seed_id:
+                    continue
+                    
+                csv_row = get_book_from_csv(book_id)
+                if csv_row is None:
+                    continue
+                    
+                # --- APPLY ADVANCED FILTERS ---
+                if author_filter:
+                    book_author = str(csv_row.get('authors', csv_row.get('author', ''))).lower()
+                    if author_filter not in book_author:
+                        continue
+                
+                if min_rating > 0:
+                    book_rating = csv_row.get('average_rating', 0)
+                    try:
+                        book_rating_val = float(book_rating) if pd.notna(book_rating) else 0.0
+                        if book_rating_val < min_rating:
+                            continue
+                    except (ValueError, TypeError):
+                        continue
+                
+                if from_year > 0 or to_year < 3000:
+                    pub_year = csv_row.get('original_publication_year')
+                    try:
+                        if pd.notna(pub_year):
+                            book_year = int(float(pub_year))
+                            if not (from_year <= book_year <= to_year):
+                                continue
+                    except (ValueError, TypeError):
+                        pass
+                # -------------------------------
+                
+                match_score = 100.0  # Perfect match for pure filtering
+                rec = format_recommendation(csv_row, match_score)
+                if rec:
+                    results.append(rec)
+                    
+            print(f"📚 Returning {len(results)} recommendations (Pure Filter)")
+            return jsonify({
+                "status": "success",
+                "based_on_book": "Filters Only",
+                "recommendations": results
+            }), 200
         
         # Encode and search
         try:
             query_vector = model.encode([query_text]).astype('float32')
-            distances, indices = faiss_index.search(query_vector, 10)  # Get top 10, filter later
+            distances, indices = faiss_index.search(query_vector, 100)  # Get top 100, filter later
         except Exception as e:
             print(f"Error during search: {e}")
             return jsonify({
@@ -210,7 +272,7 @@ def recommend_by_text():
         # Build recommendations
         results = []
         for match_id, distance in zip(indices[0], distances[0]):
-            if len(results) >= 3:
+            if len(results) >= 20:
                 break
             
             try:
@@ -230,6 +292,35 @@ def recommend_by_text():
                 # Skip if exact title match
                 if str(csv_row.get('title', '')).lower() == title.lower():
                     continue
+                
+                # --- APPLY ADVANCED FILTERS ---
+                # Author
+                if author_filter:
+                    book_author = str(csv_row.get('authors', csv_row.get('author', ''))).lower()
+                    if author_filter not in book_author:
+                        continue
+                
+                # Minimum Rating
+                if min_rating > 0:
+                    book_rating = csv_row.get('average_rating', 0)
+                    try:
+                        book_rating_val = float(book_rating) if pd.notna(book_rating) else 0.0
+                        if book_rating_val < min_rating:
+                            continue
+                    except (ValueError, TypeError):
+                        continue
+                
+                # Publication Year
+                if from_year > 0 or to_year < 3000:
+                    pub_year = csv_row.get('original_publication_year')
+                    try:
+                        if pd.notna(pub_year):
+                            book_year = int(float(pub_year))
+                            if not (from_year <= book_year <= to_year):
+                                continue
+                    except (ValueError, TypeError):
+                        pass # Ignore books with invalid year formats and let them through
+                # -------------------------------
                 
                 # Calculate match score
                 match_score = max(70.0, 100.0 - float(distance) * 12.0)
@@ -353,212 +444,6 @@ def check_grammar():
         # Run grammar check
         matches = grammar_tool.check(user_text)
         
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
-import pandas as pd
-from flask import Flask, jsonify
-from flask_cors import CORS
-from sentence_transformers import SentenceTransformer
-import faiss
-import os
-import math
-<<<<<<< HEAD
-import language_tool_python
-=======
->>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
-
-app = Flask(__name__)
-CORS(app)
-
-print("Starting up the AI-Scholar Recommendation Engine (FAISS Fast Mode)...")
-model = SentenceTransformer('all-MiniLM-L6-v2')
-
-print("Loading FAISS index and metadata...")
-try:
-    index = faiss.read_index("books.index")
-    df_meta = pd.read_pickle("books_metadata.pkl")
-    print("FAISS index loaded successfully.")
-except Exception as e:
-    print("Error loading FAISS index:", e)
-
-print("Loading user book.csv to get the newest info...")
-df_csv = pd.read_csv("book.csv")
-
-# Ensure 'id' exists
-if 'book_id' in df_csv.columns and 'id' not in df_csv.columns:
-    df_csv['id'] = df_csv['book_id']
-if 'id' not in df_csv.columns and 'bookId' in df_csv.columns:
-    df_csv['id'] = df_csv['bookId']
-
-# Normalize cover column
-if 'cover_url' not in df_csv.columns:
-    for col in ['image_url', 'images.url', 'image', 'images_url']:
-        if col in df_csv.columns:
-            df_csv['cover_url'] = df_csv[col]
-            break
-
-if 'description' not in df_csv.columns:
-    df_csv['description'] = ''
-else:
-    df_csv['description'] = df_csv['description'].fillna("")
-
-<<<<<<< HEAD
-# --- LOAD GRAMMAR TOOL ---
-print("Loading Grammar Checker...")
-# This creates a local grammar checker for US English
-grammar_tool = language_tool_python.LanguageTool('en-US') 
-print("Grammar Checker Loaded!")
-
-=======
->>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
-print("Model and Database Loaded! API is active and listening.")
-
-@app.route('/api/recommend/<int:book_id>', methods=['GET'])
-def recommend_books(book_id):
-    try:
-        # A. Get the seed book from user's CSV
-        seed_book = df_csv[df_csv['id'] == book_id]
-        if seed_book.empty:
-            return jsonify({"error": f"Could not find book with ID {book_id} in CSV"}), 404
-        
-        seed_book_data = seed_book.iloc[0]
-        seed_title = seed_book_data['title']
-        seed_description = str(seed_book_data.get('description', ''))
-        
-        # B. Encode seed request
-        import numpy as np
-        query_vector = model.encode([seed_description]).astype('float32')
-        
-        # C. Fast Similarity Search!
-        D, I = index.search(query_vector, 5) # search top 5 to ensure we get 3 valid Others
-        candidate_indices = I[0]
-        
-        # Extract the original book_id of the matches from metadata
-        recommended_ids = df_meta.iloc[candidate_indices]['book_id'].tolist()
-        
-        # D. Map back to user's updated CSV
-        results = []
-        for match_id, score in zip(recommended_ids, D[0]):
-            if int(match_id) == book_id:
-                continue # Skip the seed book itself
-            
-            # Find row in user's CSV
-            row_matches = df_csv[df_csv['id'] == match_id]
-            if not row_matches.empty:
-                row = row_matches.iloc[0]
-                
-                # Check for null image
-                cover = row.get('cover_url')
-                if pd.isna(cover):
-                    cover = "https://via.placeholder.com/150x220?text=No+Cover"
-                
-                # Estimate a match score from 0-100% 
-                match_percentage = max(70.0, 100.0 - float(score)*15.0)
-                
-                results.append({
-                    "id": int(row['id']),
-                    "title": str(row['title']),
-                    "description": str(row.get('description', '')),
-                    "cover_url": cover,
-                    "match_score": round(match_percentage, 1)
-                })
-            
-            if len(results) >= 3:
-                break
-                
-        return jsonify({
-            "status": "success",
-            "based_on_book": str(seed_title),
-            "recommendations": results
-        })
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
-
-from flask import request
-
-@app.route('/api/recommend/text', methods=['POST'])
-def recommend_books_text():
-    try:
-        data = request.json
-        seed_title = data.get('title', '')
-        seed_description = data.get('description', '')
-        seed_id = data.get('id', 0)
-        
-        query_text = seed_title + " " + seed_description
-        if not query_text.strip():
-            return jsonify({"error": "No title or description provided"}), 400
-            
-        import numpy as np
-        query_vector = model.encode([query_text]).astype('float32')
-        
-        # Search for top matches
-        D, I = index.search(query_vector, 6) # Top 6 to allow filtering
-        candidate_indices = I[0]
-        recommended_ids = df_meta.iloc[candidate_indices]['book_id'].tolist()
-        
-        results = []
-        for match_id, score in zip(recommended_ids, D[0]):
-            if int(match_id) == seed_id:
-                continue
-                
-            row_matches = df_csv[df_csv['id'] == match_id]
-            if not row_matches.empty:
-                row = row_matches.iloc[0]
-                # Filter out exactly matching titles
-                if str(row.get('title', '')).lower() == seed_title.lower():
-                    continue
-                    
-                cover = row.get('cover_url')
-                if pd.isna(cover): cover = "https://via.placeholder.com/150x220?text=No+Cover"
-                match_percentage = max(70.0, 100.0 - float(score)*15.0)
-                
-                results.append({
-                    "id": int(row['id']),
-                    "title": str(row['title']),
-                    "author": str(row.get('authors', '')),
-                    "cover_url": cover,
-                    "match_score": round(match_percentage, 1)
-                })
-                if len(results) >= 3: break
-                
-        return jsonify({
-            "status": "success",
-            "based_on_book": seed_title,
-            "recommendations": results
-        })
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/', methods=['GET'])
-def api_index():
-    return jsonify({"status": "recommender", "message": "running (FAISS fast mode)"})
-
-<<<<<<< HEAD
-# --- SPELLING & GRAMMAR API ENDPOINT ---
-@app.route('/api/check-grammar', methods=['POST'])
-def check_grammar():
-    try:
-        # 1. Get the text the user typed in the React form
-        from flask import request
-        data = request.json
-        user_text = data.get('text', '')
-
-        if not user_text:
-            return jsonify({"status": "error", "message": "No text provided"}), 400
-
-        # 2. Run the grammar and spell check
-        matches = grammar_tool.check(user_text)
-
-        # 3. Format the mistakes nicely for React
->>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
         mistakes = []
         for match in matches:
             error_len = getattr(match, 'errorLength', getattr(match, 'error_length', 0))
@@ -569,17 +454,12 @@ def check_grammar():
                 "offset": match.offset,
                 "length": error_len
             })
-<<<<<<< HEAD
             
-=======
-
->>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
         return jsonify({
             "status": "success",
             "original_text": user_text,
             "mistakes_found": len(mistakes),
             "details": mistakes
-<<<<<<< HEAD
         }), 200
         
     except Exception as e:
@@ -607,6 +487,227 @@ def index():
         ]
     }), 200
 
+@app.route('/api/routes', methods=['GET'])
+def list_routes():
+    """Debug endpoint to list all registered routes"""
+    routes = []
+    for rule in app.url_map.iter_rules():
+        if rule.endpoint != 'static':
+            routes.append(str(rule))
+    return jsonify({"routes": routes}), 200
+
+# ============================================
+# READING VELOCITY & ANALYTICS ENDPOINTS
+# ============================================
+print("[DEBUG] Attempting to import velocity analyzer...")
+try:
+    from reading_velocity import ReadingVelocityAnalyzer
+    print("[DEBUG] ✓ Successfully imported ReadingVelocityAnalyzer")
+    
+    # Initialize analyzer
+    velocity_analyzer = ReadingVelocityAnalyzer()
+    print(f"[DEBUG] ✓ Successfully initialized velocity analyzer: {velocity_analyzer}")
+except Exception as e:
+    print(f"[ERROR] Failed to import/initialize velocity analyzer: {e}")
+    import traceback
+    traceback.print_exc()
+    velocity_analyzer = None
+
+@app.route('/api/velocity/log-session', methods=['POST', 'OPTIONS'])
+def log_reading_session():
+    """Log a reading session with pages and duration"""
+    if request.method == 'OPTIONS':
+        return '', 204
+    
+    try:
+        data = request.get_json()
+        user_id = data.get('userId')
+        book_id = data.get('bookId')
+        pages_read = data.get('pagesRead', 0)
+        duration_seconds = data.get('durationSeconds', 0)
+        
+        if not all([user_id, book_id]):
+            return jsonify({"status": "error", "message": "Missing required fields"}), 400
+        
+        session = velocity_analyzer.log_reading_session(
+            user_id, book_id, pages_read, duration_seconds
+        )
+        
+        return jsonify({
+            "status": "success",
+            "session": session
+        }), 201
+    
+    except Exception as e:
+        print(f"Error logging session: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/velocity/calculate/<int:user_id>/<int:book_id>', methods=['GET', 'OPTIONS'])
+def get_velocity(user_id, book_id):
+    """Calculate velocity metrics for a user-book combination"""
+    print(f"[DEBUG] get_velocity called: user={user_id}, book={book_id}")
+    if request.method == 'OPTIONS':
+        return '', 204
+    
+    if velocity_analyzer is None:
+        return jsonify({"status": "error", "message": "Velocity analyzer not initialized"}), 500
+    
+    try:
+        velocity = velocity_analyzer.calculate_velocity(user_id, book_id)
+        print(f"[DEBUG] velocity result: {velocity}")
+        
+        if "error" in velocity:
+            return jsonify({
+                "status": "error",
+                "message": velocity["error"]
+            }), 404
+        
+        return jsonify({
+            "status": "success",
+            "data": velocity
+        }), 200
+    
+    except Exception as e:
+        print(f"[ERROR] Error calculating velocity: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/velocity/estimate-completion', methods=['POST', 'OPTIONS'])
+def estimate_completion():
+    """Estimate time to complete a book based on current velocity"""
+    if request.method == 'OPTIONS':
+        return '', 204
+    
+    try:
+        data = request.get_json()
+        user_id = data.get('userId')
+        book_id = data.get('bookId')
+        total_pages = data.get('totalPages', 0)
+        current_page = data.get('currentPage', 0)
+        
+        if not all([user_id, book_id, total_pages]):
+            return jsonify({"status": "error", "message": "Missing required fields"}), 400
+        
+        estimate = velocity_analyzer.estimate_completion(
+            user_id, book_id, total_pages, current_page
+        )
+        
+        if "error" in estimate:
+            return jsonify({
+                "status": "error",
+                "message": estimate["error"]
+            }), 400
+        
+        return jsonify({
+            "status": "success",
+            "data": estimate
+        }), 200
+    
+    except Exception as e:
+        print(f"Error estimating completion: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/velocity/heatmap/<int:user_id>', methods=['GET', 'OPTIONS'])
+def get_reading_heatmap(user_id):
+    """Get reading activity heatmap for past N days"""
+    if request.method == 'OPTIONS':
+        return '', 204
+    
+    try:
+        days = request.args.get('days', 28, type=int)
+        
+        heatmap = velocity_analyzer.get_reading_heatmap(user_id, days)
+        
+        return jsonify({
+            "status": "success",
+            "data": heatmap
+        }), 200
+    
+    except Exception as e:
+        print(f"Error generating heatmap: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/velocity/user-stats/<int:user_id>', methods=['GET', 'OPTIONS'])
+def get_user_stats(user_id):
+    """Get comprehensive reading statistics for a user"""
+    if request.method == 'OPTIONS':
+        return '', 204
+    
+    try:
+        stats = velocity_analyzer.get_reading_stats(user_id)
+        
+        if "error" in stats:
+            return jsonify({
+                "status": "error",
+                "message": stats["error"]
+            }), 404
+        
+        return jsonify({
+            "status": "success",
+            "data": stats
+        }), 200
+    
+    except Exception as e:
+        print(f"Error getting user stats: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/velocity/time-of-day/<int:user_id>', methods=['GET', 'OPTIONS'])
+def get_time_of_day_analytics(user_id):
+    """Analyze reading patterns by time of day (morning, afternoon, evening, night)"""
+    if request.method == 'OPTIONS':
+        return '', 204
+    
+    try:
+        analytics = velocity_analyzer.get_time_of_day_analytics(user_id)
+        
+        if "error" in analytics:
+            return jsonify({
+                "status": "error",
+                "message": analytics["error"]
+            }), 404
+        
+        return jsonify({
+            "status": "success",
+            "data": analytics
+        }), 200
+    
+    except Exception as e:
+        print(f"Error getting time of day analytics: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/velocity/timeline/<int:user_id>', methods=['GET', 'OPTIONS'])
+@app.route('/api/velocity/timeline/<int:user_id>/<int:book_id>', methods=['GET', 'OPTIONS'])
+def get_session_timeline(user_id, book_id=None):
+    """Get detailed chronological timeline of reading sessions with timestamps"""
+    if request.method == 'OPTIONS':
+        return '', 204
+    
+    try:
+        timeline = velocity_analyzer.get_session_timeline(user_id, book_id)
+        
+        if "error" in timeline:
+            return jsonify({
+                "status": "error",
+                "message": timeline["error"]
+            }), 404
+        
+        return jsonify({
+            "status": "success",
+            "data": timeline
+        }), 200
+    
+    except Exception as e:
+        print(f"Error getting session timeline: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 # ============================================
 # ERROR HANDLERS
 # ============================================
@@ -630,97 +731,3 @@ if __name__ == '__main__':
         debug=False,
         threaded=True
     )
-=======
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-=======
->>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
-@app.route('/api/health', methods=['GET'])
-def health():
-    return jsonify({"status": "ok"})
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', '5001'))
-<<<<<<< HEAD
-    app.run(host='127.0.0.1', port=port, debug=True)
-=======
-    app.run(host='127.0.0.1', port=port, debug=True)
-=======
-from flask import Flask, jsonify
-from flask_cors import CORS
-import mysql.connector
-from sentence_transformers import SentenceTransformer, util
-
-app = Flask(__name__)
-CORS(app) # Allows VS Code (React) to securely talk to PyCharm (Flask)
-
-# --- 1. LOAD AI MODEL ONCE AT STARTUP ---
-print("Starting up the AI-Scholar Recommendation Engine...")
-model = SentenceTransformer('all-MiniLM-L6-v2')
-print("Model Loaded! API is active and listening.")
-
-# --- 2. DATABASE CONNECTION HELPER ---
-def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",               # Update if needed
-        password="Bharana@2004",  # Put your MySQL password here!
-        database="elibrary_db"    # Put your exact schema name here!
-    )
-
-# --- 3. THE API ENDPOINT ---
-# When React asks for /api/recommend/1508, this function runs!
-@app.route('/api/recommend/<int:book_id>', methods=['GET'])
-def recommend_books(book_id):
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        # A. Get the book the user just read
-        cursor.execute("SELECT title, description FROM books WHERE id = %s", (book_id,))
-        seed_book = cursor.fetchone()
-
-        if not seed_book:
-            return jsonify({"error": f"Could not find book with ID {book_id}"}), 404
-
-        # B. Get all other unread books (Including cover_url for React!)
-        cursor.execute("SELECT id, title, description, cover_url FROM books WHERE id != %s", (book_id,))
-        other_books = cursor.fetchall()
-
-        # C. Run the AI Math
-        seed_embedding = model.encode(seed_book['description'])
-        other_descriptions = [book['description'] for book in other_books]
-        other_embeddings = model.encode(other_descriptions)
-
-        cosine_scores = util.cos_sim(seed_embedding, other_embeddings)[0]
-
-        # D. Attach scores and sort
-        for i in range(len(other_books)):
-            other_books[i]['match_score'] = round(cosine_scores[i].item() * 100, 2)
-
-        recommended = sorted(other_books, key=lambda x: x['match_score'], reverse=True)
-
-        # E. Package it up nicely for VS Code
-        return jsonify({
-            "status": "success",
-            "based_on_book": seed_book['title'],
-            "recommendations": recommended[:3] # Send the top 3
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        if 'conn' in locals() and conn.is_connected():
-            cursor.close()
-            conn.close()
-
-# --- 4. START THE SERVER ---
-if __name__ == '__main__':
-    # Running on port 5000
-    app.run(port=5000, debug=True)
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
->>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
->>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5

@@ -84,13 +84,6 @@ CREATE TABLE reading_progress (
   INDEX idx_book_id (book_id)
 );
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
->>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 -- Bookmarks Table
 CREATE TABLE bookmarks (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -121,10 +114,6 @@ CREATE TABLE highlights (
   INDEX idx_created_at (created_at)
 );
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
 -- Feedbacks Table
 CREATE TABLE feedbacks (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -139,13 +128,40 @@ CREATE TABLE feedbacks (
   INDEX idx_created_at (created_at)
 );
 
-<<<<<<< HEAD
-=======
-=======
-=======
->>>>>>> 214ea6c94b151641970906ae80d8582b1f1a2db5
->>>>>>> 90e533a64b037985637d2a52a5bf42cda436d520
->>>>>>> 7d6a5d204ea17806ab69918b293c59a83a16ffc5
+-- Bookshelf Items Table
+CREATE TABLE bookshelf_items (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  title VARCHAR(255),
+  author VARCHAR(255),
+  emoji VARCHAR(50),
+  genre VARCHAR(100),
+  rating DOUBLE DEFAULT 0,
+  status VARCHAR(50),
+  progress INT DEFAULT 0,
+  list_name VARCHAR(100) DEFAULT 'favourites',
+  cover_image LONGTEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  INDEX idx_user_id (user_id),
+  INDEX idx_list_name (list_name),
+  INDEX idx_created_at (created_at)
+);
+
+-- Search History Table
+CREATE TABLE search_history (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  search_query VARCHAR(500) NOT NULL,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  is_deleted BOOLEAN DEFAULT FALSE,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  INDEX idx_user_id (user_id),
+  INDEX idx_timestamp (timestamp),
+  INDEX idx_user_timestamp (user_id, timestamp)
+);
+
 -- ============================================
 -- Sample Data (Optional - for testing)
 -- ============================================

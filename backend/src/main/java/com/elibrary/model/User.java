@@ -40,6 +40,9 @@ public class User {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
+    @Column(name = "is_premium")
+    private Boolean isPremium = false;
+
     // Constructors
     public User() {
     }
@@ -50,7 +53,7 @@ public class User {
         this.password = password;
     }
 
-    public User(Long id, String email, String fullName, String password, String profilePictureUrl, String bio, String readingPreference, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean isDeleted) {
+    public User(Long id, String email, String fullName, String password, String profilePictureUrl, String bio, String readingPreference, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean isDeleted, Boolean isPremium) {
         this.id = id;
         this.email = email;
         this.fullName = fullName;
@@ -61,6 +64,7 @@ public class User {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.isDeleted = isDeleted;
+        this.isPremium = isPremium;
     }
 
     // Getters and Setters
@@ -150,5 +154,13 @@ public class User {
 
     public void setIsDeleted(Boolean isDeleted) {
         this.isDeleted = isDeleted;
+    }
+
+    public Boolean getIsPremium() {
+        return isPremium;
+    }
+
+    public void setIsPremium(Boolean isPremium) {
+        this.isPremium = isPremium;
     }
 }

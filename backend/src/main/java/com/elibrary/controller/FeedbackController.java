@@ -11,16 +11,17 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v1/feedback")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001",
-                         "http://localhost:5173", "http://localhost:5174"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class FeedbackController {
 
     @Autowired
     private FeedbackRepository feedbackRepository;
 
+    // Use standard POST without wildcard for better tracking mapping
     @PostMapping
     public ResponseEntity<?> submitFeedback(@Valid @RequestBody Feedback feedbackRequest) {
         try {
+            // Validate required fields
             if (feedbackRequest.getUserId() == null || feedbackRequest.getUserId() <= 0) {
                 return ResponseEntity.badRequest().body("Error: userId is required and must be valid");
             }
@@ -30,7 +31,8 @@ public class FeedbackController {
             if (feedbackRequest.getMessage() == null || feedbackRequest.getMessage().trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("Error: feedback message is required");
             }
-
+            
+            // Default values and security check
             feedbackRequest.setStatus("PENDING");
             Feedback savedFeedback = feedbackRepository.save(feedbackRequest);
             return ResponseEntity.ok(savedFeedback);

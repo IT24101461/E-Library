@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/ApiConfig';
 
-const API_URL = 'http://localhost:8080/api/v1/feedback';
+const API_URL = `${API_BASE_URL}/v1/feedback`;
 
 const FeedbackService = {
   submitFeedback: async (feedbackData) => {

@@ -22,6 +22,9 @@ public class Bookmark {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
     public Bookmark() {}
 
     public Bookmark(Long userId, Long bookId, Integer pageNumber) {
@@ -40,4 +43,6 @@ public class Bookmark {
     public void setPageNumber(Integer pageNumber) { this.pageNumber = pageNumber; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public Boolean getIsDeleted() { return isDeleted; }
+    public void setIsDeleted(Boolean isDeleted) { this.isDeleted = isDeleted; }
 }

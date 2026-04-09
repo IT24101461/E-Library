@@ -3,31 +3,16 @@ import styles from './FeedbackWidget.module.css';
 import FeedbackService from '../services/FeedbackService';
 
 const FeedbackWidget = ({ isOpen, onClose }) => {
-  const [type, setType] = useState('bug');
+  const [type, setType] = useState('bug'); // 'bug', 'feature', 'review'
   const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [theme, setTheme] = useState('dark');
   const [isCheckingGrammar, setIsCheckingGrammar] = useState(false);
-  const [grammarIssues, setGrammarIssues] = useState([]);
 
-  useEffect(() => {
-    const rootTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-    setTheme(rootTheme);
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          setTheme(document.documentElement.getAttribute('data-theme'));
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
-    return () => observer.disconnect();
-  }, []);
-
+  // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
       setIsSuccess(false);
@@ -35,13 +20,14 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
       setRating(0);
       setType('bug');
       setErrorMessage('');
-      setGrammarIssues([]);
     }
   }, [isOpen]);
 
   const handleTypeSelect = (selectedType) => {
     setType(selectedType);
-    if (selectedType !== 'review') setRating(0);
+    if (selectedType !== 'review') {
+      setRating(0);
+    }
   };
 
   const handleCheckGrammar = async () => {
@@ -49,7 +35,9 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
       setErrorMessage('Please enter text to check');
       return;
     }
+
     setIsCheckingGrammar(true);
+    setErrorMessage('');
     try {
       const params = new URLSearchParams();
       params.append('text', message);
@@ -63,15 +51,15 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
 
       const data = await response.json();
       const mistakes = data.matches || [];
-      setGrammarIssues(mistakes);
+      
       if (mistakes.length === 0) {
-        setErrorMessage('✓ No grammar issues found!');
+        setErrorMessage('✓ No grammar issues found! Your message is perfectly balanced.');
       } else {
-        setErrorMessage(`Found ${mistakes.length} issue(s)`);
+        setErrorMessage(`Found ${mistakes.length} point(s) for refinement.`);
       }
     } catch (error) {
       console.error('Grammar check error:', error);
-      setErrorMessage('Could not connect to grammar checker');
+      setErrorMessage('Harmony check could not be completed at this time.');
     } finally {
       setIsCheckingGrammar(false);
     }
@@ -80,9 +68,10 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!message.trim()) {
-      setErrorMessage('Please enter a message');
+      setErrorMessage('Your thought is empty. Please share your feedback.');
       return;
     }
+
     setIsSubmitting(true);
     setErrorMessage('');
     try {
@@ -92,14 +81,16 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
         message
       });
       setIsSuccess(true);
-      setTimeout(() => { onClose(); }, 2000);
+      setTimeout(() => {
+        onClose();
+      }, 3000);
     } catch (error) {
       console.error('Failed to submit feedback', error);
-      const errorMsg = error.response?.data?.message ||
-                       error.response?.data ||
-                       error.message ||
-                       'Failed to submit feedback. Please try again.';
-      setErrorMessage(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+      const errorMsg = error.response?.data?.message || 
+                       error.response?.data || 
+                       error.message || 
+                       'Failed to transmit feedback. Please try again.';
+      setErrorMessage(typeof errorMsg === 'string' ? errorMsg : 'Feedback transmission failed.');
     } finally {
       setIsSubmitting(false);
     }
@@ -109,43 +100,42 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} data-theme={theme} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.closeBtn} onClick={onClose}>✕</button>
-
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <button className={styles.closeBtn} onClick={onClose} aria-label="Close Hub">✕</button>
+        
         {!isSuccess ? (
           <>
             <div className={styles.header}>
-              <h3 className={styles.title}>Send Feedback</h3>
-              <p className={styles.subtitle}>Help us improve your E-Library experience</p>
+              <h3 className={styles.title}>Feedback Hub</h3>
+              <p className={styles.subtitle}>Collaborate with us to refine the Sanctuary experience.</p>
             </div>
 
             <div className={styles.typeSelector}>
-              <button
-                type="button"
-                className={`${styles.typeBtn} ${type === 'bug' ? styles.selected : ''}`}
+              <div
+                className={`${styles.typeCard} ${type === 'bug' ? styles.selected : ''}`}
                 onClick={() => handleTypeSelect('bug')}
               >
-                <span>🐛</span> Bug
-              </button>
-              <button
-                type="button"
-                className={`${styles.typeBtn} ${type === 'feature' ? styles.selected : ''}`}
+                <span className={styles.typeIcon}>🐛</span>
+                <span className={styles.typeName}>Reports</span>
+              </div>
+              <div
+                className={`${styles.typeCard} ${type === 'feature' ? styles.selected : ''}`}
                 onClick={() => handleTypeSelect('feature')}
               >
-                <span>💡</span> Feature
-              </button>
-              <button
-                type="button"
-                className={`${styles.typeBtn} ${type === 'review' ? styles.selected : ''}`}
+                <span className={styles.typeIcon}>💡</span>
+                <span className={styles.typeName}>Aspirations</span>
+              </div>
+              <div
+                className={`${styles.typeCard} ${type === 'review' ? styles.selected : ''}`}
                 onClick={() => handleTypeSelect('review')}
               >
-                <span>⭐</span> Review
-              </button>
+                <span className={styles.typeIcon}>✨</span>
+                <span className={styles.typeName}>Reflection</span>
+              </div>
             </div>
 
             {type === 'review' && (
-              <div className={styles.ratingContainer}>
-                <p className={styles.subtitle} style={{ marginBottom: '5px' }}>Rate your experience</p>
+              <div className={styles.ratingSection}>
                 <div className={styles.stars} onMouseLeave={() => setHoveredStar(0)}>
                   {[1, 2, 3, 4, 5].map((value) => (
                     <span
@@ -162,44 +152,54 @@ const FeedbackWidget = ({ isOpen, onClose }) => {
             )}
 
             <form onSubmit={handleSubmit}>
-              <textarea
-                className={styles.textarea}
-                placeholder={
-                  type === 'bug' ? "What's broken or not working?" :
-                  type === 'feature' ? "What new feature would you like to see?" :
-                  "Tell us about your experience..."
-                }
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                maxLength={500}
-                required
-              />
-              <button
-                type="button"
-                onClick={handleCheckGrammar}
-                className={styles.grammarBtn}
-                disabled={isCheckingGrammar || !message.trim()}
-              >
-                {isCheckingGrammar ? 'Checking...' : '✓ CHECK GRAMMAR'}
-              </button>
+              <div className={styles.inputWrapper}>
+                <textarea
+                  className={styles.textarea}
+                  placeholder={
+                    type === 'bug' ? "Describe the friction you encountered..." :
+                    type === 'feature' ? "What additions would enrich the sanctuary?" :
+                    "Share your experience with our library..."
+                  }
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  maxLength={500}
+                  required
+                />
+                <div className={styles.charCounter}>{message.length} / 500</div>
+              </div>
+              
+              <div className={styles.actions}>
+                <button
+                  type="button"
+                  onClick={handleCheckGrammar}
+                  className={styles.grammarBtn}
+                  disabled={isCheckingGrammar || !message.trim()}
+                >
+                  {isCheckingGrammar ? 'REFINING...' : '✨ HARMONY CHECK'}
+                </button>
+                
+                <button 
+                  type="submit" 
+                  className={styles.submitBtn}
+                  disabled={isSubmitting || !message.trim() || (type === 'review' && rating === 0)}
+                >
+                  {isSubmitting ? 'SENDING...' : 'TRANSMIT'}
+                </button>
+              </div>
+
               {errorMessage && (
-                <div className={styles.errorMessage}>{errorMessage}</div>
+                <div className={styles.errorMessage}>
+                  {errorMessage}
+                </div>
               )}
-              <button
-                type="submit"
-                className={styles.submitBtn}
-                disabled={isSubmitting || !message.trim() || (type === 'review' && rating === 0)}
-              >
-                {isSubmitting ? 'Sending...' : 'Send Feedback'}
-              </button>
             </form>
           </>
         ) : (
-          <div className={styles.successMessage}>
-            <div className={styles.checkIcon}>✓</div>
-            <h3 className={styles.title}>Thank You!</h3>
-            <p className={styles.subtitle}>Your feedback has been received.</p>
-          </div>
+           <div className={styles.successState}>
+              <div className={styles.checkIcon}>✓</div>
+              <h3 className={styles.title}>Grateful</h3>
+              <p className={styles.subtitle}>Your feedback has been successfully woven into our future.</p>
+           </div>
         )}
       </div>
     </div>

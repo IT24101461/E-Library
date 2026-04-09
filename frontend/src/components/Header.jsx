@@ -1,90 +1,132 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { 
+  LayoutDashboard, Book, Bookmark, MessageSquare, 
+  Settings, LogOut, Gem, User, Sun, Moon, BookText
+} from 'lucide-react';
 import styles from './Header.module.css';
+import PaymentModal from './PaymentModal';
+import { useTheme } from '../context/ThemeContext';
 
 const Header = () => {
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const raw = localStorage.getItem('authUser');
     if (raw) setUser(JSON.parse(raw));
-  }, []);
+  }, [isPaymentModalOpen]);
 
-  const isActive = (path) => location.pathname === path ? styles.navLinkActive : '';
+  const handleUpgradeSuccess = () => {
+    const raw = localStorage.getItem('authUser');
+    if (raw) setUser(JSON.parse(raw));
+  };
+
+  const isActive = (path) => (location.pathname === path ? styles.navLinkActive : '');
 
   return (
     <header className={styles.header}>
       <div className={styles.headerContainer}>
-        <div className={styles.logo}>
-          <Link to="/" className={styles.logoLink}>
-            <div className={styles.logoBadge}>
-              <img src="/images/logo.svg" alt="E-Library" className={styles.logoImage} />
-            </div>
-          </Link>
-          <div>
-            <h1 className={styles.logoTitle}>E-Library</h1>
-            <p className={styles.logoSubtitle}>Digital Reading</p>
+        {/* LOGO SECTION */}
+        <Link to="/" className={styles.logo}>
+          <div className={styles.logoBadge}>
+            <img src="/images/premium_logo.png" alt="" className={styles.logoImage} />
           </div>
-        </div>
+          <div className={styles.logoText}>
+            <h1 className={styles.logoTitle}>E-Library</h1>
+            <p className={styles.logoSubtitle}>The Sanctuary</p>
+          </div>
+        </Link>
 
-        {/* Desktop Nav */}
+        {/* DESKTOP NAVIGATION */}
         <nav className={styles.navDesktop}>
-          <Link to="/dashboard" className={`${styles.navLink} ${isActive('/dashboard')}`}>🏠 Dashboard</Link>
-          <Link to="/books" className={`${styles.navLink} ${isActive('/books')}`}>📖 Books</Link>
-          <Link to="/bookshelf" className={`${styles.navLink} ${isActive('/bookshelf')}`}>🗂 Bookshelf</Link>
-          <Link to="/book-list" className={`${styles.navLink} ${isActive('/book-list')}`}>📋 Book List</Link>
-          <Link to="/history" className={`${styles.navLink} ${isActive('/history')}`}>🕓 History</Link>
-          <Link to="/ranker" className={`${styles.navLink} ${isActive('/ranker')}`}>🏆 Ranker</Link>
-          <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={styles.navLink}>🤖 AI Recs</Link>
-          <Link to="/feedback" className={`${styles.navLink} ${isActive('/feedback')}`}>💬 Feedback</Link>
-
-          {/* Admin-only links */}
+          <Link to="/activity" className={`${styles.navLink} ${isActive('/activity')}`}>
+            <LayoutDashboard className={styles.navIcon} size={18} />
+            <span>Dashboard</span>
+          </Link>
+          <Link to="/books" className={`${styles.navLink} ${isActive('/books')}`}>
+            <Book className={styles.navIcon} size={18} />
+            <span>Books</span>
+          </Link>
+          {user && (
+            <Link to="/bookshelf" className={`${styles.navLink} ${isActive('/bookshelf')}`}>
+              <Bookmark className={styles.navIcon} size={18} />
+              <span>Bookshelf</span>
+            </Link>
+          )}
+          <Link to="/feedback" className={`${styles.navLink} ${isActive('/feedback')}`}>
+            <MessageSquare className={styles.navIcon} size={18} />
+            <span>Feedback</span>
+          </Link>
           {user && user.role === 'ADMIN' && (
-            <>
-              <Link to="/upload" className={`${styles.navLink} ${isActive('/upload')}`}>⬆️ Upload</Link>
-              <Link to="/admin" className={`${styles.navLink} ${isActive('/admin')}`}>⚙️ Admin</Link>
-              <Link to="/add-book" className={`${styles.navLink} ${isActive('/add-book')}`}>➕ Add Book</Link>
-            </>
+            <Link to="/admin" className={`${styles.navLink} ${isActive('/admin')}`}>
+              <Settings className={styles.navIcon} size={18} />
+              <span>Admin</span>
+            </Link>
           )}
         </nav>
 
-        {/* User Menu */}
+        {/* THEME SWITCHER */}
+        <div className={styles.themeSwitcher}>
+          <button 
+            onClick={() => toggleTheme('light')}
+            className={`${styles.themeBtn} ${theme === 'light' ? styles.themeBtnActive : ''}`}
+            title="Light Mode"
+          >
+            <Sun size={16} />
+            <span>Light</span>
+          </button>
+          <button 
+            onClick={() => toggleTheme('dark')}
+            className={`${styles.themeBtn} ${theme === 'dark' ? styles.themeBtnActive : ''}`}
+            title="Dark Mode"
+          >
+            <Moon size={16} />
+            <span>Dark</span>
+          </button>
+          <button 
+            onClick={() => toggleTheme('sepia')}
+            className={`${styles.themeBtn} ${theme === 'sepia' ? styles.themeBtnActive : ''}`}
+            title="Sepia Mode"
+          >
+            <BookText size={16} />
+            <span>Sepia</span>
+          </button>
+        </div>
+
+        {/* USER MENU */}
         <div className={styles.userMenu}>
           {user ? (
             <>
-              <button onClick={() => navigate('/dashboard')} className={styles.userButton}>{user.fullName}</button>
-
-              {/* Dev-only helper: promote current session user to ADMIN (client-side only) */}
-              {process.env.NODE_ENV === 'development' && user.role !== 'ADMIN' && (
+              {user.isPremium ? (
+                <div className={styles.premiumBadgeHeader}>
+                  <Gem size={14} style={{ marginRight: '6px' }} />
+                  Premium Scholar
+                </div>
+              ) : (
                 <button
-                  onClick={() => {
-                    try {
-                      const raw = localStorage.getItem('authUser');
-                      if (!raw) return;
-                      const u = JSON.parse(raw);
-                      u.role = 'ADMIN';
-                      localStorage.setItem('authUser', JSON.stringify(u));
-                      setUser(u);
-                      alert('Local session promoted to ADMIN (development only)');
-                    } catch (e) {
-                      console.error('Failed to promote to admin', e);
-                    }
-                  }}
-                  title="Temporarily promote this session to ADMIN (dev only)"
-                  className={styles.userButtonSecondary}
+                  onClick={() => setIsPaymentModalOpen(true)}
+                  className={styles.upgradeBtn}
                 >
-                  Promote to Admin
+                  <Gem size={16} />
+                  Upgrade
                 </button>
               )}
-
-              <button
-                onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }}
+              
+              <button onClick={() => navigate('/activity')} className={styles.userButton}>
+                <User size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                {user.fullName.split(' ')[0]}
+              </button>
+              
+              <button 
+                onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }} 
                 className={styles.userButtonPrimary}
               >
-                Log Out
+                <LogOut size={16} />
               </button>
             </>
           ) : (
@@ -95,46 +137,27 @@ const Header = () => {
           )}
         </div>
 
+        {/* MOBILE TOGGLE */}
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className={styles.mobileToggle}>
           {mobileMenuOpen ? '✕' : '☰'}
         </button>
+
+        {/* MOBILE NAV OVERLAY - Moved to BottomNav, but keeping it as a fallback for non-nav items if needed, or hiding it */}
+        {/* Commented out as it is now redundant with BottomNav */}
+        {/*
+        {mobileMenuOpen && (
+          <nav className={styles.mobileNav}>
+            ...
+          </nav>
+        )}
+        */}
       </div>
 
-      {/* Mobile Nav */}
-      {mobileMenuOpen && (
-        <nav className={styles.mobileNav}>
-          <Link to="/dashboard" className={styles.mobileNavLink}>🏠 Dashboard</Link>
-          <Link to="/books" className={styles.mobileNavLink}>📖 Books</Link>
-          <Link to="/bookshelf" className={styles.mobileNavLink}>🗂 Bookshelf</Link>
-          <Link to="/book-list" className={styles.mobileNavLink}>📋 Book List</Link>
-          <Link to="/history" className={styles.mobileNavLink}>🕓 History</Link>
-          <Link to="/ranker" className={styles.mobileNavLink}>🏆 Ranker</Link>
-          <Link to={{ pathname: '/dashboard', hash: '#recommendations' }} className={styles.mobileNavLink}>🤖 AI Recs</Link>
-          <Link to="/feedback" className={styles.mobileNavLink}>💬 Feedback</Link>
-
-          {user && user.role === 'ADMIN' && (
-            <>
-              <Link to="/upload" className={styles.mobileNavLink}>⬆️ Upload</Link>
-              <Link to="/admin" className={styles.mobileNavLink}>⚙️ Admin</Link>
-              <Link to="/add-book" className={styles.mobileNavLink}>➕ Add Book</Link>
-            </>
-          )}
-
-          {user ? (
-            <button
-              onClick={() => { localStorage.removeItem('authUser'); setUser(null); navigate('/login'); }}
-              className={styles.mobileNavLink}
-            >
-              Log Out
-            </button>
-          ) : (
-            <>
-              <Link to="/login" className={styles.mobileNavLink}>Sign in</Link>
-              <Link to="/register" className={styles.mobileNavLink}>Register</Link>
-            </>
-          )}
-        </nav>
-      )}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onShowSuccess={handleUpgradeSuccess}
+      />
     </header>
   );
 };

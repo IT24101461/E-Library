@@ -1,8 +1,7 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/ApiConfig';
 
-// Use base URL without trailing /api. Service methods add the /api prefix
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
-
+// API Base URL is now dynamically detected based on environment
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -11,17 +10,19 @@ const apiClient = axios.create({
 });
 
 export const ActivityService = {
-
+ 
   getHistory: (userId) => {
-    return apiClient.get(`/api/history?userId=${userId}`);
+    return apiClient.get(`/history?userId=${userId}`);
   },
 
+  // READ - Get reading stats
   getStats: (userId) => {
-    return apiClient.get(`/api/stats?userId=${userId}`);
+    return apiClient.get(`/stats?userId=${userId}`);
   },
 
+  // READ - Get reading progress for a book
   getProgress: (userId, bookId) => {
-    return apiClient.get('/api/progress', {
+    return apiClient.get('/progress', {
       params: {
         userId: userId,
         bookId: bookId,
@@ -29,12 +30,14 @@ export const ActivityService = {
     });
   },
 
+  // CREATE - Add activity (borrow, start reading, etc.)
   createActivity: (activityData) => {
-    return apiClient.post('/api/activity', activityData);
+    return apiClient.post('/activity', activityData);
   },
 
+  // CREATE/UPDATE - Log reading activity and update progress
   logActivity: (userId, action, bookId, progressData) => {
-    return apiClient.put('/api/progress', null, {
+    return apiClient.put('/progress', null, {
       params: {
         userId: userId,
         bookId: bookId,
@@ -44,8 +47,9 @@ export const ActivityService = {
     });
   },
 
+  // UPDATE - Update reading progress
   updateProgress: (progressData) => {
-    return apiClient.put('/api/progress', null, {
+    return apiClient.put('/progress', null, {
       params: {
         userId: progressData.userId,
         bookId: progressData.bookId,
@@ -55,29 +59,36 @@ export const ActivityService = {
     });
   },
 
+  // DELETE - Remove activity from history (soft delete)
   deleteActivity: (activityId) => {
-    return apiClient.delete(`/api/history/${activityId}`);
+    return apiClient.delete(`/history/${activityId}`);
   },
 
+  // GET - Fetch all books
   getBooks: () => {
-    return apiClient.get('/api/books');
+    return apiClient.get('/books');
   },
 
+  // GET - Fetch single book details
   getBook: (bookId) => {
-    return apiClient.get(`/api/books/${bookId}`);
+    return apiClient.get(`/books/${bookId}`);
   },
 
+  // POST - Create new book
   createBook: (bookData, userId) => {
-    const url = userId ? `/api/books?userId=${userId}` : '/api/books';
+    // If userId provided, send as query param for server-side role check
+    const url = userId ? `/books?userId=${userId}` : '/books';
     return apiClient.post(url, bookData);
   },
 
+  // PUT - Update book details
   updateBook: (bookId, bookData) => {
-    return apiClient.put(`/api/books/${bookId}`, bookData);
+    return apiClient.put(`/books/${bookId}`, bookData);
   },
 
+  // DELETE - Delete a book
   deleteBook: (bookId) => {
-    return apiClient.delete(`/api/books/${bookId}`);
+    return apiClient.delete(`/books/${bookId}`);
   },
 };
 

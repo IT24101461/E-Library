@@ -56,10 +56,12 @@ public class ProgressService {
                 progress = new ReadingProgress();
                 progress.setUserId(userId);
                 progress.setBookId(bookId);
-                progress.setCurrentPage(currentPage);
+                // Start new books at page 1 if currentPage is 0 or null
+                int startPage = (currentPage == null || currentPage <= 0) ? 1 : currentPage;
+                progress.setCurrentPage(startPage);
                 progress.setTotalPages(totalPages);
                 progress.setVersion(0L);
-                logger.debug("Created new progress: currentPage={}, totalPages={}", currentPage, totalPages);
+                logger.debug("Created new progress: currentPage={}, totalPages={}", startPage, totalPages);
             }
             
             progress.setLastReadAt(LocalDateTime.now());

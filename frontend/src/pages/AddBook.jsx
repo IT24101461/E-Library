@@ -15,6 +15,8 @@ const AddBook = () => {
     publicationYear: new Date().getFullYear(),
     coverUrl: '',
     pdfUrl: '',
+    content: '',
+    isAvailable: true,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -35,10 +37,10 @@ const AddBook = () => {
   }, [authUser, navigate]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'totalPages' || name === 'publicationYear' ? parseInt(value) : value,
+      [name]: type === 'checkbox' ? checked : (name === 'totalPages' || name === 'publicationYear' ? parseInt(value) : value),
     }));
   };
 
@@ -273,6 +275,66 @@ const AddBook = () => {
               <p className={styles['addbook-hint']}>
                 Use our API: http://localhost:8080/files/[filename] or external PDF URLs
               </p>
+            </div>
+
+            {/* Emoji and Genre */}
+            <div className={styles['addbook-row']}>
+              <div>
+                <label className={styles['addbook-label']}>
+                  Book Emoji
+                </label>
+                <input
+                  type="text"
+                  name="emoji"
+                  value={formData.emoji}
+                  onChange={handleChange}
+                  placeholder="e.g., 📚"
+                  maxLength="2"
+                  className={styles['addbook-input']}
+                />
+              </div>
+              <div>
+                <label className={styles['addbook-label']}>
+                  Genre
+                </label>
+                <input
+                  type="text"
+                  name="genre"
+                  value={formData.genre}
+                  onChange={handleChange}
+                  placeholder="e.g., Adventure"
+                  className={styles['addbook-input']}
+                />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div>
+              <label className={styles['addbook-label']}>
+                Book Content (Text)
+              </label>
+              <textarea
+                name="content"
+                value={formData.content}
+                onChange={handleChange}
+                placeholder="Paste the full book text content here (or leave empty if using PDF URL)"
+                rows="6"
+                className={styles['addbook-input']}
+              ></textarea>
+            </div>
+
+            {/* Availability */}
+            <div>
+              <label className={styles['addbook-label']}>
+                <input
+                  type="checkbox"
+                  name="isAvailable"
+                  checked={formData.isAvailable}
+                  onChange={handleChange}
+                  className={styles['addbook-checkbox']}
+                />
+                {' '}Book is Available
+              </label>
             </div>
 
             {/* Buttons */}

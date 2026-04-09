@@ -35,6 +35,9 @@ public class Feedback {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
     public Feedback() {}
 
     @PrePersist
@@ -64,4 +67,7 @@ public class Feedback {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Boolean getIsDeleted() { return isDeleted; }
+    public void setIsDeleted(Boolean isDeleted) { this.isDeleted = isDeleted; }
 }

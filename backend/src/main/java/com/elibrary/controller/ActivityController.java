@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class ActivityController {
 
@@ -34,13 +33,15 @@ public class ActivityController {
     public ResponseEntity<List<Map<String, Object>>> getHistory(@RequestParam Long userId) {
         try {
             List<ActivityLog> activities = activityService.getUserHistory(userId);
-
+            
+            // Transform activities to include real book details
             List<Map<String, Object>> response = activities.stream()
                     .map(activity -> {
                         Map<String, Object> map = new HashMap<>();
                         map.put("id", activity.getId());
                         map.put("bookId", activity.getBookId());
-
+                        
+                        // Fetch real book details from database
                         Book book = bookRepository.findById(activity.getBookId()).orElse(null);
                         if (book != null) {
                             map.put("title", book.getTitle());
@@ -57,7 +58,8 @@ public class ActivityController {
                             map.put("category", "Unknown");
                             map.put("description", "");
                         }
-
+                        
+                        // Prefer the authoritative ReadingProgress if available
                         ReadingProgress progress = progressService.getProgress(activity.getUserId(), activity.getBookId());
                         if (progress != null) {
                             map.put("currentPage", progress.getCurrentPage() != null ? progress.getCurrentPage() : 0);
@@ -66,35 +68,34 @@ public class ActivityController {
                         }
                         map.put("lastRead", activity.getTimestamp());
                         map.put("action", activity.getAction());
+                        map.put("timeSpent", activity.getTimeSpentMinutes() != null ? activity.getTimeSpentMinutes() : 0);
                         return map;
                     })
                     .collect(Collectors.toList());
 
-            return ResponseEntity.ok(response);
+            // Deduplicate by bookId — keep only the most recent activity per book
+            List<Map<String, Object>> deduplicated = response.stream()
+                    .sorted((a, b) -> {
+                        java.time.LocalDateTime ta = (java.time.LocalDateTime) a.get("lastRead");
+                        java.time.LocalDateTime tb = (java.time.LocalDateTime) b.get("lastRead");
+                        if (ta == null && tb == null) return 0;
+                        if (ta == null) return 1;
+                        if (tb == null) return -1;
+                        return tb.compareTo(ta);
+                    })
+                    .collect(java.util.stream.Collectors.toMap(
+                            m -> (Long) m.get("bookId"),
+                            m -> m,
+                            (existing, replacement) -> existing,
+                            java.util.LinkedHashMap::new
+                    ))
+                    .values()
+                    .stream()
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(deduplicated);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
-    // GET - Reading stats for a user
-    @GetMapping("/stats")
-    public ResponseEntity<Map<String, Object>> getStats(@RequestParam Long userId) {
-        try {
-            ActivityService.ActivityStatsDTO statsDTO = activityService.getUserStats(userId);
-
-            Map<String, Object> stats = new HashMap<>();
-            stats.put("booksRead", statsDTO.getBooksRead());
-            stats.put("readingVelocity", statsDTO.getReadingVelocity());
-            stats.put("currentStreak", statsDTO.getCurrentStreak());
-
-            return ResponseEntity.ok(stats);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, Object> defaults = new HashMap<>();
-            defaults.put("booksRead", 0);
-            defaults.put("readingVelocity", 0);
-            defaults.put("currentStreak", 0);
-            return ResponseEntity.ok(defaults);
         }
     }
 
@@ -102,20 +103,21 @@ public class ActivityController {
     @PostMapping("/activity")
     public ResponseEntity<Map<String, Object>> createActivity(@RequestBody Map<String, Object> request) {
         try {
+            // Parse request parameters with null checks
             if (request.get("userId") == null || request.get("bookId") == null || request.get("action") == null) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", "Missing required fields: userId, bookId, action");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
-
+            
             Long userId = ((Number) request.get("userId")).longValue();
             Long bookId = ((Number) request.get("bookId")).longValue();
             String action = (String) request.get("action");
             Integer currentPage = request.get("currentPage") != null ? ((Number) request.get("currentPage")).intValue() : null;
             Integer timeSpentMinutes = request.get("timeSpentMinutes") != null ? ((Number) request.get("timeSpentMinutes")).intValue() : null;
-
+            
             ActivityLog activity = activityService.createActivity(userId, bookId, action, currentPage, timeSpentMinutes);
-
+            
             Map<String, Object> response = new HashMap<>();
             response.put("id", activity.getId());
             response.put("bookId", activity.getBookId());
@@ -123,12 +125,19 @@ public class ActivityController {
             response.put("action", action);
             response.put("timestamp", activity.getTimestamp());
             response.put("message", "Activity created successfully");
-
+            
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            // Limit exceeded or validation error
             e.printStackTrace();
             Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        } catch (Exception e) {
+            e.printStackTrace(); // Log for debugging
+            Map<String, Object> error = new HashMap<>();
             error.put("error", "Failed to create activity: " + e.getMessage());
+            error.put("details", e.getClass().getSimpleName());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }

@@ -1,16 +1,27 @@
-# React + Vite
+---
+title: E-Library Management System
+emoji: 📚
+colorFrom: green
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: true
+license: mit
+---
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# E-Library: Modern Reading Management System
 
-Currently, two official plugins are available:
+This is a professional E-Library application built with **React** and **Spring Boot (Java 21)**. 
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 🚀 Online Hosting on Hugging Face
+This space is configured via a multi-stage Dockerfile that bundles the entire application for cloud deployment.
 
-## React Compiler
+### 🛠️ Key Features:
+- **Full-Stack Integration**: React frontend served via a Java backend.
+- **SQLite Support**: Self-contained database for easy cloud migration.
+- **Port 7860**: Optimized for Hugging Face Spaces.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 📂 How to Update (for Developer):
+1. Simply push your changes to this repository.
+2. Hugging Face will automatically detect the `Dockerfile` and rebuild the entire system.
+3. Your data stays safe in the `/data` persistent directory if persistent storage is enabled.

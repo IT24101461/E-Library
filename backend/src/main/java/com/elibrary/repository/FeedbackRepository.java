@@ -11,4 +11,6 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     List<Feedback> findByStatus(String status);
     List<Feedback> findByType(String type);
     List<Feedback> findAllByOrderByCreatedAtDesc();
+    List<Feedback> findByUserId(Long userId);
+    List<Feedback> findByUserIdAndIsDeletedFalse(Long userId);
 }

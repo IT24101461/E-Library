@@ -20,10 +20,19 @@ public class ELibraryApplication {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        // Allow web frontend
+                        .allowedOrigins(
+                            "http://localhost:3000", 
+                            "http://localhost:3001",
+                            "https://localhost",      // Capacitor Android
+                            "capacitor://localhost"   // Capacitor iOS/General
+                        )
+                        // Allow Android requests (no origin header or patterns)
+                        .allowedOriginPatterns("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                         .allowedHeaders("*")
-                        .allowCredentials(true)
+                        .exposedHeaders("Authorization", "Content-Type")
+                        .allowCredentials(false)
                         .maxAge(3600);
             }
         };
