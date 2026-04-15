@@ -22,6 +22,18 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives(
+                                        "default-src 'self'; " +
+                                        "img-src 'self' https://images.unsplash.com https://*.unsplash.com https://*.googleapis.com https://*.gstatic.com data: blob: *; " +
+                                        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+                                        "font-src 'self' https://fonts.gstatic.com; " +
+                                        "connect-src 'self' http://localhost:8080 http://localhost:5000 ws://localhost:3000;"
+                                )
+                        )
+                )
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()

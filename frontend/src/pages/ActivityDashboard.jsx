@@ -6,6 +6,27 @@ import { ActivityService } from '../services/ActivityService';
 import { getApiUrl } from '../config/ApiConfig';
 import AdminAccessModal from '../components/AdminAccessModal'; import styles from './ActivityDashboard.module.css';
 
+// Helper to extract cover URL from any possible field name
+const extractCoverUrl = (obj) => {
+  if (!obj) return '';
+  const raw =
+    obj.coverUrl ||
+    obj.cover_url ||
+    obj.coverImage ||
+    obj.cover_image ||
+    obj.imageUrl ||
+    obj.image_url ||
+    obj.thumbnail ||
+    obj.book?.coverUrl ||
+    obj.book?.cover_url ||
+    obj.book?.coverImage ||
+    obj.book?.cover_image ||
+    '';
+  if (!raw) return '';
+  // Ensure HTTPS to avoid mixed-content blocking
+  return raw.startsWith('http://') ? raw.replace('http://', 'https://') : raw;
+};
+
 const ActivityDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
@@ -40,12 +61,14 @@ const ActivityDashboard = () => {
     if (authUser) {
       fetchData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser]);
 
   useEffect(() => {
     if (currentBook && (currentBook.bookId || currentBook.id)) {
       fetchRecommendedBooks(currentBook);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentBook]);
 
   const fetchData = async () => {
@@ -71,9 +94,17 @@ const ActivityDashboard = () => {
             const totalPagesFromHistory = hp.totalPages ?? bookMeta.totalPages ?? 0;
             const currentPage = prog?.currentPage ?? currentPageFromHistory ?? 0;
             const totalPages = prog?.totalPages ?? totalPagesFromHistory ?? 0;
-            return { ...h, currentPage, totalPages };
+            return {
+              ...h,
+              currentPage,
+              totalPages,
+              coverUrl: extractCoverUrl(h),
+            };
           } catch (e) {
-            return { ...h };
+            return {
+              ...h,
+              coverUrl: extractCoverUrl(h),
+            };
           }
         })
       );
@@ -157,12 +188,12 @@ const ActivityDashboard = () => {
                 bookId: parseInt(rec.book_id || rec.id || 0),
                 title: rec.title || 'Unknown Title',
                 author: rec.author || 'Unknown Author',
-                coverUrl: rec.cover_url,
+                coverUrl: extractCoverUrl(rec),
                 category: rec.category || '',
                 matchScore: parseFloat(rec.match_score) || 0,
                 description: rec.description || ''
               }));
-              setAiRecs(recs.slice(0, 5)); // Increased to 5 for better grid
+              setAiRecs(recs.slice(0, 5));
               return;
             }
           }
@@ -174,7 +205,11 @@ const ActivityDashboard = () => {
         const books = response.data || [];
         if (books.length > 0) {
           const shuffled = [...books].sort(() => Math.random() - 0.5);
-          setAiRecs(shuffled.slice(0, 5));
+          const mapped = shuffled.slice(0, 5).map(b => ({
+            ...b,
+            coverUrl: extractCoverUrl(b),
+          }));
+          setAiRecs(mapped);
         }
       } catch (dbErr) {
         setAiRecs([]);
@@ -347,10 +382,18 @@ const ActivityDashboard = () => {
                     src={currentBook.coverUrl}
                     alt={currentBook.title}
                     className={styles['hero-book-3d-cover']}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
                   />
-                ) : (
-                  <div className={styles['hero-book-3d-empty']}>📕</div>
-                )}
+                ) : null}
+                <div
+                  className={styles['hero-book-3d-empty']}
+                  style={{ display: currentBook?.coverUrl ? 'none' : 'flex' }}
+                >
+                  📕
+                </div>
               </div>
 
               <div className={styles['hero-3d-content']}>
@@ -423,7 +466,7 @@ const ActivityDashboard = () => {
                             status: 'new',
                             progress: 0,
                             listName: 'favourites',
-                            coverImage: currentBook.coverUrl || currentBook.cover_url || ''
+                            coverImage: currentBook.coverUrl || ''
                           })
                         });
                         if (res.ok) alert(`❤️ "${currentBook.title}" added to favorites!`);
@@ -523,6 +566,7 @@ const ActivityDashboard = () => {
                       src={book.coverUrl}
                       alt={book.title}
                       className={styles['activity-card-image']}
+                      onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   )}
                   <div className={styles['activity-card-info']}>
@@ -658,10 +702,20 @@ const ActivityDashboard = () => {
                         src={book.coverUrl}
                         alt={book.title}
                         className={styles['rec-image']}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
                       />
-                    ) : (
-                      <div style={{ height: '100%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>📖</div>
-                    )}
+                    ) : null}
+                    <div style={{
+                      height: '100%',
+                      background: '#f1f5f9',
+                      display: book.coverUrl ? 'none' : 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '2rem'
+                    }}>📖</div>
                     {book.matchScore > 0 && (
                       <div className={styles['rec-badge']}>
                         {Math.round(book.matchScore)}% Match
